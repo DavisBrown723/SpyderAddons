@@ -8,7 +8,8 @@ class Recruitment_Menu
 {
 	idd = 570;
 	movingEnable = 1;
-   	 onLoad = ""; 
+	onLoad = "";
+	onUnload = "player setVariable ['Recruitment_CurrentObject', nil]";
 	class controls 
 	{
 		class Recruitment_Background: Recruitment_RscText
@@ -27,7 +28,7 @@ class Recruitment_Menu
 			text = "Recruitment";
 			x = 7 * GUI_GRID_W + GUI_GRID_X;
 			y = 3 * GUI_GRID_H + GUI_GRID_Y;
-			w = 24 * GUI_GRID_W;
+			w = 24.5 * GUI_GRID_W;
 			h = 1 * GUI_GRID_H;
 			colorBackground[] = {0.788,0.443,0.157,0.65};
 			colorActive[] = {0.788,0.443,0.157,0.65};
@@ -74,7 +75,7 @@ class Recruitment_Menu
 			w = 12.5 * GUI_GRID_W;
 			h = 16 * GUI_GRID_H;
 			colorBackground[] = {0,0,0,0};
-			sizeEx = .65 * GUI_GRID_H;
+			sizeEx = .6 * GUI_GRID_H;
 		};
 		class Recruitment_Close: Recruitment_RscButton
 		{
