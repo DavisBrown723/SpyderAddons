@@ -395,21 +395,21 @@ switch (_operation) do {
 
 		if (player canAddItemToBackpack _item) exitWith {
 			player addItemToBackpack _item;
-			_civ removeWeapon _item;_civ removeMagazine _item;_civ removeItem _item;
+			_civ removeWeaponGlobal _item;_civ removeMagazineGlobal _item;_civ removeItem _item;
 			["displayGear"] call MAINCLASS;
 			ctrlShow [CIVINTERACT_CONFISCATEBUTTON, false];
 		};
 
 		if (player canAddItemToVest _item) exitWith {
 			player addItemToVest _item;
-			_civ removeWeapon _item;_civ removeMagazine _item;_civ removeItem _item;
+			_civ removeWeaponGlobal _item;_civ removeMagazineGlobal _item;_civ removeItem _item;
 			["displayGear"] call MAINCLASS;
 			ctrlShow [CIVINTERACT_CONFISCATEBUTTON, false];
 		};
 
 		if (player canAddItemToUniform _item) exitWith {
 			player addItemToUniform _item;
-			_civ removeWeapon _item;_civ removeMagazine _item;_civ removeItem _item;
+			_civ removeWeaponGlobal _item;_civ removeMagazineGlobal _item;_civ removeItem _item;
 			["displayGear"] call MAINCLASS;
 			ctrlShow [CIVINTERACT_CONFISCATEBUTTON, false];
 		};
