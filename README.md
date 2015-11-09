@@ -6,8 +6,9 @@
 A collection of modules in order to aid mission makers in adding depth to their missions.
 
 I started this project so that I could use it as a method of learning the addon structure. Please report any bugs/issues to me and I'll attempt to fix them as soon as possible.
-[BIF Account](https://forums.bistudio.com/user/802166-spyderblack723/)
 </p>
+
+[BIF Account](https://forums.bistudio.com/user/802166-spyderblack723/)
 
 Features
 
