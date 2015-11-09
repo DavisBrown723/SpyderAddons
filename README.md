@@ -13,7 +13,7 @@ I started this project so that I could use it as a method of learning the addon 
      <a href="https://forums.bistudio.com/user/802166-spyderblack723">BIF Account</a></strong></sup>
 </p>
 
-Features
+#Features
 
 Civilian Interaction
   - Integrated with ALiVE
