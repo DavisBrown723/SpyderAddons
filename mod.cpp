@@ -1,0 +1,17 @@
+dir = "@spyderaddons";
+name = "Spyder Addons";
+picture = "";
+actionName = "";
+action = "";
+description = "A set of scripts developed by SpyderBlack723";
+hideName = 1;
+hidePicture = 0;
+logo = "";
+logoOver = "";
+tooltip = "SpyderBlack723";
+tooltipOwned = "Spyder Addons Owned!";
+overview = "A set of scripts developed by SpyderBlack723.";
+author = "SpyderBlack723";
+overviewPicture = "";
+overviewText = "Spyder Addons - Giving missions depth";
+overviewFootnote = "";

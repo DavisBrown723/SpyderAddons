@@ -1,0 +1,23 @@
+asymmetric
+
+	getPositionSideHostility
+
+logistics
+
+	addForcepool
+
+misc
+
+	getFactionMostPlayers
+
+objectives
+
+	createObjective
+	getSideDominantObjectives
+
+opcom
+
+	getOpcoms
+	getAsymmOpcoms
+
+profiles
