@@ -21,21 +21,18 @@ Loadout Organizer
   - Transfer loadouts to other players and AI
   - Access Virtual Arsenal
   - Load class on respawn
-  Usage:
-  - Sync module to object to add the loadout manager action to it
+  Usage: Sync module to object to add the loadout manager action to it
 
 Recruitment
   - Specify entire factions of units to whitelist
   - Whitelist units
   - Blacklist units
   - View unit gear before recruiting them
-  Usage:
-  - Sync module to object to add recruit action to it
+  Usage: Sync module to object to add recruit action to it
 
 Vehicle Spawner
  - Specify entire factions of vehicles to whitelist
  - Whitelist vehicles
  - Blacklist vehicles
  - View vehicle characteristics such as top speed, number of passenger seats, fuel consumption and more prior to spawning it.
-  Usage:
-    - Sync module to object to add vehicle spawner action to it
+  Usage: Sync module to object to add vehicle spawner action to it
