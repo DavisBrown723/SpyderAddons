@@ -66,6 +66,12 @@ class CfgVehicles
 				description = "Units that will be excluded from the recruit list. Separate class names with commas.";
 				defaultValue = "";
 			};
+
+			class MaximumUnits {
+				displayName = "Maximum Squad Size";
+				description = "The maximum amount of units a player may have in his squad before being unable to recruit.";
+				defaultValue = "10";
+			};
 			
 		};
 
