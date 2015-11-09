@@ -11,6 +11,7 @@ Civilian Interaction
   - Ask civilians about insurgent activity in the area.
   - Ask civilians about nearby civilians that may be preparing to commit an act of terror.
   - All information is persistent thanks to ALiVE's Civilian Population system.
+
   Usage:
   - Define insurgent faction being used
 
