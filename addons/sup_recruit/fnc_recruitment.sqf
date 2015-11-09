@@ -43,12 +43,14 @@ switch (_operation) do {
 		_factions = [_logic getVariable "RecruitableFactions"] call SpyderAddons_fnc_getModuleArray;
 		_whitelist = [_logic getVariable "RecruitableUnits"] call SpyderAddons_fnc_getModuleArray;
 		_blacklist = [_logic getVariable "BlacklistedUnits"] call SpyderAddons_fnc_getModuleArray;
+		_maxUnits = call compile (_logic getVariable "MaximumUnits");
 
 		{
 			if (typeName _x == "OBJECT") then {
 				_x setVariable ["Recruitment_Factions", _factions];
 				_x setVariable ["Recruitment_Whitelist", _whitelist];
 				_x setVariable ["Recruitment_Blacklist", _blacklist];
+				_x setVariable ["Recruitment_MaximumUnits", _maxUnits];
 				_x addAction ["Recruit", {["open",_this] call SpyderAddons_fnc_recruitment}];
 			};
 		} forEach _syncedUnits;
@@ -63,6 +65,8 @@ switch (_operation) do {
 		private ["_factions"];
 		_arguments params ["_object","_caller"];
 
+		player setVariable ["Recruitment_CurrentObject", _object];
+
 		//-- Get settings
 		_factions = _object getVariable ["Recruitment_Factions",[]];
 		_whitelist = _object getVariable ["Recruitment_Whitelist",[]];
@@ -73,8 +77,9 @@ switch (_operation) do {
 			((getText (_x >> 'faction')) in _factions) and
 			{(configName _x) isKindOf 'Man' and
 			{!((getText (_x >> '_generalMacro') == 'B_Soldier_base_F')) and
+			{count (getArray (_x >> 'weapons')) > 2 and
 			{!((configName _x) in _blacklist)
-		}}})" configClasses (configFile >> "CfgVehicles");
+		}}}})" configClasses (configFile >> "CfgVehicles");
 
 		//-- Add whitelisted units
 		{
@@ -96,9 +101,6 @@ switch (_operation) do {
 	};
 
 	case "updateGear": {
-		private ["_index"];
-		_index = 0;
-
 		//-- Clear any existing data
 		lbClear RECRUITMENT_GEARLIST;
 
@@ -112,27 +114,32 @@ switch (_operation) do {
 		_magazines = getArray (_configClass >> "magazines");
 		_items = getArray (_configClass >> "Items");
 
-		//-- Populate weapons and items
+		private ["_index"];
+		_index = 0;
+
+		//-- Weapons
 		{
 			if !((_x == "Throw") or (_x == "Put")) then {
 				_configPath = configfile >> "CfgWeapons" >> _x;
 				if (isClass _configPath) then {
-					_text = getText (_configPath >> "displayName");
+					_displayName = getText (_configPath >> "displayName");
 					_picture = getText (_configPath >> "picture");
-					lbAdd [RECRUITMENT_GEARLIST, _text];
+
+					lbAdd [RECRUITMENT_GEARLIST, _displayName];
 					lbSetPicture [RECRUITMENT_GEARLIST, _index, _picture];
 					_index = _index + 1;
 				};
 			};
 		} forEach _weapons;
 
-		//-- Populate magazines
+		_itemArray = _magazines + _items;
 		{
-			private ["_configPath"];
+			private ["_item","_count","_configPath"];
 			_item = _x;
-			_count = {_x == _item} count _magazines;
+			_count = {_x == _item} count _itemArray;
+
 			if !(_count == 0) then {
-				for "_i" from 0 to _count step 1 do {_magazines = _magazines - [_item]};
+				for "_i" from 0 to _count step 1 do {_itemArray = _itemArray - [_item]};
 
 				_configPath = configfile >> "CfgWeapons" >> _item;
 				if !(isClass _configPath) then {_configPath = configfile >> "CfgMagazines" >> _item};
@@ -140,19 +147,26 @@ switch (_operation) do {
 
 				if (isClass _configPath) then {
 					_displayName = getText (_configPath >> "displayName");
-					_magazineInfo = format ["%1: %2", _displayName,_count];
 					_picture = getText (_configPath >> "picture");
-					lbAdd [RECRUITMENT_GEARLIST,_magazineInfo];
+					_itemInfo = format ["%1: %2", _displayName, _count];
+
+					lbAdd [RECRUITMENT_GEARLIST, _itemInfo];
 					lbSetPicture [RECRUITMENT_GEARLIST, _index, _picture];
 					_index = _index + 1;
 				};
 			};
-		} forEach _magazines + _items;
+		} forEach _itemArray;
 	};
 
 	case "recruitUnit": {
 		private ["_locality"];
 		_locality = _arguments select 0;
+
+		//-- Exit if too many units in player group
+		_maxUnits = (player getVariable "Recruitment_CurrentObject") getVariable ["Recruitment_MaximumUnits", 10];
+		if (count units group player >= _maxUnits) exitWith {
+			hint format ["You have too many units in your group. You may not recruit more until you have less than %1 units in your group.", _maxUnits];
+		};
 
 		switch (_locality) do {
 			//-- Get data from client and execute file on server
