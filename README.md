@@ -1,7 +1,9 @@
 # SpyderAddons
 A collection of modules in order to aid mission makers in adding depth to their missions.
 
-
+<p align="center">
+    <img src="https://github.com/SpyderBlack723/SpyderAddons/blob/master/images/LogoOfficial.png" width="265">
+</p>
 
 Features
 
