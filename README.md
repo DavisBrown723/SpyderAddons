@@ -38,6 +38,7 @@ I started this project so that I could use it as a method of learning the addon 
   - Whitelist units
   - Blacklist units
   - View unit gear before recruiting them
+  - Set a maximum limit of units that a player may recruit into his squad at one time
    - Usage: Sync module to object to add recruit action to it
 
 ####Vehicle Spawner (To be included)
