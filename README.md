@@ -12,7 +12,7 @@ Civilian Interaction
   - Ask civilians about nearby civilians that may be preparing to commit an act of terror.
   - All information is persistent thanks to ALiVE's Civilian Population system.
   Usage:
-    - Define insurgent faction being used
+  - Define insurgent faction being used
 
 Loadout Organizer
   - Save, Load, Delete, and Name loadouts
@@ -21,7 +21,7 @@ Loadout Organizer
   - Access Virtual Arsenal
   - Load class on respawn
   Usage:
-    - Sync module to object to add the loadout manager action to it
+  - Sync module to object to add the loadout manager action to it
 
 Recruitment
   - Specify entire factions of units to whitelist
@@ -29,7 +29,7 @@ Recruitment
   - Blacklist units
   - View unit gear before recruiting them
   Usage:
-    - Sync module to object to add recruit action to it
+  - Sync module to object to add recruit action to it
 
 Vehicle Spawner
  - Specify entire factions of vehicles to whitelist
