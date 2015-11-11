@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-A collection of modules in order to aid mission makers in adding depth to their missions.
+A collection of modules to aid mission makers in adding depth to their missions.
 </p>
 <p align="center">
 I started this project so that I could use it as a method of learning the addon structure. Please report any bugs/issues to me and I'll attempt to fix them as soon as possible.
