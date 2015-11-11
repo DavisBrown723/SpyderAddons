@@ -2,11 +2,11 @@
 Function: SpyderAddons_fnc_detectionInit
 
 Description:
-Creates the server side object to store settings
+Initializes detection
 
 Parameters:
-_this select 0: OBJECT - Reference to module
-_this select 1: ARRAY - Synchronized units
+Object - Module object
+Array - Synchronized units
 
 Returns:
 nil
