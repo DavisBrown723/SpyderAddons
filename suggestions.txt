@@ -1,0 +1,19 @@
+Features
+--------------------
+"my only request is a module that will play a 3d sound in a loop...maybe attached to a trigger point or something...
+so I can add effects like sound effects of a market, call to prayer, african singing, etc. at certain points of the map.
+
+
+
+Fixes
+--------------------
+
+
+
+Improvements
+--------------------
+
+With addition of ambiance module >> 
+	"Being able to toggle whether ambiance will spawn insurgents or now"
+	"Being able to set vehicle density/percentage"
+	"Being able to set civ/insurgent ratio"
