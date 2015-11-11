@@ -1,7 +1,7 @@
 class CfgVehicles
 {
 	class ModuleSpyderAddonsBase;
-	class SpyderAddons_SupLoadoutModule: ModuleSpyderAddonsBase
+	class SpyderAddons_sup_loadout: ModuleSpyderAddonsBase
 	{
 		scope = 2;
 		author = "SpyderBlack723";
