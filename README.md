@@ -41,6 +41,18 @@ I started this project so that I could use it as a method of learning the addon 
   - Set a maximum limit of units that a player may recruit into his squad at one time
    - Usage: Sync module to object to add recruit action to it
 
+####Detection
+ - Easily create scenarios with players as the guerilla fighters
+ - Define hostile sides
+ - Define cooldown timer
+ - Restricted areas
+ - Customize whether players can drive offroad without being hostile
+ - Customize speed limit
+ - Restrict certain vehicles/faction vehicles as hostile
+ - Define incognito vehicles which allow you to pose as the enemy
+ - Define detection values for each on foot, in vehicle, and incognito vehicles
+  - Usage: Sync module to players to have them tracked by the detection system
+
 ####Vehicle Spawner (To be included)
  - Specify entire factions of vehicles to whitelist
  - Whitelist vehicles
