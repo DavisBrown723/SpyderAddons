@@ -1,7 +1,7 @@
 class CfgVehicles
 {
 	class ModuleSpyderAddonsBase;
-	class SpyderAddons_CivInteractModule: ModuleSpyderAddonsBase
+	class SpyderAddons_civ_interact: ModuleSpyderAddonsBase
 	{
 		scope = 2;
 		author = "SpyderBlack723";
