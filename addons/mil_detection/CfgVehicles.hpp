@@ -118,6 +118,35 @@ class CfgVehicles
 				description = "Factions of vehicles that cause the player to benefit from an increased incognito rating (ex. enemy vehicles).";
 				defaultValue = "";
 			};
+			
+			class RestrictedClothing {
+				displayName = "";
+				description = "";
+				class Values {
+					class Divider {
+						name = "----- Restricted Clothing --------------------------------------------------------";
+						value = "";
+					};
+				};
+			};
+			
+			class RestrictedHeadgear {
+				displayName = "Restricted Headgear";
+				description = "Headgear that will cause the player to be made instantly hostile if worn. Separate classnames with commas.";
+				defaultValue = "";
+			};
+			
+			class RestrictedVests {
+				displayName = "Restricted Vests";
+				description = "Vests that will cause the player to be made instantly hostile if worn. Separate classnames with commas.";
+				defaultValue = "";
+			};
+			
+			class RestrictedUniforms {
+				displayName = "Restricted Uniforms";
+				description = "Uniforms that will cause the player to be made instantly hostile if worn. Separate classnames with commas.";
+				defaultValue = "";
+			};
 
 			class DetectionValues {
 				displayName = "";
