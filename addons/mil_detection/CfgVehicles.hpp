@@ -132,19 +132,48 @@ class CfgVehicles
 			
 			class RestrictedHeadgear {
 				displayName = "Restricted Headgear";
-				description = "Headgear that will cause the player to be made instantly hostile if worn. Separate classnames with commas.";
+				description = "Headgear that will cause the player to be made instantly hostile if worn. Entries can be either singular classnames or factions.";
 				defaultValue = "";
 			};
 			
 			class RestrictedVests {
 				displayName = "Restricted Vests";
-				description = "Vests that will cause the player to be made instantly hostile if worn. Separate classnames with commas.";
+				description = "Vests that will cause the player to be made instantly hostile if worn. Entries can be either singular classnames or factions.";
 				defaultValue = "";
 			};
 			
 			class RestrictedUniforms {
 				displayName = "Restricted Uniforms";
-				description = "Uniforms that will cause the player to be made instantly hostile if worn. Separate classnames with commas.";
+				description = "Uniforms that will cause the player to be made instantly hostile if worn. Entries can be either singular classnames or factions.";
+				defaultValue = "";
+			};
+
+			class IncognitoClothing {
+				displayName = "";
+				description = "";
+				class Values {
+					class Divider {
+						name = "----- Incognito Clothing --------------------------------------------------------";
+						value = "";
+					};
+				};
+			};
+			
+			class IncognitoHeadgear {
+				displayName = "Incognito Headgear";
+				description = "Headgear that will allow the player to be able to masquerade as the enemies. Entries can be either singular classnames or factions.";
+				defaultValue = "";
+			};
+			
+			class IncognitoVests {
+				displayName = "Incognito Vests";
+				description = "Vests that will allow the player to be able to masquerade as the enemies. Entries can be either singular classnames or factions.";
+				defaultValue = "";
+			};
+			
+			class IncognitoUniforms {
+				displayName = "Incognito Uniforms";
+				description = "Uniforms that will allow the player to be able to masquerade as the enemies. Entries can be either singular classnames or factions.";
 				defaultValue = "";
 			};
 
@@ -171,9 +200,15 @@ class CfgVehicles
 				defaultValue = 3.5;
 			};
 
-			class IncognitoDetection {
-				displayName = "Incognito Detection";
-				description = "How aware enemies must be of players inside incognito vehicles to consider them hostile.";
+			class IncognitoDetectionInfantry {
+				displayName = "Infantry: Incognito Detection";
+				description = "How aware enemies must be of players wearing incognito clothing before considering them hostile.";
+				defaultValue = 4;
+			};
+
+			class IncognitoDetectionVehicle {
+				displayName = "Vehicle: Incognito Detection";
+				description = "How aware enemies must be of players inside incognito vehicles before considering them hostile.";
 				defaultValue = 4;
 			};
 
@@ -184,7 +219,7 @@ class CfgVehicles
 			description[] = {
 				"Enables an in-depth detection system best suited to guerilla and insurgent scenarios.",
 				"",
-				"Usage: Sync objects to this module to have them be tracked by the detection system."
+				"Usage: Sync players to this module to have them be tracked by the detection system."
 			};
 			optional = 1; // Synced entity is optional
 		};
