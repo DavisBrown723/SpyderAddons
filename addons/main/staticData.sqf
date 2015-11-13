@@ -1,0 +1,1 @@
+SpyderAddons_StaticData_Loaded = true;
