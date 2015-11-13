@@ -59,11 +59,17 @@ switch (_operation) do {
 		_restrictedHeadgear = [_logic getVariable "RestrictedHeadgear"] call SpyderAddons_fnc_getModuleArray;	//-- Array
 		_restrictedVests = [_logic getVariable "RestrictedVests"] call SpyderAddons_fnc_getModuleArray;		//-- Array
 		_restrictedUniforms = [_logic getVariable "RestrictedUniforms"] call SpyderAddons_fnc_getModuleArray;	//-- Array
+
+		//-- Incognito Clothing
+		_incognitoHeadgear = [_logic getVariable "IncognitoHeadgear"] call SpyderAddons_fnc_getModuleArray;	//-- Array
+		_incognitoVests = [_logic getVariable "IncognitoVests"] call SpyderAddons_fnc_getModuleArray;		//-- Array
+		_incognitoUniforms = [_logic getVariable "IncognitoUniforms"] call SpyderAddons_fnc_getModuleArray;	//-- Array
 		
 		//-- Detection Values
 		_requiredDetectionInfantry = call compile (_logic getVariable "RequiredDetectionInfantry");		//-- Scalar
 		_requiredDetectionVehicle = call compile (_logic getVariable "RequiredDetectionVehicle");		//-- Scalar
-		_incognitoDetection = call compile (_logic getVariable "IncognitoDetection");				//-- Scalar
+		_incognitoDetectionInfantry = call compile (_logic getVariable "IncognitoDetectionInfantry");		//-- Scalar
+		_incognitoDetectionVehicle = call compile (_logic getVariable "IncognitoDetectionVehicle");		//-- Scalar
 
 		
 		//-- Create client-side object to save settings
@@ -82,11 +88,17 @@ switch (_operation) do {
 		[SpyderAddons_milDetection_logic,"RestrictedHeadgear", _restrictedHeadgear] call ALiVE_fnc_hashSet;
 		[SpyderAddons_milDetection_logic,"RestrictedVests", _restrictedVests] call ALiVE_fnc_hashSet;
 		[SpyderAddons_milDetection_logic,"RestrictedUniforms", _restrictedUniforms] call ALiVE_fnc_hashSet;
+
+		//-- Incognito Clothing
+		[SpyderAddons_milDetection_logic,"IncognitoHeadgear", _incognitoHeadgear] call ALiVE_fnc_hashSet;
+		[SpyderAddons_milDetection_logic,"IncognitoVests", _incognitoVests] call ALiVE_fnc_hashSet;
+		[SpyderAddons_milDetection_logic,"IncognitoUniforms", _incognitoUniforms] call ALiVE_fnc_hashSet;
 		
 		//-- Detection Values
 		[SpyderAddons_milDetection_logic,"InfantryDetection",_requiredDetectionInfantry] call ALiVE_fnc_hashSet;
 		[SpyderAddons_milDetection_logic,"VehicleDetection",_requiredDetectionVehicle] call ALiVE_fnc_hashSet;
-		[SpyderAddons_milDetection_logic,"IncognitoDetection",_incognitoDetection] call ALiVE_fnc_hashSet;
+		[SpyderAddons_milDetection_logic,"IncognitoDetectionInfantry",_incognitoDetectionInfantry] call ALiVE_fnc_hashSet;
+		[SpyderAddons_milDetection_logic,"IncognitoDetectionVehicle",_incognitoDetectionVehicle] call ALiVE_fnc_hashSet;
 
 		//-- Make restricted area markers invisible
 		{_x setMarkerAlpha 0} forEach _restrictedAreas;
@@ -237,6 +249,7 @@ switch (_operation) do {
 	};
 
 	case "isHostile": {
+		private ["_incognito"];
 		_result = false;
 		_playerPos = getPosATL vehicle player;
 		
@@ -253,13 +266,25 @@ switch (_operation) do {
 		if (vehicle player == player) then {
 			//-- On foot
 
+			if (["inIncognitoClothing"] call SpyderAddons_fnc_detection) then {
+				_incognito = true;
+			} else {
+				_incognito = false;
+			};
+
 			//-- Check if player has been spotted
 			{
 				_side = _x;
 				_side = [_side] call ALIVE_fnc_sideTextToObject;
 
-				if (_side knowsAbout player >= ([SpyderAddons_milDetection_logic,"InfantryDetection"] call ALiVE_fnc_hashGet)) exitWith {
-					_result = true;
+				if !(_incognito) then {
+					if (_side knowsAbout player >= ([SpyderAddons_milDetection_logic,"InfantryDetection"] call ALiVE_fnc_hashGet)) exitWith {
+						_result = true;
+					};
+				} else {
+					if (_side knowsAbout player >= ([SpyderAddons_milDetection_logic,"IncognitoDetectionInfantry"] call ALiVE_fnc_hashGet)) exitWith {
+						_result = true;
+					};
 				};
 			} forEach ([SpyderAddons_milDetection_logic,"HostileSides"] call ALiVE_fnc_hashGet);
 		} else {
@@ -285,7 +310,7 @@ switch (_operation) do {
 				{
 					_side = _x;
 					_side = [_side] call ALIVE_fnc_sideTextToObject;
-					if (_side knowsAbout vehicle player >= ([SpyderAddons_milDetection_logic,"IncognitoDetection"] call ALiVE_fnc_hashGet)) then {
+					if (_side knowsAbout vehicle player >= ([SpyderAddons_milDetection_logic,"IncognitoDetectionVehicle"] call ALiVE_fnc_hashGet)) then {
 						_result = true;
 					};
 				} forEach ([SpyderAddons_milDetection_logic,"HostileSides"] call ALiVE_fnc_hashGet);
@@ -363,6 +388,25 @@ switch (_operation) do {
 		
 		//-- Check uniform
 		if (uniform player in ([SpyderAddons_milDetection_logic,"RestrictedUniforms"] call ALiVE_fnc_hashGet)) exitWith {
+			_result = true;
+		};
+	};
+
+	case "inIncognitoClothing": {
+		_result = false;
+		
+		//-- Check headgear
+		if (headgear player in ([SpyderAddons_milDetection_logic,"IncognitoHeadgear"] call ALiVE_fnc_hashGet)) exitWith {
+			_result = true;
+		};
+		
+		//-- Check vest
+		if (vest player in ([SpyderAddons_milDetection_logic,"IncognitoVests"] call ALiVE_fnc_hashGet)) exitWith {
+			_result = true;
+		};
+		
+		//-- Check uniform
+		if (uniform player in ([SpyderAddons_milDetection_logic,"IncognitoUniforms"] call ALiVE_fnc_hashGet)) exitWith {
 			_result = true;
 		};
 	};
