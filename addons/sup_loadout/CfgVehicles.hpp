@@ -31,20 +31,37 @@ class CfgVehicles
 					};
 				};
 			};
-			
-			class Debug {
-				displayName = "Debug";
-				description = "Enable debug";
+
+			class Transfer {
+				displayName = "Enable Loadout Transfer";
+				description = "Allow players to transfer loadouts to AI and other players.";
 				class values {
 					class Yes {
 						name = "Yes";
 						value = true;
+						default = 1;
 					};
 
 					class No {
 						name = "No";
 						value = false;
+					};
+				};
+			};
+
+			class Arsenal {
+				displayName = "Enable Arsenal";
+				description = "Allow players to access the BIS arsenal from within the loadout manager.";
+				class values {
+					class Yes {
+						name = "Yes";
+						value = true;
 						default = 1;
+					};
+
+					class No {
+						name = "No";
+						value = false;
 					};
 				};
 			};
