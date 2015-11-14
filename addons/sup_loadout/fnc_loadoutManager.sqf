@@ -44,25 +44,44 @@ private ["_result"];
 #define LOADOUTMANAGER_UNITLIST 7199
 #define LOADOUTMANAGER_TEXTBOX 7185
 #define LOADOUTMANAGER_MAINCONTROLS allControls findDisplay 721
+#define LOADOUTMANAGER_ARSENALBUTTON 72120
 
 switch (_operation) do {
 
 	case "init": {
-		_syncedUnits = _arguments;
+		_arguments params ["_logic","_syncedUnits"];
+
+		//-- Get module parameters
+		_transfer = call compile (_logic getVariable "Transfer");
+		_arsenal = call compile (_logic getVariable "Arsenal");
 
 		{
 			if (typeName _x == "OBJECT") then {
-				_x addAction ["Access Loadout Manager", {["open"] call SpyderAddons_fnc_loadoutManager}];
+				_x setVariable ["LoadoutManager_Transfer", _transfer];
+				_x setVariable ["LoadoutManager_Arsenal", _arsenal];
+				_x addAction ["Access Loadout Manager", {["open",_this] call SpyderAddons_fnc_loadoutManager}];
 			};
 		} forEach _syncedUnits;
 	};
 	
 	case "open": {
+		_arguments params ["_object","_caller"];
+
+		//-- Create temporary logic
+		SpyderAddons_LoadoutManager_Logic = [] call ALiVE_fnc_hashCreate;
+		[SpyderAddons_LoadoutManager_Logic, "Object", _object] call ALiVE_fnc_hashSet;
+		[SpyderAddons_LoadoutManager_Logic, "Caller", _caller] call ALiVE_fnc_hashSet;
+
 		CreateDialog LOADOUTMANAGER_MAINDIALOG;
 		["onLoad"] call SpyderAddons_fnc_loadoutManager;
 	};
 
 	case "onLoad": {
+		//-- Check if arsenal is enabled
+		_object = [SpyderAddons_LoadoutManager_Logic, "Object"] call ALiVE_fnc_hashGet;
+		_arsenal = _object getVariable "LoadoutManager_Arsenal";
+		ctrlEnable [LOADOUTMANAGER_ARSENALBUTTON, _arsenal];
+
 		ctrlShow [LOADOUTMANAGER_GEARTITLE, false];
 
 		["buildClassList"] call SpyderAddons_fnc_loadoutManager;
@@ -81,7 +100,12 @@ switch (_operation) do {
 
 			if (!isNil '_loadout') then {
 				['displayGear', [_loadout]] call SpyderAddons_fnc_loadoutManager;
-				{ctrlEnable [_x, true]} forEach [7218, 7219, 72121, 72125, 72122];
+
+				_object = [SpyderAddons_LoadoutManager_Logic, 'Object'] call ALiVE_fnc_hashGet;
+				_transfer = _object getVariable 'LoadoutManager_Transfer';
+				ctrlEnable [72122, _transfer];
+
+				{ctrlEnable [_x, true]} forEach [7218, 7219, 72121, 72125];
 			} else {
 				['displayGear'] call SpyderAddons_fnc_loadoutManager;
 				{ctrlEnable [_x, false]} forEach [7218, 7219, 72121, 72125, 72122];
