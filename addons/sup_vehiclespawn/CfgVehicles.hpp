@@ -31,23 +31,6 @@ class CfgVehicles
 					};
 				};
 			};
-			
-			class Debug {
-				displayName = "Debug";
-				description = "Enable debug";
-				class values {
-					class Yes {
-						name = "Yes";
-						value = true;
-					};
-
-					class No {
-						name = "No";
-						value = false;
-						default = 1;
-					};
-				};
-			};
 
 			class SpawnPosition {
 				displayName = "Spawn Position";
