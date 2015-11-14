@@ -11,6 +11,7 @@ class Loadout_Manager
 	idd = 721;
 	movingEnable = 1;
 	onLoad = "";
+	onUnload = "SpyderAddons_LoadoutManager_Logic = nil";
 	class controls 
 	{
 
