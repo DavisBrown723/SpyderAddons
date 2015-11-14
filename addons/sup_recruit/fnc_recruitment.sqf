@@ -90,7 +90,9 @@ switch (_operation) do {
 
 		//-- Build list with retrieved units
 		{
-			lbAdd [RECRUITMENT_UNITLIST, (getText (_x >> "displayName"))];
+			_name = getText (_x >> "displayName");
+
+			lbAdd [RECRUITMENT_UNITLIST, _name];
 			lbSetData [RECRUITMENT_UNITLIST, _forEachIndex, configName _x];
 		} forEach _units;
 
