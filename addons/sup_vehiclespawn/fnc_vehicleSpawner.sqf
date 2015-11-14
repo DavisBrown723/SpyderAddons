@@ -70,7 +70,6 @@ switch (_operation) do {
 	};
 
 	case "onLoad": {
-		private ["_index"];
 		_arguments params ["_object","_caller"];
 
 		_factions = _object getVariable ["VehicleSpawner_Factions", []];
@@ -98,17 +97,14 @@ switch (_operation) do {
 			};
 		} forEach _whitelist;
 
-		_index = 0;
-
 		//-- Add to list
 		{
 			_name = getText (_x >> "displayName");
 			_icon = getText (_x >> "icon"); //-- picture
 
 				lbAdd [VEHICLESPAWNER_VEHICLELIST, _name];
-				lbSetData [VEHICLESPAWNER_VEHICLELIST, _index, configName _x];
-				lbSetPicture [VEHICLESPAWNER_VEHICLELIST, _index, _icon];
-				_index = _index + 1;
+				lbSetData [VEHICLESPAWNER_VEHICLELIST, _forEachIndex, configName _x];
+				lbSetPicture [VEHICLESPAWNER_VEHICLELIST, _forEachIndex, _icon];
 		} forEach _vehicles;
 
 		//-- Track vehicle list selection
