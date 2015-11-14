@@ -430,7 +430,7 @@ class VehicleSpawner_RscListBox
 class VehicleSpawner_ListNBox {
 	style = "ST_LEFT + LB_TEXTURES";
 	type = 102;
-	rowHeight = .05;
+	rowHeight = .06;
 	idcLeft = -1;
 	idcRight = -1;
 	w = "(safeZoneW / 10)";

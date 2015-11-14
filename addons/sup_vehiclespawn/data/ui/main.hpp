@@ -54,7 +54,7 @@ class SpyderAddons_VehicleSpawner
 
 			x = 7.5 * GUI_GRID_W + GUI_GRID_X;
 			y = 7 * GUI_GRID_H + GUI_GRID_Y;
-			w = 11 * GUI_GRID_W;
+			w = 12 * GUI_GRID_W;
 			h = 16 * GUI_GRID_H;
 			colorBackground[] = {0.722,0.694,0.62,0.2};
 			colorActive[] = {0.722,0.694,0.62,0.2};
@@ -65,7 +65,7 @@ class SpyderAddons_VehicleSpawner
 			idc = 575;
 
 			text = "Vehicle Info";
-			x = 21.8 * GUI_GRID_W + GUI_GRID_X;
+			x = 22.8 * GUI_GRID_W + GUI_GRID_X;
 			y = 5 * GUI_GRID_H + GUI_GRID_Y;
 			w = 5.5 * GUI_GRID_W;
 			h = 1.5 * GUI_GRID_H;
@@ -75,7 +75,7 @@ class SpyderAddons_VehicleSpawner
 		{
 			idc = 576;
 
-			x = 18.8 * GUI_GRID_W + GUI_GRID_X;
+			x = 19.8 * GUI_GRID_W + GUI_GRID_X;
 			y = 7 * GUI_GRID_H + GUI_GRID_Y;
 			w = 12.5 * GUI_GRID_W;
 			h = 16 * GUI_GRID_H;
