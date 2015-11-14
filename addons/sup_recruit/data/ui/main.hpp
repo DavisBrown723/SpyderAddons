@@ -52,7 +52,7 @@ class Recruitment_Menu
 			y = 7 * GUI_GRID_H + GUI_GRID_Y;
 			w = 11 * GUI_GRID_W;
 			h = 16 * GUI_GRID_H;
-			sizeEx = .75 * GUI_GRID_H;
+			sizeEx = .6 * GUI_GRID_H;
 			colorBackground[] = {0.722,0.694,0.62,0.2};
 			colorActive[] = {0.722,0.694,0.62,0.2};
 		};
