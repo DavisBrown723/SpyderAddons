@@ -24,11 +24,16 @@ Peer Reviewed:
 nil
 ---------------------------------------------------------------------------- */
 
+private ["_debug","_result"];
+
 params [
 	["_operation", ""],
 	["_arguments", []]
 ];
-private ["_debug","_result"];
+
+//-- Define functions
+#define MAINCLASS SpyderAddons_fnc_detection
+#define MAIN_LOGIC SpyderAddons_milDetection_logic
 
 if (!isNil "SpyderAddons_milDetection_logic") then {
 	_debug = [SpyderAddons_milDetection_logic,"Debug"] call ALiVE_fnc_hashGet;
@@ -73,32 +78,32 @@ switch (_operation) do {
 
 		
 		//-- Create client-side object to save settings
-		SpyderAddons_milDetection_logic = [] call ALIVE_fnc_hashCreate;
-		[SpyderAddons_milDetection_logic,"Debug",_debug] call ALiVE_fnc_hashSet;
-		[SpyderAddons_milDetection_logic,"HostileSides",_hostileSides] call ALiVE_fnc_hashSet;
-		[SpyderAddons_milDetection_logic,"Cooldown",_cooldown] call ALiVE_fnc_hashSet;
-		[SpyderAddons_milDetection_logic,"RestrictedAreas",_restrictedAreas] call ALiVE_fnc_hashSet;
-		[SpyderAddons_milDetection_logic,"DriveOffroad",_canDriveOffroad] call ALiVE_fnc_hashSet;
-		[SpyderAddons_milDetection_logic,"IncognitoVehicles",_incognitoVehicles] call ALiVE_fnc_hashSet;
-		[SpyderAddons_milDetection_logic,"RestrictFactionVehicles",_restrictFactionVehicles] call ALiVE_fnc_hashSet;
-		[SpyderAddons_milDetection_logic,"FactionVehicles",_factionVehicles] call ALiVE_fnc_hashSet;
-		[SpyderAddons_milDetection_logic,"SpeedLimit",_speedLimit] call ALiVE_fnc_hashSet;
+		MAIN_LOGIC = [] call ALIVE_fnc_hashCreate;
+		[MAIN_LOGIC,"Debug",_debug] call ALiVE_fnc_hashSet;
+		[MAIN_LOGIC,"HostileSides",_hostileSides] call ALiVE_fnc_hashSet;
+		[MAIN_LOGIC,"Cooldown",_cooldown] call ALiVE_fnc_hashSet;
+		[MAIN_LOGIC,"RestrictedAreas",_restrictedAreas] call ALiVE_fnc_hashSet;
+		[MAIN_LOGIC,"DriveOffroad",_canDriveOffroad] call ALiVE_fnc_hashSet;
+		[MAIN_LOGIC,"IncognitoVehicles",_incognitoVehicles] call ALiVE_fnc_hashSet;
+		[MAIN_LOGIC,"RestrictFactionVehicles",_restrictFactionVehicles] call ALiVE_fnc_hashSet;
+		[MAIN_LOGIC,"FactionVehicles",_factionVehicles] call ALiVE_fnc_hashSet;
+		[MAIN_LOGIC,"SpeedLimit",_speedLimit] call ALiVE_fnc_hashSet;
 		
 		//-- Restricted Clothing
-		[SpyderAddons_milDetection_logic,"RestrictedHeadgear", _restrictedHeadgear] call ALiVE_fnc_hashSet;
-		[SpyderAddons_milDetection_logic,"RestrictedVests", _restrictedVests] call ALiVE_fnc_hashSet;
-		[SpyderAddons_milDetection_logic,"RestrictedUniforms", _restrictedUniforms] call ALiVE_fnc_hashSet;
+		[MAIN_LOGIC,"RestrictedHeadgear", _restrictedHeadgear] call ALiVE_fnc_hashSet;
+		[MAIN_LOGIC,"RestrictedVests", _restrictedVests] call ALiVE_fnc_hashSet;
+		[MAIN_LOGIC,"RestrictedUniforms", _restrictedUniforms] call ALiVE_fnc_hashSet;
 
 		//-- Incognito Clothing
-		[SpyderAddons_milDetection_logic,"IncognitoHeadgear", _incognitoHeadgear] call ALiVE_fnc_hashSet;
-		[SpyderAddons_milDetection_logic,"IncognitoVests", _incognitoVests] call ALiVE_fnc_hashSet;
-		[SpyderAddons_milDetection_logic,"IncognitoUniforms", _incognitoUniforms] call ALiVE_fnc_hashSet;
+		[MAIN_LOGIC,"IncognitoHeadgear", _incognitoHeadgear] call ALiVE_fnc_hashSet;
+		[MAIN_LOGIC,"IncognitoVests", _incognitoVests] call ALiVE_fnc_hashSet;
+		[MAIN_LOGIC,"IncognitoUniforms", _incognitoUniforms] call ALiVE_fnc_hashSet;
 		
 		//-- Detection Values
-		[SpyderAddons_milDetection_logic,"InfantryDetection",_requiredDetectionInfantry] call ALiVE_fnc_hashSet;
-		[SpyderAddons_milDetection_logic,"VehicleDetection",_requiredDetectionVehicle] call ALiVE_fnc_hashSet;
-		[SpyderAddons_milDetection_logic,"IncognitoDetectionInfantry",_incognitoDetectionInfantry] call ALiVE_fnc_hashSet;
-		[SpyderAddons_milDetection_logic,"IncognitoDetectionVehicle",_incognitoDetectionVehicle] call ALiVE_fnc_hashSet;
+		[MAIN_LOGIC,"InfantryDetection",_requiredDetectionInfantry] call ALiVE_fnc_hashSet;
+		[MAIN_LOGIC,"VehicleDetection",_requiredDetectionVehicle] call ALiVE_fnc_hashSet;
+		[MAIN_LOGIC,"IncognitoDetectionInfantry",_incognitoDetectionInfantry] call ALiVE_fnc_hashSet;
+		[MAIN_LOGIC,"IncognitoDetectionVehicle",_incognitoDetectionVehicle] call ALiVE_fnc_hashSet;
 
 		//-- Make restricted area markers invisible
 		{_x setMarkerAlpha 0} forEach _restrictedAreas;
@@ -112,31 +117,31 @@ switch (_operation) do {
 		if !(count _headgearFactions == 0) then {
 			_factionNames = [];
 			{_factionNames pushBack (configName _x)} forEach _headgearFactions;
-			_gear = ["getFactionGear", ["headgear", _factionNames]] call SpyderAddons_fnc_detection;
-			_headgear = ([SpyderAddons_milDetection_logic,"RestrictedHeadgear"] call ALiVE_fnc_hashGet) + _gear;
-			[SpyderAddons_milDetection_logic,"RestrictedHeadgear", _headgear] call ALiVE_fnc_hashSet;
+			_gear = ["getFactionGear", ["headgear", _factionNames]] call MAINCLASS;
+			_headgear = ([MAIN_LOGIC,"RestrictedHeadgear"] call ALiVE_fnc_hashGet) + _gear;
+			[MAIN_LOGIC,"RestrictedHeadgear", _headgear] call ALiVE_fnc_hashSet;
 		};
 
 		//-- Get faction vests
 		if !(count _vestFactions == 0) then {
 			_factionNames = [];
 			{_factionNames pushBack (configName _x)} forEach _vestFactions;
-			_gear = ["getFactionGear", ["vests", _factionNames]] call SpyderAddons_fnc_detection;
-			_vests = ([SpyderAddons_milDetection_logic,"RestrictedVests"] call ALiVE_fnc_hashGet) + _gear;
-			[SpyderAddons_milDetection_logic,"RestrictedVests", _vests] call ALiVE_fnc_hashSet;
+			_gear = ["getFactionGear", ["vests", _factionNames]] call MAINCLASS;
+			_vests = ([MAIN_LOGIC,"RestrictedVests"] call ALiVE_fnc_hashGet) + _gear;
+			[MAIN_LOGIC,"RestrictedVests", _vests] call ALiVE_fnc_hashSet;
 		};
 
 		//-- Get faction uniforms
 		if !(count _uniformFactions == 0) then {
 			_factionNames = [];
 			{_factionNames pushBack (configName _x)} forEach _uniformFactions;
-			_gear = ["getFactionGear", ["uniforms", _factionNames]] call SpyderAddons_fnc_detection;
-			_uniforms = ([SpyderAddons_milDetection_logic,"RestrictedUniforms"] call ALiVE_fnc_hashGet) + _gear;
-			[SpyderAddons_milDetection_logic,"RestrictedUniforms", _uniforms] call ALiVE_fnc_hashSet;
+			_gear = ["getFactionGear", ["uniforms", _factionNames]] call MAINCLASS;
+			_uniforms = ([MAIN_LOGIC,"RestrictedUniforms"] call ALiVE_fnc_hashGet) + _gear;
+			[MAIN_LOGIC,"RestrictedUniforms", _uniforms] call ALiVE_fnc_hashSet;
 		};
 
 		//-- Start detection
-		["beginTracking"] spawn SpyderAddons_fnc_detection;
+		["beginTracking"] spawn MAINCLASS;
 		player addEventHandler ["respawn", {["beginTracking"] spawn SpyderAddons_fnc_detection}]
 	};
 
@@ -144,9 +149,9 @@ switch (_operation) do {
 		_data = _arguments;
 		_data params ["_subOperation","_factions"];
 
-		_restrictedHeadgear = [SpyderAddons_milDetection_logic,"RestrictedHeadgear"] call ALiVE_fnc_hashGet;
-		_restrictedVests = [SpyderAddons_milDetection_logic,"RestrictedVests"] call ALiVE_fnc_hashGet;
-		_restrictedUniforms = [SpyderAddons_milDetection_logic,"RestrictedUniforms"] call ALiVE_fnc_hashGet;
+		_restrictedHeadgear = [MAIN_LOGIC,"RestrictedHeadgear"] call ALiVE_fnc_hashGet;
+		_restrictedVests = [MAIN_LOGIC,"RestrictedVests"] call ALiVE_fnc_hashGet;
+		_restrictedUniforms = [MAIN_LOGIC,"RestrictedUniforms"] call ALiVE_fnc_hashGet;
 
 		_result = [];
 		_headGear = [];
@@ -229,7 +234,7 @@ switch (_operation) do {
 	};
 
 	case "beginTracking": {
-		if ([SpyderAddons_milDetection_logic,"Debug"] call ALiVE_fnc_hashGet) then {player sideChat "[SpyderAddons - Detection] Tracking Started"};
+		if ([MAIN_LOGIC,"Debug"] call ALiVE_fnc_hashGet) then {player sideChat "[SpyderAddons - Detection] Tracking Started"};
 
 		waitUntil {player == player};
 
@@ -240,9 +245,9 @@ switch (_operation) do {
 			_data params ["_debug"];
 
 			if (captive player) then {
-				if (["isHostile"] call SpyderAddons_fnc_detection) then {
+				if (["isHostile"] call MAINCLASS) then {
 					if (_debug) then {player sideChat "[SpyderAddons - Detection] Player is hostile"};
-					["setHostile"] call SpyderAddons_fnc_detection;
+					["setHostile"] call MAINCLASS;
 				};
 			};
 		}, 3, [_debug]] call CBA_fnc_addPerFrameHandler;
@@ -254,19 +259,19 @@ switch (_operation) do {
 		_playerPos = getPosATL vehicle player;
 		
 		//-- Check if player is armed
-		if (["hasWeapon"] call SpyderAddons_fnc_detection) exitWith {
+		if (["hasWeapon"] call MAINCLASS) exitWith {
 			_result = true;
 		};
 		
 		//-- Check restricted Clothing
-		if (["hasRestrictedClothing"] call SpyderAddons_fnc_detection) exitWith {
+		if (["hasRestrictedClothing"] call MAINCLASS) exitWith {
 			_result = true;
 		};
 
 		if (vehicle player == player) then {
 			//-- On foot
 
-			if (["inIncognitoClothing"] call SpyderAddons_fnc_detection) then {
+			if (["inIncognitoClothing"] call MAINCLASS) then {
 				_incognito = true;
 			} else {
 				_incognito = false;
@@ -278,51 +283,51 @@ switch (_operation) do {
 				_side = [_side] call ALIVE_fnc_sideTextToObject;
 
 				if !(_incognito) then {
-					if (_side knowsAbout player >= ([SpyderAddons_milDetection_logic,"InfantryDetection"] call ALiVE_fnc_hashGet)) exitWith {
+					if (_side knowsAbout player >= ([MAIN_LOGIC,"InfantryDetection"] call ALiVE_fnc_hashGet)) exitWith {
 						_result = true;
 					};
 				} else {
-					if (_side knowsAbout player >= ([SpyderAddons_milDetection_logic,"IncognitoDetectionInfantry"] call ALiVE_fnc_hashGet)) exitWith {
+					if (_side knowsAbout player >= ([MAIN_LOGIC,"IncognitoDetectionInfantry"] call ALiVE_fnc_hashGet)) exitWith {
 						_result = true;
 					};
 				};
-			} forEach ([SpyderAddons_milDetection_logic,"HostileSides"] call ALiVE_fnc_hashGet);
+			} forEach ([MAIN_LOGIC,"HostileSides"] call ALiVE_fnc_hashGet);
 		} else {
 			//-- In Vehicle
 
 			//-- Check if player is offroad -- Don't use isOnRoad --> unreliable
-			if !([SpyderAddons_milDetection_logic,"DriveOffroad"] call ALiVE_fnc_hashGet) then {
+			if !([MAIN_LOGIC,"DriveOffroad"] call ALiVE_fnc_hashGet) then {
 				if ((count (_playerPos nearRoads 22)) == 0) then {
 					_result = true;
 				};
 			};
 
 			//-- Check if player has been spotted
-			if !(vehicle player in ([SpyderAddons_milDetection_logic,"IncognitoVehicles"] call ALiVE_fnc_hashGet)) then {
+			if !(vehicle player in ([MAIN_LOGIC,"IncognitoVehicles"] call ALiVE_fnc_hashGet)) then {
 				{
 					_side = _x;
 					_side = [_side] call ALIVE_fnc_sideTextToObject;
-					if (_side knowsAbout vehicle player >= ([SpyderAddons_milDetection_logic,"VehicleDetection"] call ALiVE_fnc_hashGet)) then {
+					if (_side knowsAbout vehicle player >= ([MAIN_LOGIC,"VehicleDetection"] call ALiVE_fnc_hashGet)) then {
 						_result = true;
 					};
-				} forEach ([SpyderAddons_milDetection_logic,"HostileSides"] call ALiVE_fnc_hashGet);
+				} forEach ([MAIN_LOGIC,"HostileSides"] call ALiVE_fnc_hashGet);
 			} else {
 				{
 					_side = _x;
 					_side = [_side] call ALIVE_fnc_sideTextToObject;
-					if (_side knowsAbout vehicle player >= ([SpyderAddons_milDetection_logic,"IncognitoDetectionVehicle"] call ALiVE_fnc_hashGet)) then {
+					if (_side knowsAbout vehicle player >= ([MAIN_LOGIC,"IncognitoDetectionVehicle"] call ALiVE_fnc_hashGet)) then {
 						_result = true;
 					};
-				} forEach ([SpyderAddons_milDetection_logic,"HostileSides"] call ALiVE_fnc_hashGet);
+				} forEach ([MAIN_LOGIC,"HostileSides"] call ALiVE_fnc_hashGet);
 			};
 
 			//-- Check speed limit
-			if (speed vehicle player > ([SpyderAddons_milDetection_logic,"SpeedLimit"] call ALiVE_fnc_hashGet)) then {
+			if (speed vehicle player > ([MAIN_LOGIC,"SpeedLimit"] call ALiVE_fnc_hashGet)) then {
 				_result = true;
 			};
 
 			//-- Check restricted vehicle
-			if (["inRestrictedVehicle"] call SpyderAddons_fnc_detection) then {
+			if (["inRestrictedVehicle"] call MAINCLASS) then {
 				_result = true;
 			};
 		};
@@ -334,7 +339,7 @@ switch (_operation) do {
 			if ([_marker, _playerPos] call BIS_fnc_inTrigger) exitWith {
 				_result = true;
 			};
-		} forEach ([SpyderAddons_milDetection_logic,"RestrictedAreas"] call ALiVE_fnc_hashGet);
+		} forEach ([MAIN_LOGIC,"RestrictedAreas"] call ALiVE_fnc_hashGet);
 	};
 
 		case "setHostile": {
@@ -347,17 +352,17 @@ switch (_operation) do {
 		player setCaptive false;
 
 		[] spawn {
-			_cooldown = [SpyderAddons_milDetection_logic,"Cooldown"] call ALiVE_fnc_hashGet;
+			_cooldown = [MAIN_LOGIC,"Cooldown"] call ALiVE_fnc_hashGet;
 			sleep _cooldown;
 
-			while {["isHostile"] call SpyderAddons_fnc_detection} do {
+			while {["isHostile"] call MAINCLASS} do {
 				sleep _cooldown;
 			};
 
 			//-- Make player friendly
 			player setCaptive true;
 
-			if ([SpyderAddons_milDetection_logic,"Debug"] call ALiVE_fnc_hashGet) then {player sideChat "[SpyderAddons - Detection] Player is friendly"};
+			if ([MAIN_LOGIC,"Debug"] call ALiVE_fnc_hashGet) then {player sideChat "[SpyderAddons - Detection] Player is friendly"};
 		};
 	};
 
@@ -377,17 +382,17 @@ switch (_operation) do {
 		_result = false;
 		
 		//-- Check headgear
-		if (headgear player in ([SpyderAddons_milDetection_logic,"RestrictedHeadgear"] call ALiVE_fnc_hashGet)) exitWith {
+		if (headgear player in ([MAIN_LOGIC,"RestrictedHeadgear"] call ALiVE_fnc_hashGet)) exitWith {
 			_result = true;
 		};
 		
 		//-- Check vest
-		if (vest player in ([SpyderAddons_milDetection_logic,"RestrictedVests"] call ALiVE_fnc_hashGet)) exitWith {
+		if (vest player in ([MAIN_LOGIC,"RestrictedVests"] call ALiVE_fnc_hashGet)) exitWith {
 			_result = true;
 		};
 		
 		//-- Check uniform
-		if (uniform player in ([SpyderAddons_milDetection_logic,"RestrictedUniforms"] call ALiVE_fnc_hashGet)) exitWith {
+		if (uniform player in ([MAIN_LOGIC,"RestrictedUniforms"] call ALiVE_fnc_hashGet)) exitWith {
 			_result = true;
 		};
 	};
@@ -396,17 +401,17 @@ switch (_operation) do {
 		_result = false;
 		
 		//-- Check headgear
-		if (headgear player in ([SpyderAddons_milDetection_logic,"IncognitoHeadgear"] call ALiVE_fnc_hashGet)) exitWith {
+		if (headgear player in ([MAIN_LOGIC,"IncognitoHeadgear"] call ALiVE_fnc_hashGet)) exitWith {
 			_result = true;
 		};
 		
 		//-- Check vest
-		if (vest player in ([SpyderAddons_milDetection_logic,"IncognitoVests"] call ALiVE_fnc_hashGet)) exitWith {
+		if (vest player in ([MAIN_LOGIC,"IncognitoVests"] call ALiVE_fnc_hashGet)) exitWith {
 			_result = true;
 		};
 		
 		//-- Check uniform
-		if (uniform player in ([SpyderAddons_milDetection_logic,"IncognitoUniforms"] call ALiVE_fnc_hashGet)) exitWith {
+		if (uniform player in ([MAIN_LOGIC,"IncognitoUniforms"] call ALiVE_fnc_hashGet)) exitWith {
 			_result = true;
 		};
 	};
@@ -414,10 +419,10 @@ switch (_operation) do {
 	case "inRestrictedVehicle": {
 		_result = false;
 
-		if !([SpyderAddons_milDetection_logic,"RestrictFactionVehicles"] call ALiVE_fnc_hashGet) exitWith {};
+		if !([MAIN_LOGIC,"RestrictFactionVehicles"] call ALiVE_fnc_hashGet) exitWith {};
 
 		_vehicle = typeOf vehicle player;
-		_factionVehicleArray = [SpyderAddons_milDetection_logic,"FactionVehicles"] call ALiVE_fnc_hashGet;
+		_factionVehicleArray = [MAIN_LOGIC,"FactionVehicles"] call ALiVE_fnc_hashGet;
 
 		if (((getText (configFile >> "CfgVehicles" >> _vehicle >> "faction")) in _factionVehicleArray) or (_vehicle in _factionVehicleArray)) then {
 			_result = true;
