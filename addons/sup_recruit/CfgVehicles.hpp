@@ -51,19 +51,19 @@ class CfgVehicles
 			
 			class RecruitableFactions {
 				displayName = "Recruitable Factions";
-				description = "Units of listed factions will be recruitable. Separate factions with commas.";
+				description = "Factions of units that will be recruitable.";
 				defaultValue = "";
 			};
 			
 			class RecruitableUnits {
 				displayName = "Whitelisted Units";
-				description = "Class names of units that will be recruitable. Separate class names with commas.";
+				description = "Units that will be recruitable.";
 				defaultValue = "";
 			};
 			
 			class BlacklistedUnits {
 				displayName = "Blacklisted Units";
-				description = "Units that will be excluded from the recruit list. Separate class names with commas.";
+				description = "Units that will be excluded from the recruitment list.";
 				defaultValue = "";
 			};
 
