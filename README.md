@@ -53,7 +53,7 @@ I started this project so that I could use it as a method of learning the addon 
  - Define detection values for each on foot, in vehicle, and incognito vehicles
   - Usage: Sync module to players to have them tracked by the detection system
 
-####Vehicle Spawner (To be included)
+####Vehicle Spawner
  - Specify entire factions of vehicles to whitelist
  - Whitelist vehicles
  - Blacklist vehicles
