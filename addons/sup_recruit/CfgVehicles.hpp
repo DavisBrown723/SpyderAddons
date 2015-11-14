@@ -32,23 +32,6 @@ class CfgVehicles
 				};
 			};
 			
-			class Debug {
-				displayName = "Debug";
-				description = "Enable debug";
-				class values {
-					class Yes {
-						name = "Yes";
-						value = true;
-					};
-
-					class No {
-						name = "No";
-						value = false;
-						default = 1;
-					};
-				};
-			};
-			
 			class RecruitableFactions {
 				displayName = "Recruitable Factions";
 				description = "Factions of units that will be recruitable.";
