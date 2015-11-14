@@ -37,6 +37,7 @@ private ["_result"];
 #define MAINCLASS SpyderAddons_fnc_civInteract
 #define COMMAND_HANDLER SpyderAddons_fnc_commandHandler
 #define QUESTION_HANDLER SpyderAddons_fnc_questionHandler
+#define MAIN_LOGIC SpyderAddons_civInteract_Logic
 
 //-- Define control ID's
 #define CIVINTERACT_DIALOG "Civ_Interact"
@@ -63,12 +64,10 @@ switch (_operation) do {
 			//-- Get settings
 			_debug = _logic getVariable "Debug";
 			_factionEnemy = _logic getVariable "enemyFaction";
-			
-			//-- Replace this with an error message but allow the script to continue.. will need to make changes to getInstallations and getActions so that they can return values when no opcoms exist for insurgents
-			if (_factionEnemy isEqualTo "") then {["[SpyderAddons - Civ Interact] No insurgent faction given"] call ALIVE_fnc_dump};
 
 			//-- Initialize settings
-			//_logic setVariable ["class", MAINCLASS]; //-- Not currently needed
+			//_logic setVariable ["class", MAINCLASS]; //-- Not currently needed (events not in use)
+			[SpyderAddons_civInteract_Logic, "Debug", _debug] call ALiVE_fnc_hashSet;
 			[SpyderAddons_civInteract_Logic, "Module", _logic] call ALiVE_fnc_hashSet;
 			[SpyderAddons_civInteract_Logic, "InsurgentFaction", _factionEnemy] call ALiVE_fnc_hashSet;
 
