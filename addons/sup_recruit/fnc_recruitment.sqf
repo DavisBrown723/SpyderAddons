@@ -145,7 +145,7 @@ switch (_operation) do {
 				if !(isClass _configPath) then {_configPath = configfile >> "CfgMagazines" >> _item};
 				if !(isClass _configPath) then {_configPath = configfile >> "CfgVehicles" >> _item};
 
-				if (isClass _configPath) then {
+				if !(isClass _configPath) then {
 					_displayName = getText (_configPath >> "displayName");
 					_picture = getText (_configPath >> "picture");
 					_itemInfo = format ["%1: %2", _displayName, _count];
