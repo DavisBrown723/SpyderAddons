@@ -32,3 +32,5 @@ if (isNil "SpyderAddons_fnc_loadoutManager") exitWith {["[SpyderAddons - Sup Loa
 ["init", [_logic,_syncedUnits]] call SpyderAddons_fnc_loadoutManager;
 
 ["[SpyderAddons - Sup Loadout] Initialization complete"] call SpyderAddons_fnc_log;
+
+true
