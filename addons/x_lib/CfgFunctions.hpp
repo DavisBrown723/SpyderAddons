@@ -34,6 +34,11 @@ class CfgFunctions {
 				file = "\x\spyderaddons\addons\x_lib\functions\misc\getModuleArray.sqf";
 				recompile = RECOMPILE;
 			};
+			class getNearAgents {
+				description = "Returns civilian agents from the closest settlement";
+				file = "\x\spyderaddons\addons\x_lib\functions\misc\getNearAgents.sqf";
+				recompile = RECOMPILE;
+			};
 			
 			//-- Objectives
 			class createObjective {
@@ -60,8 +65,16 @@ class CfgFunctions {
 			};
 			
 			//-- Profiles
-			
-			
+			class profilePatrol {
+				description = "Returns asymmetric opcom handlers";
+				file = "\x\spyderaddons\addons\x_lib\functions\profiles\profilePatrol.sqf";
+				recompile = RECOMPILE;
+			};
+			class isProfileAlive {
+				description = "Returns whether or not the profile is still alive";
+				file = "\x\spyderaddons\addons\x_lib\functions\profiles\isProfileAlive.sqf";
+				recompile = RECOMPILE;
+			};
 		};
 	};
 };
