@@ -59,3 +59,9 @@ I started this project so that I could use it as a method of learning the addon 
  - Blacklist vehicles
  - View vehicle characteristics such as top speed, number of passenger seats, fuel consumption and more prior to spawning it.
   - Usage: Sync module to object to add vehicle spawner action to it
+
+####Insurgency (WIP)
+ - Establish recruitment HQ's, weapon depots, and IED factories.
+ - Recruit civilians
+ - Plan coordinated assaults
+  - Usage: Sync module to players to enable them to have access to insurgent abilities.
