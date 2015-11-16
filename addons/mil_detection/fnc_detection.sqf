@@ -108,37 +108,73 @@ switch (_operation) do {
 		//-- Make restricted area markers invisible
 		{_x setMarkerAlpha 0} forEach _restrictedAreas;
 
+		/////////////////////////////-- Restricted Clothing --/////////////////////////////
 		//-- Get faction gear
-		_headgearFactions = "(configName _x) in _restrictedHeadgear" configClasses (configFile >> "CfgFactionClasses");
-		_vestFactions = "(configName _x) in _restrictedVests" configClasses (configFile >> "CfgFactionClasses");
-		_uniformFactions = "(configName _x) in _restrictedUniforms" configClasses (configFile >> "CfgFactionClasses");
+		_headgearFactionsRestricted = "(configName _x) in _restrictedHeadgear" configClasses (configFile >> "CfgFactionClasses");
+		_vestFactionsRestricted = "(configName _x) in _restrictedVests" configClasses (configFile >> "CfgFactionClasses");
+		_uniformFactionsRestricted = "(configName _x) in _restrictedUniforms" configClasses (configFile >> "CfgFactionClasses");
 
 		//-- Get faction headgear
-		if !(count _headgearFactions == 0) then {
+		if !(count _headgearFactionsRestricted == 0) then {
 			_factionNames = [];
-			{_factionNames pushBack (configName _x)} forEach _headgearFactions;
+			{_factionNames pushBack (configName _x)} forEach _headgearFactionsRestricted;
 			_gear = ["getFactionGear", ["headgear", _factionNames]] call MAINCLASS;
 			_headgear = ([MAIN_LOGIC,"RestrictedHeadgear"] call ALiVE_fnc_hashGet) + _gear;
 			[MAIN_LOGIC,"RestrictedHeadgear", _headgear] call ALiVE_fnc_hashSet;
 		};
 
 		//-- Get faction vests
-		if !(count _vestFactions == 0) then {
+		if !(count _vestFactionsRestricted == 0) then {
 			_factionNames = [];
-			{_factionNames pushBack (configName _x)} forEach _vestFactions;
+			{_factionNames pushBack (configName _x)} forEach _vestFactionsRestricted;
 			_gear = ["getFactionGear", ["vests", _factionNames]] call MAINCLASS;
 			_vests = ([MAIN_LOGIC,"RestrictedVests"] call ALiVE_fnc_hashGet) + _gear;
 			[MAIN_LOGIC,"RestrictedVests", _vests] call ALiVE_fnc_hashSet;
 		};
 
 		//-- Get faction uniforms
-		if !(count _uniformFactions == 0) then {
+		if !(count _uniformFactionsRestricted == 0) then {
 			_factionNames = [];
-			{_factionNames pushBack (configName _x)} forEach _uniformFactions;
+			{_factionNames pushBack (configName _x)} forEach _uniformFactionsRestricted;
 			_gear = ["getFactionGear", ["uniforms", _factionNames]] call MAINCLASS;
 			_uniforms = ([MAIN_LOGIC,"RestrictedUniforms"] call ALiVE_fnc_hashGet) + _gear;
 			[MAIN_LOGIC,"RestrictedUniforms", _uniforms] call ALiVE_fnc_hashSet;
 		};
+
+		/////////////////////////////-- Incognito Clothing --/////////////////////////////
+		//-- Get faction gear
+		_headgearFactionsIncognito = "(configName _x) in _incognitoHeadgear" configClasses (configFile >> "CfgFactionClasses");
+		_vestFactionsIncognito = "(configName _x) in _incognitoVests" configClasses (configFile >> "CfgFactionClasses");
+		_uniformFactionsIncognito = "(configName _x) in _incognitoUniforms" configClasses (configFile >> "CfgFactionClasses");
+
+		//-- Get faction headgear
+		if !(count _headgearIncognito == 0) then {
+			_factionNames = [];
+			{_factionNames pushBack (configName _x)} forEach _headgearFactionsIncognito;
+			_gear = ["getFactionGear", ["headgear", _factionNames]] call MAINCLASS;
+			_headgear = ([MAIN_LOGIC,"IncognitoHeadgear"] call ALiVE_fnc_hashGet) + _gear;
+			[MAIN_LOGIC,"IncognitoHeadgear", _headgear] call ALiVE_fnc_hashSet;
+		};
+
+		//-- Get faction vests
+		if !(count _vestFactionsIncognito == 0) then {
+			_factionNames = [];
+			{_factionNames pushBack (configName _x)} forEach _vestFactionsIncognito;
+			_gear = ["getFactionGear", ["vests", _factionNames]] call MAINCLASS;
+			_vests = ([MAIN_LOGIC,"IncognitoVests"] call ALiVE_fnc_hashGet) + _gear;
+			[MAIN_LOGIC,"IncognitoVests", _vests] call ALiVE_fnc_hashSet;
+		};
+
+		//-- Get faction uniforms
+		if !(count _uniformFactionsIncognito == 0) then {
+			_factionNames = [];
+			{_factionNames pushBack (configName _x)} forEach _uniformFactionsIncognito;
+			_gear = ["getFactionGear", ["uniforms", _factionNames]] call MAINCLASS;
+			_uniforms = ([MAIN_LOGIC,"IncognitoUniforms"] call ALiVE_fnc_hashGet) + _gear;
+			[MAIN_LOGIC,"IncognitoUniforms", _uniforms] call ALiVE_fnc_hashSet;
+		};
+
+		//-- Init done
 
 		//-- Start detection
 		["beginTracking"] spawn MAINCLASS;
