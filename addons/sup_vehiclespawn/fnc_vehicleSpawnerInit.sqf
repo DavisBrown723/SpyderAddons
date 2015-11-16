@@ -32,3 +32,5 @@ if (isNil "SpyderAddons_fnc_vehicleSpawner") exitWith {["[SpyderAddons - Sup Veh
 ["init",[_logic,_syncedUnits]] call SpyderAddons_fnc_vehicleSpawner;
 
 ["[SpyderAddons - Sup Vehiclespawn] Initialization complete"] call SpyderAddons_fnc_log;
+
+true
