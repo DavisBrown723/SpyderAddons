@@ -58,7 +58,7 @@ switch (_operation) do {
 	case "init": {
 		_logic = _arguments;
 		
-		if ((hasInterface) and (isNil "SpyderAddons_civInteract_Logic")) then {
+		if (isNil "SpyderAddons_civInteract_Logic") then {
 			SpyderAddons_civInteract_Logic = [] call ALIVE_fnc_hashCreate;
 			
 			//-- Get settings
