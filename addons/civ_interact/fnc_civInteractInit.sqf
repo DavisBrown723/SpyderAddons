@@ -32,3 +32,5 @@ if (isNil "SpyderAddons_fnc_civInteract") exitWith {["[SpyderAddons - Civ Intera
 ["init",_logic] call SpyderAddons_fnc_civInteract;
 
 ["[SpyderAddons - Civ Interact] Initialization complete"] call ALIVE_fnc_dump;
+
+true
