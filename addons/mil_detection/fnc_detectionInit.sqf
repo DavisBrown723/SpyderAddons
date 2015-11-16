@@ -32,3 +32,5 @@ if (isNil "SpyderAddons_fnc_detection") exitWith {["[SpyderAddons - Mil Detectio
 ["init",[_logic,_syncedUnits]] call SpyderAddons_fnc_detection;
 
 ["[SpyderAddons - Mil Detection] Initialization complete"] call SpyderAddons_fnc_log;
+
+true
