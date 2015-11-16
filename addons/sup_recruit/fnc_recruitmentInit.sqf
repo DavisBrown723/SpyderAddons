@@ -32,3 +32,5 @@ if (isNil "SpyderAddons_fnc_recruitment") exitWith {["[SpyderAddons - Sup Recrui
 ["init",[_logic,_syncedUnits]] call SpyderAddons_fnc_recruitment;
 
 ["[SpyderAddons - Sup Recruit] Initialization complete"] call SpyderAddons_fnc_log;
+
+true
