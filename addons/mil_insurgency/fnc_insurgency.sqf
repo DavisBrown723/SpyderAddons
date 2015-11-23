@@ -1,3 +1,5 @@
+#include <\x\spyderaddons\addons\mil_insurgency\script_component.hpp>
+
 /* ----------------------------------------------------------------------------
 Function: SpyderAddons_fnc_insurgency
 
@@ -25,6 +27,7 @@ nil
 ---------------------------------------------------------------------------- */
 
 params [
+	["_logic", objNull],
 	["_operation", ""],
 	["_arguments", []]
 ];
@@ -32,18 +35,51 @@ private ["_result"];
 
 //-- Define control ID's
 #define MAINCLASS SpyderAddons_fnc_insurgency
+#define COMMANDBOARD SpyderAddons_fnc_commandBoard
+
+/*
+Event Tags
+OPCOM_RESERVE = HQ,Depot,Roadblocks
+OPCOM_CAPTURE = Assault
+OPCOM_RECON = Ambush
+OPCOM_DEFEND = Retreat
+OPCOM_TERRORIZE = Factory,IED,Suicide,Sabotage
+*/
 
 switch (_operation) do {
 
 	case "init": {
-		_arguments params ["_logic","_syncedUnits"];
+		_syncedUnits = _arguments;
+		
+		//Only one init per instance is allowed
+		if !(isNil {_logic getVariable "initGlobal"}) exitwith {["[SpyderAddons -  Mil Insurgency]:Only one init process per instance allowed, Exiting..."] call SpyderAddons_fnc_log};
+
+		//-- Start init
+		_logic setVariable ["initGlobal", false];
 
 		//-- Get module parameters
 		_debug = call compile (_logic getVariable "Debug");
+		_factions = [_logic getVariable "InsurgentFactions"] call SpyderAddons_fnc_getModuleArray;
+		_sides = [];
+		{
+			_sides pushBack (_x call ALiVE_fnc_factionSide);
+		} forEach _factions;
+
+		if (isServer) then {
+			if (isNil "SpyderAddons_CommandBoard_Handler") then {
+				SpyderAddons_CommandBoard_Handler = [nil,"create"] call COMMANDBOARD;
+				[SpyderAddons_CommandBoard_Handler, "init"] call COMMANDBOARD;
+				[SpyderAddons_CommandBoard_Handler, "debug", _debug] call COMMANDBOARD;
+				[SpyderAddons_CommandBoard_Handler, "sides", _sides] call COMMANDBOARD;
+			};
+		};
+		if (hasInterface) then {
+			_logic setVariable ["startupComplete", true];
+		};
 	};
 
 	case "createHQ": {
-		if (!isServer) exitWith {_this remoteExecCall [MAINCLASS, 2]};
+		if (!isServer) exitWith {_this remoteExecCall [QUOTE(MAINCLASS), 2]};
 		_player = _arguments;
 
 		//-- Get nearest building
@@ -95,17 +131,21 @@ switch (_operation) do {
 			};
 		} forEach _agents;
 
-		//-- Record event
+		//-- Record events
 		_side = _faction call ALiVE_fnc_factionSide;
-		_event = ['OPCOM_RESERVE',[_side,_objective],"OPCOM"] call ALIVE_fnc_event;
-		_eventID = [ALIVE_eventLog, "addEvent",_event] call ALIVE_fnc_eventLog;  
+		_event = ["OPCOM_RESERVE",[_side,_objective],"OPCOM"] call ALIVE_fnc_event;
+		_eventID = [ALIVE_eventLog, "addEvent",_event] call ALIVE_fnc_eventLog;
+
+		_pos = getPosATL _HQ;
+		_event = ["SA_Insurgency",["HQ",_pos,_objective],(name _player),"INSTALLATION_CREATED"] call ALIVE_fnc_event;
+		_eventID = [ALIVE_eventLog, "addEvent",_event] call ALIVE_fnc_eventLog;
 
 		//-- Start Recruitment
 		["recruitment", [_pos,_size,_faction,_agents,_HQ]] spawn MAINCLASS;
 	};
 
 	case "createDepot": {
-		if (!isServer) exitWith {_this remoteExecCall [MAINCLASS, 2]};
+		if (!isServer) exitWith {_this remoteExecCall [QUOTE(MAINCLASS), 2]};
 		_player = _arguments;
 
 		//-- Get nearest building
@@ -156,9 +196,13 @@ switch (_operation) do {
 			};
 		} forEach _agents;
 
-		//-- Record event
+		//-- Record events
 		_side = _faction call ALiVE_fnc_factionSide;
-		_event = ['OPCOM_RESERVE',[_side,_objective],"OPCOM"] call ALIVE_fnc_event;
+		_event = ["OPCOM_RESERVE",[_side,_objective],"OPCOM"] call ALIVE_fnc_event;
+		_eventID = [ALIVE_eventLog, "addEvent",_event] call ALIVE_fnc_eventLog;
+
+		_pos = getPosATL _depot;
+		_event = ["SA_Insurgency",["Depot",_pos,_objective],(name _player),"INSTALLATION_CREATED"] call ALIVE_fnc_event;
 		_eventID = [ALIVE_eventLog, "addEvent",_event] call ALIVE_fnc_eventLog;
 
 		//-- Update hostility
@@ -169,7 +213,7 @@ switch (_operation) do {
 	};
 
 	case "createFactory": {
-		if (!isServer) exitWith {_this remoteExecCall [MAINCLASS, 2]};
+		if (!isServer) exitWith {_this remoteExecCall [QUOTE(MAINCLASS), 2]};
 		_player = _arguments;
 
 		//-- Get nearest building
@@ -220,9 +264,13 @@ switch (_operation) do {
 			};
 		} forEach _agents;
 
-		//-- Record event
+		//-- Record events
 		_side = _faction call ALiVE_fnc_factionSide;
-		_event = ['OPCOM_TERRORIZE',[_side,_objective],"OPCOM"] call ALIVE_fnc_event;
+		_event = ["OPCOM_TERRORIZE",[_side,_objective],"OPCOM"] call ALIVE_fnc_event;
+		_eventID = [ALIVE_eventLog, "addEvent",_event] call ALIVE_fnc_eventLog;
+
+		_pos = getPosATL _factory;
+		_event = ["SA_Insurgency",["Factory",_pos,_objective],(name _player),"INSTALLATION_CREATED"] call ALIVE_fnc_event;
 		_eventID = [ALIVE_eventLog, "addEvent",_event] call ALIVE_fnc_eventLog;
 
 		//-- Update hostility
@@ -234,7 +282,7 @@ switch (_operation) do {
 /*
 This should be changed to "orderRoadblocks". There can only be one roadblock command per objective so players creating roadblocks one by one would hinder the insurgents overall effort by reducing total roadblock count.
 	case "createRoadblocks": {
-		if (!isServer) exitWith {_this remoteExecCall [MAINCLASS, 2]};
+		if (!isServer) exitWith {_this remoteExecCall [QUOTE(MAINCLASS), 2]};
 		_player = _arguments;
 		_faction = faction _player;
 
@@ -268,7 +316,7 @@ This should be changed to "orderRoadblocks". There can only be one roadblock com
 		[_objective,"roadblocks",[[],"convertObject",_pos nearestObject ""] call ALiVE_fnc_OPCOM] call ALiVE_fnc_HashSet;
 
 		//-- Record event
-		_event = ['OPCOM_RESERVE',[_side,_objective],"OPCOM"] call ALIVE_fnc_event;
+		_event = ["OPCOM_RESERVE",[_side,_objective],"OPCOM"] call ALIVE_fnc_event;
 		_eventID = [ALIVE_eventLog, "addEvent",_event] call ALIVE_fnc_eventLog;
 
 		//-- Update hostility
@@ -309,6 +357,10 @@ This should be changed to "orderRoadblocks". There can only be one roadblock com
 
 			//-- Update recruit count
 			_recruited = _recruited + 1;
+
+			//-- Record event
+			_event = ["SA_Insurgency",[_group,_pos,_HQ],(name _player),"HQ_RECRUIT"] call ALIVE_fnc_event;
+			_eventID = [ALIVE_eventLog, "addEvent",_event] call ALIVE_fnc_eventLog;
 
 			//-- Recruitment delay
 			sleep (1200 + random 600);
