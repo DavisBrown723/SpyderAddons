@@ -48,6 +48,12 @@ class CfgVehicles
 					};
 				};
 			};
+
+			class InsurgentFactions {
+				displayName = "Insurgent Factions";
+				description = "Factions that insurgents belong to.";
+				defaultValue = "";
+			};
 			
 		};
 

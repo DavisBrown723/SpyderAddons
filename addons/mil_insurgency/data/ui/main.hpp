@@ -111,7 +111,7 @@ class Command_Board
 			text = "Back";
 			x = -6.5 * GUI_GRID_W + GUI_GRID_X;
 			y = 27.5 * GUI_GRID_H + GUI_GRID_Y;
-			w = 53 * GUI_GRID_W;
+			w = 26 * GUI_GRID_W;
 			h = 1 * GUI_GRID_H;
 		};
 		class CommandBoard_Close: Insurgency_RscButton

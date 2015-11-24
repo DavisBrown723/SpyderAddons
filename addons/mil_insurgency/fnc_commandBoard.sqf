@@ -44,7 +44,7 @@ disableSerialization;
 #define COMMANDBOARD_FACTIONLOGO 9203
 #define COMMANDBOARD_MAINMENU 9202
 #define COMMANDBOARD_SECONDARYMENU 9206
-#define COMMANDBOARD_MAP 9201
+#define COMMANDBOARD_MAP (findDisplay 9200 displayCtrl 9201)
 #define COMMANDBOARD_BACKBUTTON 9204
 #define COMMANDBOARD_BACKSECONDARY 9207
 #define COMMANDBOARD_MAINMENUCONTROL (findDisplay 9200 displayCtrl 9202)
@@ -175,6 +175,7 @@ switch (_operation) do {
 
 	case "enableMainMenu": {
 		(COMMANDBOARD_DISPLAY displayCtrl COMMANDBOARD_MAINMENU) ctrlRemoveAllEventHandlers "LBSelChanged";
+		COMMANDBOARD_MAP ctrlRemoveAllEventHandlers "MouseButtonClick";
 		[nil,"enableBackButton", false] call MAINCLASS;
 		ctrlShow [COMMANDBOARD_BACKSECONDARY, false];
 
@@ -275,11 +276,10 @@ switch (_operation) do {
 			params ["_control","_index"];
 			_data = lbData [COMMANDBOARD_MAINMENU,_index];
 			_pos = call compile _data;
-			_map = (COMMANDBOARD_DISPLAY displayCtrl COMMANDBOARD_MAP);
 
-			ctrlMapAnimClear _map;
-			_map ctrlMapAnimAdd [.3, ctrlMapScale _map, _pos];
-			ctrlMapAnimCommit _map;
+			ctrlMapAnimClear COMMANDBOARD_MAP;
+			COMMANDBOARD_MAP ctrlMapAnimAdd [.3, ctrlMapScale COMMANDBOARD_MAP, _pos];
+			ctrlMapAnimCommit COMMANDBOARD_MAP;
 		}];
 	};
 
@@ -431,11 +431,10 @@ switch (_operation) do {
 			params ["_control","_index"];
 			_data = lbData [COMMANDBOARD_MAINMENU,_index];
 			_pos = call compile _data;
-			_map = (COMMANDBOARD_DISPLAY displayCtrl COMMANDBOARD_MAP);
 
-			ctrlMapAnimClear _map;
-			_map ctrlMapAnimAdd [.3, ctrlMapScale _map, _pos];
-			ctrlMapAnimCommit _map;
+			ctrlMapAnimClear COMMANDBOARD_MAP;
+			COMMANDBOARD_MAP ctrlMapAnimAdd [.3, ctrlMapScale COMMANDBOARD_MAP, _pos];
+			ctrlMapAnimCommit COMMANDBOARD_MAP;
 		}];
 	};
 
@@ -466,6 +465,7 @@ switch (_operation) do {
 		private ["_color","_prefix"];
 		_profileData = _arguments;
 		_markers = [];
+		_markerData = [];
 
 		switch (playerSide) do {
 			case west: {
@@ -503,6 +503,7 @@ switch (_operation) do {
 			_markerType = format ["%1_inf", _prefix];
 			_marker = [_markerName, _pos, ICON, [0.7,0.7], _color, _markerText,_markerType, "Solid", 0, .7] call ALiVE_fnc_createMarker;
 			_markers pushBack _marker;
+			_markerData pushBack [_pos,_profileID];
 
 			lbAdd [COMMANDBOARD_MAINMENU, _name];
 			_data = str [_profileID,_pos,_count,_busy];
@@ -510,6 +511,7 @@ switch (_operation) do {
 		} forEach _profileData;
 
 		[SpyderAddons_CommandBoard_Temp,"markers",_markers] call ALiVE_fnc_hashSet;
+		[SpyderAddons_CommandBoard_Temp,"ProfilePositions",_markerData] call ALiVE_fnc_hashSet;
 
 		[nil,"enableBackButton",true] call MAINCLASS;
 		buttonSetAction [COMMANDBOARD_BACKBUTTON, "
@@ -523,13 +525,36 @@ switch (_operation) do {
 			_data = lbData [COMMANDBOARD_MAINMENU,_index];
 			_data = call compile _data;
 			_data params ["_profileID","_pos","_count","_busy"];
-			_map = (COMMANDBOARD_DISPLAY displayCtrl COMMANDBOARD_MAP);
 
 			[nil,"groupSelected"] call SpyderAddons_fnc_commandBoard;
 
-			ctrlMapAnimClear _map;
-			_map ctrlMapAnimAdd [.3, ctrlMapScale _map, _pos];
-			ctrlMapAnimCommit _map;
+			ctrlMapAnimClear COMMANDBOARD_MAP;
+			COMMANDBOARD_MAP ctrlMapAnimAdd [.3, ctrlMapScale COMMANDBOARD_MAP, _pos];
+			ctrlMapAnimCommit COMMANDBOARD_MAP;
+		}];
+
+		COMMANDBOARD_MAP ctrlAddEventHandler ["MouseButtonClick",{
+			_pos = (_this select 0) ctrlMapScreenToWorld [(_this select 2),(_this select 3)];
+			_profileData = [SpyderAddons_CommandBoard_Temp,"ProfilePositions"] call ALiVE_fnc_hashGet;
+
+			{
+				_profilePos = _x select 0;
+				if (_pos distance2D _profilePos < 40) then {
+					ctrlMapAnimClear COMMANDBOARD_MAP;
+					COMMANDBOARD_MAP ctrlMapAnimAdd [.3, ctrlMapScale COMMANDBOARD_MAP, _profilePos];
+					ctrlMapAnimCommit COMMANDBOARD_MAP;
+
+					_profileID = _x select 1;
+					_count = lbSize COMMANDBOARD_MAINMENU;
+
+					for "_i" from 0 to _count do {
+						_data = lbData [COMMANDBOARD_MAINMENU, _i];
+						if (_profileID in (call compile _data)) exitWith {
+							lbSetCurSel [COMMANDBOARD_MAINMENU, _i];
+						};
+					};
+				};
+			} forEach _profileData;
 		}];
 	};
 
@@ -541,6 +566,7 @@ switch (_operation) do {
 		ctrlShow [COMMANDBOARD_BACKSECONDARY, false];
 		buttonSetAction [COMMANDBOARD_BACKSECONDARY, ""];
 
+		COMMANDBOARD_SECONDARYMENUCONTROL ctrlRemoveAllEventHandlers "LBSelChanged";
 		(COMMANDBOARD_DISPLAY displayCtrl COMMANDBOARD_SECONDARYMENU)  ctrlAddEventHandler ["LBSelChanged",{
 			params ["_control","_index"];
 
@@ -568,6 +594,7 @@ switch (_operation) do {
 
 		ctrlShow [COMMANDBOARD_BACKSECONDARY, true];
 		buttonSetAction [COMMANDBOARD_BACKSECONDARY, "[nil,'groupSelected'] call SpyderAddons_fnc_commandBoard"];
+
 	};
 
 	case "enableCommandGroup": {
@@ -576,8 +603,8 @@ switch (_operation) do {
 		_data = call compile _data;
 		_data params ["_profileID","_pos","_count","_busy"];
 
-		lbClear COMMANDBOARD_SECONDARYMENU;
 		COMMANDBOARD_SECONDARYMENUCONTROL ctrlRemoveAllEventHandlers "LBSelChanged";
+		lbClear COMMANDBOARD_SECONDARYMENU;
 
 		lbAdd [COMMANDBOARD_SECONDARYMENU, "Assault Objective"];
 		lbAdd [COMMANDBOARD_SECONDARYMENU, "Setup Ambush"];
@@ -612,6 +639,8 @@ switch (_operation) do {
 			_data pushBack [_pos,_size];
 		} forEach _objectives;
 
+		[SpyderAddons_CommandBoard_Temp, "DisplayedObjectives", _data] call ALiVE_fnc_hashSet;
+
 		[nil,"enableObjectiveDisplay", _data] remoteExecCall [QUOTE(MAINCLASS),2];
 	};
 
@@ -619,6 +648,9 @@ switch (_operation) do {
 		private ["_color"];
 		_objectives = _arguments;
 		_markers = [];
+
+		lbClear COMMANDBOARD_SECONDARYMENU;
+		lbAdd [COMMANDBOARD_SECONDARYMENU, "Select Objective"];
 
 		switch (playerSide) do {
 			case west: {_color = "ColorWEST"};
@@ -645,6 +677,13 @@ switch (_operation) do {
 		buttonSetAction [COMMANDBOARD_BACKSECONDARY, "
 			[nil,'clearObjectiveMarkers'] call SpyderAddons_fnc_commandBoard;
 			[nil,'enableCommandGroup'] call SpyderAddons_fnc_commandBoard;
+		"];
+
+		[nil,"enableBackButton",true] call MAINCLASS;
+		buttonSetAction [COMMANDBOARD_BACKBUTTON, "
+			[nil,'clearObjectiveMarkers'] call SpyderAddons_fnc_commandBoard;
+			[nil,'clearMarkers'] call SpyderAddons_fnc_commandBoard;
+			[nil,'enableMainMenu'] call SpyderAddons_fnc_commandBoard;
 		"];
 	};
 

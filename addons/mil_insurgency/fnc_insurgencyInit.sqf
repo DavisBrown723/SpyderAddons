@@ -29,7 +29,7 @@ if (isNil "SpyderAddons_fnc_insurgency") exitWith {["[SpyderAddons - Mil Insurge
 
 ["[SpyderAddons - Mil Insurgency] Initialization starting"] call SpyderAddons_fnc_log;
 
-["init",[_logic,_syncedUnits]] call SpyderAddons_fnc_recruitment;
+[_logic,"init",_syncedUnits] call SpyderAddons_fnc_insurgency;
 
 ["[SpyderAddons - Mil Insurgency] Initialization complete"] call SpyderAddons_fnc_log;
 
