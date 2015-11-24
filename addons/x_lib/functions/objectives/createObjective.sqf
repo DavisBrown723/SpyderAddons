@@ -57,7 +57,6 @@ _objectiveParams = [_id, _pos, _size, _type, _priority];
 
 		if (_identifier in ([_side] + _factions)) then {
 			[_opcom, "addObjective", _objectiveParams] call ALiVE_fnc_OPCOM;
-			["SpyderAddons_fnc_createObjective: Registering %1 for %2", (_objectiveParams select 1) select 0, _identifier] call ALIVE_fnc_dump;
 		};
 	} forEach _identifiers;
 } forEach OPCOM_INSTANCES;

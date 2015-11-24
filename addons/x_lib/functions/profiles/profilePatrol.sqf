@@ -2,7 +2,7 @@ params [
 	["_profile"],
 	["_radius", 300],
 	["_behavior", "SAFE"],
-	["_defaultPos",[0,0,0]],
+	["_defaultPos",[0,0,0]]
 ];
 
 _command = ["ALIVE_fnc_ambientMovement",[_radius,_behavior,_defaultPos]];

@@ -50,7 +50,6 @@ for "_i" from 0 to (count _factionData) do {
 	_testedFactionData params ["_faction","_factionCount"];
 
 	if (_factionCount == _playerFaction) exitWith {
-		["SpyderAddons_fnc_getFactionMostPlayers: Returning faction %1", _faction] call ALIVE_fnc_dump;
 		_faction;
 	};
 };

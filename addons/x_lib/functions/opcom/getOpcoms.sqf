@@ -46,6 +46,4 @@ _opcoms = [];
 	};
 } forEach OPCOM_instances;
 
-["SpyderAddons_fnc_getOpcoms: Returning %1 opcoms", count _opcoms] call ALIVE_fnc_dump;
-
 _opcoms

@@ -12,6 +12,6 @@ _agents = [];
 			};
 		};
 	};
-} forEach allUnitsl
+} forEach allUnits;
 
 _agents

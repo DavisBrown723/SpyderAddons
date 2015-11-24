@@ -43,4 +43,3 @@ if ((isNil {[ALIVE_globalForcePool, _faction] call ALIVE_fnc_hashGet}) or (isNil
 
 _forcePool = [ALIVE_globalForcePool, _faction] call ALIVE_fnc_hashGet;
 [ALIVE_globalForcePool, _faction, (_forcePool + _amount)] call ALIVE_fnc_hashSet;
-["SpyderAddons_fnc_addForcepool: %1 forcepool added to faction %2", _amount, _faction] call ALIVE_fnc_dump;
