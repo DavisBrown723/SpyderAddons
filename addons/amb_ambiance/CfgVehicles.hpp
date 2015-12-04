@@ -84,7 +84,7 @@ class CfgVehicles
 				description = "";
 				class Values
 				{
-					class Divider
+					class AnimalsDivider
 					{
 						name = "----- Animals ------------------------------------------------------";
 						value = "";
@@ -99,12 +99,12 @@ class CfgVehicles
 					class Yes {
 						name = "Yes";
 						value = true;
+						default = 1;
 					};
 
 					class No {
 						name = "No";
 						value = false;
-						default = 1;
 					};
 				};
 			};
@@ -118,7 +118,7 @@ class CfgVehicles
 			class AnimalClasses {
 				displayName = "Animals";
 				description = "Animals that will be spawned";
-				defaultValue = "Goat_Random_F,Sheep_random_F";
+				defaultValue = "Goat_Random_F, Sheep_random_F";
 			};
 
 
@@ -127,7 +127,7 @@ class CfgVehicles
 				description = "";
 				class Values
 				{
-					class Divider
+					class VehiclesDivider
 					{
 						name = "----- Vehicles -----------------------------------------------------";
 						value = "";
@@ -142,12 +142,12 @@ class CfgVehicles
 					class Yes {
 						name = "Yes";
 						value = true;
+						default = 1;
 					};
 
 					class No {
 						name = "No";
 						value = false;
-						default = 1;
 					};
 				};
 			};
@@ -167,13 +167,13 @@ class CfgVehicles
 			class VehicleClasses {
 				displayName = "Vehicles";
 				description = "Vehicles that will be spawned";
-				defaultValue = "C_Hatchback_01_F,C_Offroad_01_F,C_Van_01_transport_F,C_Van_01_box_F";
+				defaultValue = "C_Hatchback_01_F, C_Offroad_01_F, C_Van_01_transport_F, C_Van_01_box_F";
 			};
 
 			class CivilianClasses {
 				displayName = "Civilians";
 				description = "Civilians that will be spawned";
-				defaultValue = "C_man_1,C_man_polo_1_F,C_man_polo_2_F,C_man_polo_6_F,C_man_shorts_1_F,C_man_w_worker_F";
+				defaultValue = "C_man_1, C_man_polo_1_F, C_man_polo_2_F, C_man_polo_6_F, C_man_shorts_1_F, C_man_w_worker_F";
 			};
 
 			class EnemiesInsideVehicles {
@@ -183,12 +183,12 @@ class CfgVehicles
 					class Yes {
 						name = "Yes";
 						value = true;
+						default = 1;
 					};
 
 					class No {
 						name = "No";
 						value = false;
-						default = 1;
 					};
 				};
 			};
@@ -202,7 +202,7 @@ class CfgVehicles
 			class EnemyClasses {
 				displayName = "Enemy Classes";
 				description = "Enemies that will be spawned";
-				defaultValue = "O_Soldier_F,O_Soldier_GL_F,O_Soldier_AR_F,O_Soldier_lite_F,O_Sharpshooter_F";
+				defaultValue = "O_Soldier_F, O_Soldier_GL_F, O_Soldier_AR_F, O_Soldier_lite_F, O_Sharpshooter_F";
 			};
 
 		};
@@ -210,11 +210,8 @@ class CfgVehicles
 		class ModuleDescription
 		{
 			description[] = {
-				"Enables players to play as ALiVE insurgents. Players will be given the ability to establish installations, recruit civilians, and plan coordinated attacks on security forces.",
-				"",
-				"Usage: Sync players to this module to add the insurgent actions to them."
+				"Allows mission makers to add subtle ambiance to their mission using a variety of highly customizable parameters",
 			};
-			optional = 1; // Synced entity is optional
 		};
 	};
 };
