@@ -1,1 +1,6 @@
 #define PREFIX SpyderAddons
+#define RECOMPILE 1
+
+//-- Fix..
+#define MOD(var1) SpyderAddons_##var1		//-- SpyderAddons_var1
+#define QMOD(var1) QUOTE(SpyderAddons_##var1)	//-- "SpyderAddons_var1"
