@@ -83,7 +83,7 @@ switch (_operation) do {
 			_loc setVariable ["Debug", _debug];
 			_loc setVariable ["Position", _pos];
 			_loc setVariable ["Activated", false];
-			_logic setVariable ["Objects", []];
+			_loc setVariable ["Objects", []];
 			_loc setVariable ["SpawnRange", _spawnRange];
 			_loc setVariable ["AmbientAnimals", _ambientAnimals];
 			_loc setVariable ["AnimalChance", _animalChance];
@@ -101,9 +101,10 @@ switch (_operation) do {
 				_marker = createMarker [str _pos, _pos];
 				_marker setMarkerShape "ELLIPSE";
 				_marker setMarkerSize [1000,1000];
-				_marker setMarkerAlpha 0.5;
+				_marker setMarkerAlpha 0.3;
 
 				_loc setVariable ["Marker", _marker];
+				_loc setVariable ["DebugMarkers", []];
 			};
 
 			_validLocs pushBack _loc;
@@ -154,14 +155,14 @@ switch (_operation) do {
 	case "addToQueue": {
 		_locs = _arguments;
 
-		if (isNil "SpyderAddons_ambianceHandler") then {
-			SpyderAddons_ambianceHandler = [nil,"create"] call MAINCLASS;
+		if (isNil QMOD(ambianceHandler)) then {
+			MOD(ambianceHandler) = [nil,"create"] call MAINCLASS;
 			_logics = _locs;
-			[SpyderAddons_ambianceHandler,"Logics", _logics] call ALiVE_fnc_hashSet;
+			[MOD(ambianceHandler),"Logics", _logics] call ALiVE_fnc_hashSet;
 		} else {
-			_logics = [SpyderAddons_ambianceHandler,"Logics"] call ALiVE_fnc_hashGet;
+			_logics = [MOD(ambianceHandler),"Logics"] call ALiVE_fnc_hashGet;
 			{_logics pushBack _x} forEach _locs;
-			[SpyderAddons_ambianceHandler,"Logics", _logics] call ALiVE_fnc_hashSet;
+			[MOD(ambianceHandler),"Logics", _logics] call ALiVE_fnc_hashSet;
 		};
 	};
 
@@ -197,17 +198,17 @@ switch (_operation) do {
 	case "Activate": {
 		_logic setVariable ["Activated", true];
 
-		if ([SpyderAddons_ambianceHandler,"AmbientAnimals"] call ALiVE_fnc_hashGet) then {
+		if (_logic getVariable "AmbientAnimals") then {
 			[_logic,"activateAnimals"] call MAINCLASS;
 		};
 
-		if ([SpyderAddons_ambianceHandler,"AmbientVehicles"] call ALiVE_fnc_hashGet) then {
+		if (_logic getVariable "AmbientVehicles") then {
 			[_logic,"activateVehicles"] call MAINCLASS;
 		};
 
 		if (_logic getVariable "Debug") then {
 			_marker = _logic getVariable "Marker";
-			_marker setMarkerAlpha 0.8;
+			_marker setMarkerAlpha 0.4;
 			_marker setMarkerColor "ColorBlue";
 		};
 	};
@@ -217,12 +218,14 @@ switch (_operation) do {
 
 		{deleteVehicle _x} forEach (_logic getVariable "Objects");
 		_logic setVariable ["Objects", []];
-		_logic setVariable ["Activated", false];
 
 		if (_logic getVariable "Debug") then {
 			_marker = _logic getVariable "Marker";
-			_marker setMarkerAlpha 0.5;
+			_marker setMarkerAlpha 0.3;
 			_marker setMarkerColor "ColorBlack";
+
+			{deleteMarker _x} forEach (_logic getVariable "DebugMarkers");
+			_logic setVariable ["DebugMarkers", []];
 		};
 	};
 
@@ -244,7 +247,7 @@ switch (_operation) do {
 		_vehClasses = _logic getVariable "VehicleClasses";
 		_civClasses = _logic getVariable "CivilianClasses";
 
-		for "_i" from 0 to _maxVehicles step 1 do {
+		for "_i" from 1 to _maxVehicles step 1 do {
 			if (floor random 100 <= _chance) then {
 				[_logic,"spawnVehicles", [_pos,_vehClasses,_civClasses]] spawn MAINCLASS;
 			};
@@ -253,11 +256,13 @@ switch (_operation) do {
 	};
 
 	case "spawnHerd": {
+		private ["_objects","marker"];
 		_arguments params ["_pos","_classes"];
 		_objects = _logic getVariable "Objects";
 
 		//-- Select animal to spawn
 		_herdType = _classes call BIS_fnc_selectRandom;
+		_newGroup = createGroup civilian;
 
 		//-- Create animals. Use spawn to reduce lag on unit creation
 		for "_i" from 0 to 6 + floor(random 12) step 1 do {
@@ -267,19 +272,30 @@ switch (_operation) do {
 		};
 
 		_logic setVariable ["Objects", _objects];
+
+		if (_logic getVariable "Debug") then {
+			_marker = createMarker [str _pos, _pos];
+			_marker setMarkerShape "ICON";
+			_marker setMarkerType "mil_dot";
+			_marker setMarkerSize [1,1];
+			_marker setMarkerText "Herd";
+
+			_markers = _logic getVariable "DebugMarkers";
+			_markers pushBack _marker;
+			_logic setVariable ["DebugMarkers", _markers];
+		};
 	};
 
 	case "spawnVehicles": {
-		private ["_unitClasses","_enemyVehicle","_driver","_group","_seats"];
+		private ["_objects","_unitClasses","_enemyVehicle","_driver","_group","_seats"];
 		_arguments params ["_pos","_vehClasses","_civClasses"];
 		_enemies = _logic getVariable "EnemiesInsideVehicles";
 		_enemyChance = _logic getVariable "EnemyChance";
 		_enemyClasses = _logic getVariable "EnemyClasses";
-
 		_objects = _logic getVariable "Objects";
 
 		//-- Check if vehicle is occupied by civs or enemies
-		if (floor random 100 <= _enemyChance) then {
+		if ((floor random 100 <= _enemyChance) and (_enemies)) then {
 			_unitClasses = _enemyClasses;
 			_enemyVehicle = true;
 			_driver = _unitClasses call BIS_fnc_selectRandom;
@@ -295,7 +311,9 @@ switch (_operation) do {
 
 		//-- Create vehicle
 		_road = (_pos nearRoads 400) call BIS_fnc_selectRandom;
+		if (isNil "_road") exitWith {};
 		_vehicle = (_vehClasses call BIS_fnc_selectRandom) createVehicle (getPos _road);
+		_driver = _group createUnit [(_unitClasses call BIS_fnc_selectRandom), [0,0,0], [], 5, "NONE"];
 		_objects pushBack _vehicle;
 
 		//-- Assign driver
@@ -308,8 +326,8 @@ switch (_operation) do {
 		if (_seats > 4) then {_seats  = ceil random 3};
 		for "_i" from 0 to (floor random _seats) step 1 do {
 			_unit = _group createUnit [(_unitClasses call BIS_fnc_selectRandom), [0,0,0], [], 5, "NONE"];
-			_unit assignAsCargo _veh;
-			_unit moveInCargo _veh;
+			_unit assignAsCargo _vehicle;
+			_unit moveInCargo _vehicle;
 			_objects pushBack _unit;
 			sleep .2;
 		};
@@ -334,16 +352,35 @@ switch (_operation) do {
 				[nil,"selectResponse", _group] call SpyderAddons_fnc_ambiance;
 			};
 		};
+
+		if (_logic getVariable "Debug") then {
+			_pos = getPos _vehicle;
+			_marker = createMarker [str _pos, _pos];
+			_marker setMarkerShape "ICON";
+			_marker setMarkerType "mil_dot";
+			_marker setMarkerSize [1,1];
+
+			if !(_enemyVehicle) then {
+				_marker setMarkerText "Civilian Vehicle";
+			} else {
+				_marker setMarkerText "Enemy Vehicle";
+			};
+
+			_markers = _logic getVariable "DebugMarkers";
+			_markers pushBack _marker;
+			_logic setVariable ["DebugMarkers", _markers];
+		};
 	};
 
 	case "getSide": {
 		_number = _arguments;
 
 		switch (str _number) do {
-			case "0": {_result = east};
-			case "1": {_result = west};
-			case "2": {_result = guer};
-			case "3": {_result = civilian};
+			case "0": {_result = EAST};
+			case "1": {_result = WEST};
+			case "2": {_result = GUER};
+			case "3": {_result = CIV};
+			default {_result = EAST};
 		};
 	};
 
