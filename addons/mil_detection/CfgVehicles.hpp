@@ -123,7 +123,7 @@ class CfgVehicles
 				displayName = "";
 				description = "";
 				class Values {
-					class Divider {
+					class RestrictedClothingDivider {
 						name = "----- Restricted Clothing --------------------------------------------------------";
 						value = "";
 					};
@@ -152,7 +152,7 @@ class CfgVehicles
 				displayName = "";
 				description = "";
 				class Values {
-					class Divider {
+					class IncognitoClothingDivider {
 						name = "----- Incognito Clothing --------------------------------------------------------";
 						value = "";
 					};
@@ -181,7 +181,7 @@ class CfgVehicles
 				displayName = "";
 				description = "";
 				class Values {
-					class Divider {
+					class DetectionValuesDivider {
 						name = "----- Detection Values --------------------------------------------------------";
 						value = "";
 					};
