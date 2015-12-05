@@ -66,8 +66,8 @@ I started this project so that I could use it as a method of learning the addon 
  - Define spawn ranges
  - Whitelist/Blacklist markers
  - Define locations where ambiance will exist
- - Enable/disable certain features based on your preferences
- - Each feature is customizable to fit the mission makers preferences.
+ - Enable/disable each feature
+ - Each feature is customizable to fit the mission maker's preferences.
   - Usage: Place module and input preferred parameters
 
 ####Insurgency (WIP)
