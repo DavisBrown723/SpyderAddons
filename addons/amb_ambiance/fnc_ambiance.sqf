@@ -390,14 +390,13 @@ switch (_operation) do {
 
 		_action = round(random 6);	//-- This should be a weighted selection instead
 
-		//-- Needs debug console testing
 		_leader = leader _group;
 		_vehicle = vehicle _leader;
 		_group setVariable ["Decided", true];
 
 		switch true do {
 			case (_action > 4): {
-				_retreatPos = [_vehicle, 300, ((getDir _vehicle) - 180)] call BIS_fnc_relPos;	//-- Switch to new getRelPos command
+				_retreatPos = _vehicle getRelPos [300, ((getDir _vehicle) - 180)];
 				(driver _vehicle) doMove _retreatPos;
 				_group setCombatMode "BLUE";
 				(driver _vehicle) forceSpeed 70;
