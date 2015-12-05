@@ -184,6 +184,7 @@ switch (_operation) do {
 				_data = _arguments select 1;
 				_data params ["_classname","_player"];
 				_unit = (group _player) createUnit [_classname, position _player, [], 15, "FORM"];
+				addSwitchableUnit _unit;
 			};
 		};
 	};
