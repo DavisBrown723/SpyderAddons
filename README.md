@@ -60,6 +60,16 @@ I started this project so that I could use it as a method of learning the addon 
  - View vehicle characteristics such as top speed, number of passenger seats, fuel consumption and more prior to spawning it.
   - Usage: Sync module to object to add vehicle spawner action to it
 
+####Ambiance
+ - Randomly spawned animal herds, civilian vehicles, undercover enemy vehicles
+ - Units are only spawned when players are near
+ - Define spawn ranges
+ - Whitelist/Blacklist markers
+ - Define locations where ambiance will exist
+ - Enable/disable certain features based on your preferences
+ - Each feature is customizable to fit the mission makers preferences.
+  - Usage: Place module and input preferred parameters
+
 ####Insurgency (WIP)
  - Establish recruitment HQ's, weapon depots, and IED factories.
  - Recruit civilians
