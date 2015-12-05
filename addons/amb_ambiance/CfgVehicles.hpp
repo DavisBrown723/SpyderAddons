@@ -197,7 +197,7 @@ class CfgVehicles
 				displayName = "Enemy Chance";
 				description = "Chance that enemies will be spawned inside a vehicle instead of civilians, max 100";
 				defaultValue = "15";
-			};
+			};	
 
 			class EnemyClasses {
 				displayName = "Enemy Classes";

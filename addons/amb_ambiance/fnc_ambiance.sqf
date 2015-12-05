@@ -378,7 +378,7 @@ switch (_operation) do {
 		switch (str _number) do {
 			case "0": {_result = EAST};
 			case "1": {_result = WEST};
-			case "2": {_result = GUER};
+			case "2": {_result = RESISTANCE};
 			case "3": {_result = CIV};
 			default {_result = EAST};
 		};
