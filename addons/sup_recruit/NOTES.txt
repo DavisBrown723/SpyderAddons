@@ -1,0 +1,35 @@
+["openSplash",0.25] call ALIVE_fnc_displayMenu;
+["setSplashText",_line1] call ALIVE_fnc_displayMenu;
+
+
+_event = ['OPS_JOIN_GROUP', [_requestID,_playerID,_profileID], "SCOM"] call ALIVE_fnc_event;
+_event = ['TYPE', [ARGUMENTS], "FROM"] call ALIVE_fnc_event;
+
+if(isServer) then {
+	[ALIVE_eventLog, "addEvent",_event] call ALIVE_fnc_eventLog;
+}else{
+	[[_event],"ALIVE_fnc_addEventToServer",false,false] spawn BIS_fnc_MP;
+};
+
+
+
+
+	case "handleEvent": {
+        if(typeName _args == "ARRAY") then {
+			_event = _args;
+
+			if((isServer and isMultiplayer) or isDedicated) then {
+				//-- Send to client
+				_eventData = [_event, "data"] call ALIVE_fnc_hashGet;
+				_playerID = _eventData select 0;
+				_player = [_playerID] call ALIVE_fnc_getPlayerByUID;
+
+				if !(isNull _player) then {
+					[_event,"ALIVE_fnc_SCOMTabletEventToClient",_player,false,false] spawn BIS_fnc_MP;
+				};
+			}else{
+				//-- Client is server
+				[_logic, "handleServerResponse", _event] call MAINCLASS;
+			};
+		};
+	};
