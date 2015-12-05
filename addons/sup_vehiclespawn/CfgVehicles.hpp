@@ -34,28 +34,33 @@ class CfgVehicles
 
 			class SpawnPosition {
 				displayName = "Spawn Position";
-				description = "Marker name of where vehicles will be spawned.";
+				description = "Marker name of where vehicles will be spawned";
 				defaultValue = "";
 			};
 
 			class VehicleFactions {
 				displayName = "Vehicle Factions";
-				description = "Factions of vehicles that will be able to be spawned.";
+				description = "Factions of vehicles that will be able to be spawned";
 				defaultValue = "";
 			};
 
 			class VehiclesWhitelist {
 				displayName = "Whitelist";
-				description = "Vehicles that will be able to be spawned.";
+				description = "Vehicles that will be able to be spawned";
 				defaultValue = "";
 			};
 			
 			class VehiclesBlacklist {
 				displayName = "Blacklist";
-				description = "Vehicles that will be excluded.";
+				description = "Vehicles that will be excluded";
 				defaultValue = "";
 			};
 
+			class VehiclesTypeBlacklist {
+				displayName = "Type Blacklist";
+				description = "Vehicles of this type will be excluded";
+				defaultValue = "";
+			};
 		};
 
 		class ModuleDescription

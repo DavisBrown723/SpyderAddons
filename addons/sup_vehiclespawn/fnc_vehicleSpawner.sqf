@@ -46,6 +46,7 @@ switch (_operation) do {
 		_factions = [_logic getVariable "VehicleFactions"] call SpyderAddons_fnc_getModuleArray;
 		_whitelist = [_logic getVariable "VehiclesWhitelist"] call SpyderAddons_fnc_getModuleArray;
 		_blacklist = [_logic getVariable "VehiclesBlacklist"] call SpyderAddons_fnc_getModuleArray;
+		_typeBlacklist = [_logic getVariable "VehiclesTypeBlacklist"] call SpyderAddons_fnc_getModuleArray;
 
 		_spawnPosition = getMarkerPos _spawnMarker;
 		_spawnDir = markerDir _spawnMarker;
@@ -57,6 +58,7 @@ switch (_operation) do {
 				_x setVariable ["VehicleSpawner_Factions", _factions];
 				_x setVariable ["VehicleSpawner_Whitelist", _whitelist];
 				_x setVariable ["VehicleSpawner_Blacklist", _blacklist];
+				_x setVariable ["VehicleSpawner_TypeBlacklist", _typeBlacklist];
 				_x addAction ["Vehicle Spawner", {["open",_this] call SpyderAddons_fnc_vehicleSpawner}];
 			};
 		} forEach _syncedUnits;
@@ -70,11 +72,13 @@ switch (_operation) do {
 	};
 
 	case "onLoad": {
+		private ["_vehicles"];
 		_arguments params ["_object","_caller"];
 
 		_factions = _object getVariable ["VehicleSpawner_Factions", []];
 		_whitelist = _object getVariable ["VehicleSpawner_Whitelist", []];
 		_blacklist = _object getVariable ["VehicleSpawner_Blacklist", []];
+		_typeBlacklist = _object getVariable ["VehicleSpawner_TypeBlacklist", []];
 
 		//-- Get faction vehicles
 		_vehicles = "(
@@ -96,6 +100,17 @@ switch (_operation) do {
 				};
 			};
 		} forEach _whitelist;
+
+		//-- Remove vehicles in type blacklist
+		{
+			_vehicle = _x;
+
+			{
+				if (configName _vehicle isKindOf _x) then {
+					_vehicles = _vehicles - [_vehicle];	//-- Does this recreate the array everytime? If so change
+				};
+			} forEach _typeBlacklist;
+		} forEach _vehicles;
 
 		//-- Add to list
 		{
