@@ -15,6 +15,16 @@ class CfgFunctions {
 				file = "\x\spyderaddons\addons\x_lib\functions\logging\log.sqf";
 				recompile = RECOMPILE;
 			};
+			class inspectArray {
+				description = "Inspects an array to the rpt";
+				file = "\x\spyderaddons\addons\x_lib\functions\logging\inspectArray.sqf";
+				recompile = RECOMPILE;
+			};
+			class inspectHash {
+				description = "Inspects a hash to the rpt";
+				file = "\x\spyderaddons\addons\x_lib\functions\logging\inspectHash.sqf";
+				recompile = RECOMPILE;
+			};
 
 			//-- Logistics
 			class addForcepool {

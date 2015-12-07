@@ -17,6 +17,9 @@ _opcom = ["WEST"] call SpyderAddons_fnc_getOpcoms; //-- Returns opcoms controlli
 _opcom = ["BLU_F"] call SpyderAddons_fnc_getOpcoms; //-- Returns opcom controlling NATO faction
 (end)
 
+Noes:
+Important to note that if you are retrieving a faction opcom, you will need to (_opcoms select 0) due to it still retrieving an array. Will change when not lazy.
+
 See Also:
 - nil
 

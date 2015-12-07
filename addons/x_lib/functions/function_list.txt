@@ -1,6 +1,14 @@
+//-- This is heavy WIP, some included functions may not work correctly (getAsymm..will fix when I'm not lazy) or are subject to change/removal
+
 asymmetric
 
 	getPositionSideHostility
+
+logging
+
+	inspectArray
+	inspectHash
+	log
 
 logistics
 
