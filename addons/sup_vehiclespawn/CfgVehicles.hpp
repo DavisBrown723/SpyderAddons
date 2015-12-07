@@ -58,7 +58,13 @@ class CfgVehicles
 
 			class VehiclesTypeBlacklist {
 				displayName = "Type Blacklist";
-				description = "Vehicles of this type will be excluded";
+				description = "Vehicles of these types will be excluded. Types are [Car, Truck, Armored, Tank, Helicopter, Plane]";
+				defaultValue = "";
+			};
+
+			class VehiclesTypeWhitelist {
+				displayName = "Type Whitelist";
+				description = "Only vehicles of types defined here will be included. Types are [Car, Truck, Armored, Tank, Helicopter, Plane]";
 				defaultValue = "";
 			};
 		};

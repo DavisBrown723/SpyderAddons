@@ -47,6 +47,7 @@ switch (_operation) do {
 		_whitelist = [_logic getVariable "VehiclesWhitelist"] call SpyderAddons_fnc_getModuleArray;
 		_blacklist = [_logic getVariable "VehiclesBlacklist"] call SpyderAddons_fnc_getModuleArray;
 		_typeBlacklist = [_logic getVariable "VehiclesTypeBlacklist"] call SpyderAddons_fnc_getModuleArray;
+		_typeWhitelist = [_logic getVariable "VehiclesTypeWhitelist"] call SpyderAddons_fnc_getModuleArray;
 
 		_spawnPosition = getMarkerPos _spawnMarker;
 		_spawnDir = markerDir _spawnMarker;
@@ -59,6 +60,7 @@ switch (_operation) do {
 				_x setVariable ["VehicleSpawner_Whitelist", _whitelist];
 				_x setVariable ["VehicleSpawner_Blacklist", _blacklist];
 				_x setVariable ["VehicleSpawner_TypeBlacklist", _typeBlacklist];
+				_x setVariable ["VehicleSpawner_TypeWhitelist", _typeWhitelist];
 				_x addAction ["Vehicle Spawner", {["open",_this] call SpyderAddons_fnc_vehicleSpawner}];
 			};
 		} forEach _syncedUnits;
@@ -79,6 +81,7 @@ switch (_operation) do {
 		_whitelist = _object getVariable ["VehicleSpawner_Whitelist", []];
 		_blacklist = _object getVariable ["VehicleSpawner_Blacklist", []];
 		_typeBlacklist = _object getVariable ["VehicleSpawner_TypeBlacklist", []];
+		_typeWhitelist = _object getVariable ["VehicleSpawner_TypeWhitelist", []];
 
 		//-- Get faction vehicles
 		_vehicles = "(
@@ -101,26 +104,38 @@ switch (_operation) do {
 			};
 		} forEach _whitelist;
 
-		//-- Remove vehicles in type blacklist
+		//-- Validate vehicles
+		_validVehicles = [];
 		{
 			_vehicle = _x;
 
-			{
-				if (configName _vehicle isKindOf _x) then {
-					_vehicles = _vehicles - [_vehicle];	//-- Does this recreate the array everytime? If so change
-				};
-			} forEach _typeBlacklist;
+			//-- If type whitelist exists, use those vehicle types. Otherwise, exclude type blacklists
+			if !(_typeWhitelist isEqualTo []) then {
+				//-- Validate with whitelist
+				{
+					if (configName _vehicle isKindOf _x) then {
+						_validVehicles pushBack _vehicle;
+					};
+				} forEach _typeWhitelist;
+			} else {
+				//-- Validate with blacklist
+				{
+					if !(configName _vehicle isKindOf _x) then {
+						_validVehicles pushBack _vehicle;
+					};
+				} forEach _typeBlacklist;
+			};
 		} forEach _vehicles;
 
 		//-- Add to list
 		{
 			_name = getText (_x >> "displayName");
-			_icon = getText (_x >> "icon"); //-- picture
+			_icon = getText (_x >> "icon");
 
 				lbAdd [VEHICLESPAWNER_VEHICLELIST, _name];
 				lbSetData [VEHICLESPAWNER_VEHICLELIST, _forEachIndex, configName _x];
 				lbSetPicture [VEHICLESPAWNER_VEHICLELIST, _forEachIndex, _icon];
-		} forEach _vehicles;
+		} forEach _validVehicles;
 
 		//-- Track vehicle list selection
 		VEHICLESPAWNER_VEHICLELISTCONTROL  ctrlAddEventHandler ["LBSelChanged","
