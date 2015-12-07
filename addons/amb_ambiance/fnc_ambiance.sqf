@@ -45,6 +45,8 @@ switch (_operation) do {
 	};
 
 	case "init": {
+		if !(isServer) exitWith {};
+
 		private ["_logics"];
 		params ["_logic","_synced"];
 
