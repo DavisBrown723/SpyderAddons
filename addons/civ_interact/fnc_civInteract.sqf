@@ -97,7 +97,13 @@ switch (_operation) do {
 
 		//-- Open dialog
 		CreateDialog CIVINTERACT_DIALOG;
-		ctrlSetText [CIVINTERACT_CIVNAME, name _civ];
+		_role = ["getRole",_civ] call MAINCLASS;
+		if (_role != "none") then {
+			ctrlSetText [CIVINTERACT_CIVNAME, (format ["%1 (%2)", name _civ, _role])];
+		} else {
+			ctrlSetText [CIVINTERACT_CIVNAME, name _civ];
+		};
+
 		if (_civ getVariable "detained") then {
 			ctrlSetText [CIVINTERACT_DETAIN, "Release"];
 		};
@@ -265,12 +271,12 @@ switch (_operation) do {
 	};
 
 	case "getRole": {
-		//-- TODO
+		private ["_role"];
+		_civ = _arguments;
+		_role = "none";
+		{if (_civ getvariable [_x,false]) exitwith {_role = _x}} foreach ["townelder","major","priest","muezzin","politician"];
 
-		//-- Get ALiVE assigned civilian role if any exists for the unit
-
-		//-- If a role exists, set it in parentheses after the civilian name or something
-		//-- Would probably be better to make a role text control that can be manipulated with ([_logic,"SetRoleText",_role] call MAINCLASS)
+		_result = ([_role] call CBA_fnc_capitalize);
 	};
 
 	case "UpdateHostility": {
@@ -373,6 +379,7 @@ switch (_operation) do {
 
 		{
 			_item = _x;
+			if (_item == "") exitWith {};
 
 			//-- Get config path
 			_configPath = configfile >> "CfgWeapons" >> _item;
@@ -390,7 +397,7 @@ switch (_operation) do {
 				//lbSetData [CIVINTERACT_GEARLIST, _forEachIndex, _configName];	Why the hell does this not work
 				_itemClassnames pushBack _configName;
 			};
-		} forEach (items _civ + weapons _civ + vestItems _civ);
+		} forEach (uniformItems _civ + vestItems _civ + backpackItems _civ + assignedItems _civ);
 		[SpyderAddons_civInteract_Logic, "Items", _itemClassnames] call ALiVE_fnc_hashSet;
 
 		["onGearSwitch"] call MAINCLASS;
