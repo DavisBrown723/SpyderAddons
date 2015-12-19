@@ -107,6 +107,8 @@ switch (_operation) do {
 		//-- Validate vehicles
 		_validVehicles = [];
 		{
+			private ["_valid"];
+			_valid = true;
 			_vehicle = _x;
 
 			//-- If type whitelist exists, use those vehicle types. Otherwise, exclude type blacklists
@@ -119,11 +121,17 @@ switch (_operation) do {
 				} forEach _typeWhitelist;
 			} else {
 				//-- Validate with blacklist
-				{
-					if !(configName _vehicle isKindOf _x) then {
-						_validVehicles pushBack _vehicle;
-					};
-				} forEach _typeBlacklist;
+				if !(_typeBlacklist isEqualTo []) then {
+					{
+						if (!(configName _vehicle isKindOf _x) and {_valid}) then {_valid = true} else {_valid = false};
+					} forEach _typeBlacklist;
+
+					//-- Make sure the vehicle isn't validated by not being in another blacklist
+					if (_valid) then {_validVehicles pushBack _vehicle};
+				} else {
+					//-- No blacklist or whitelist, just add the vehicle
+					_validVehicles pushBack _vehicle;
+				};
 			};
 		} forEach _vehicles;
 
