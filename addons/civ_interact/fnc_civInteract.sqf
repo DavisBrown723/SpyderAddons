@@ -264,6 +264,15 @@ switch (_operation) do {
 		["loadData",_civData] remoteExecCall ["SpyderAddons_fnc_civInteract",_player];
 	};
 
+	case "getRole": {
+		//-- TODO
+
+		//-- Get ALiVE assigned civilian role if any exists for the unit
+
+		//-- If a role exists, set it in parentheses after the civilian name or something
+		//-- Would probably be better to make a role text control that can be manipulated with ([_logic,"SetRoleText",_role] call MAINCLASS)
+	};
+
 	case "UpdateHostility": {
 		//-- Change local civilian hostility
 		private ["_townHostilityValue"];
