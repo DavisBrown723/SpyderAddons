@@ -11,7 +11,6 @@ class CfgVehicles
 		picture = "x\spyderaddons\addons\civ_interact\icon_civ_interact.paa";
 		functionPriority = 10;
 		isGlobal = 2;
-		isDisposable = 1;
 
 		class Arguments
 		{
