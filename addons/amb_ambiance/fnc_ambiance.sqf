@@ -398,7 +398,7 @@ switch (_operation) do {
 
 		switch true do {
 			case (_action > 4): {
-				_retreatPos = _vehicle getRelPos [300, ((getDir _vehicle) - 180)];
+				_retreatPos = [_vehicle, 300, ((getDir _vehicle) - 180)] call BIS_fnc_relPos;	//-- *UPDATE 1.50* _retreatPos = _vehicle getRelPos [300, ((getDir _vehicle) - 180)];
 				(driver _vehicle) doMove _retreatPos;
 				_group setCombatMode "BLUE";
 				(driver _vehicle) forceSpeed 70;
