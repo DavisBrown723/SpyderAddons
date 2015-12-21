@@ -85,6 +85,13 @@ class CfgFunctions {
 				file = "\x\spyderaddons\addons\x_lib\functions\profiles\isProfileAlive.sqf";
 				recompile = RECOMPILE;
 			};
+
+			//-- UI
+			class openRequiresAlive {
+				description = "Opens the menu notifying the user that a module being used requires ALiVE to run";
+				file = "\x\spyderaddons\addons\x_lib\functions\ui\openRequiresAlive.sqf";
+				recompile = RECOMPILE;
+			};
 		};
 	};
 };
