@@ -50,6 +50,12 @@ switch (_operation) do {
 
 	case "init": {
 		_syncedUnits = _arguments;
+
+		//-- Make sure ALiVE is running
+		if ((hasInterface) and {!(isClass (configfile >> "CfgVehicles" >> "ALiVE_require"))}) exitWith {
+			waitUntil {sleep 1; time > 5};
+			["Insurgency"] call SpyderAddons_fnc_openRequiresAlive;
+		};
 		
 		//Only one init per instance is allowed
 		if !(isNil {_logic getVariable "initGlobal"}) exitwith {["[SpyderAddons -  Mil Insurgency]:Only one init process per instance allowed, Exiting..."] call SpyderAddons_fnc_log};
