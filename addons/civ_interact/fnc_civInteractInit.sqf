@@ -22,15 +22,15 @@ private ["_logic","_moduleID"];
 params ["_logic"];
 
 _enable = call compile (_logic getvariable ["Enable","false"]);
-if !(_enable) exitWith {["[SpyderAddons - Civ Interact] Module has been disabled, exiting"] call ALIVE_fnc_dump};
+if !(_enable) exitWith {["[SpyderAddons - Civ Interact] Module has been disabled, exiting"] call SpyderAddons_fnc_log};
 
 // Confirm init function available
-if (isNil "SpyderAddons_fnc_civInteract") exitWith {["[SpyderAddons - Civ Interact] Main function missing"] call ALIVE_fnc_dump};
+if (isNil "SpyderAddons_fnc_civInteract") exitWith {["[SpyderAddons - Civ Interact] Main function missing"] call SpyderAddons_fnc_log};
 
-["[SpyderAddons - Civ Interact] Initialization starting"] call ALIVE_fnc_dump;
+["[SpyderAddons - Civ Interact] Initialization starting"] call SpyderAddons_fnc_log;
 
 ["init",_logic] call SpyderAddons_fnc_civInteract;
 
-["[SpyderAddons - Civ Interact] Initialization complete"] call ALIVE_fnc_dump;
+["[SpyderAddons - Civ Interact] Initialization complete"] call SpyderAddons_fnc_log;
 
 true

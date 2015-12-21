@@ -63,7 +63,7 @@ class Civ_Interact
 
 			x = 14.2 * GUI_GRID_W + GUI_GRID_X;
 			y = 3.5 * GUI_GRID_H + GUI_GRID_Y;
-			w = 8.5 * GUI_GRID_W;
+			w = 16 * GUI_GRID_W;
 			h = 2 * GUI_GRID_H;
 			sizeEx = 1 * GUI_GRID_H;
 		};

@@ -57,6 +57,12 @@ switch (_operation) do {
 	//-- Create logic on all localities
 	case "init": {
 		_logic = _arguments;
+
+		//-- Make sure ALiVE is running
+		if ((hasInterface) and {!(isClass (configfile >> "CfgVehicles" >> "ALiVE_require"))}) exitWith {
+			waitUntil {sleep 1; time > 5};
+			["Civilian Interaction"] call SpyderAddons_fnc_openRequiresAlive;
+		};
 		
 		if (isNil "SpyderAddons_civInteract_Logic") then {
 			SpyderAddons_civInteract_Logic = [] call ALIVE_fnc_hashCreate;
