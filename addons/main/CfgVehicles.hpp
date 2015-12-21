@@ -1,8 +1,7 @@
 class CfgFactionClasses {
-	class NO_CATEGORY;
 	class PREFIX {
 		displayName = "Spyder Addons";
-		priority = 0;
+		priority = 1;
 		side = 7;
 	};
 };
@@ -21,7 +20,7 @@ class CfgVehicles {
 
 	class ModuleSpyderAddonsBase: Module_F {
 		scope = 1;
-		displayName = "EditorSpyderAddonsBase";
-		category = "SpyderAddons";
+		displayName = "SpyderAddonsModuleBase";
+		category = QUOTE(PREFIX);
 	};
 };
