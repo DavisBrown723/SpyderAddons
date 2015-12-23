@@ -26,7 +26,7 @@ Author: SpyderBlack723
 Peer Reviewed:
 nil
 ---------------------------------------------------------------------------- */
-
+#include "script_component.hpp"
 params [
 	["_operation", ""],
 	["_arguments", []]
@@ -63,10 +63,10 @@ switch (_operation) do {
 			waitUntil {sleep 1; time > 5};
 			["Civilian Interaction"] call SpyderAddons_fnc_openRequiresAlive;
 		};
-		
+
 		if (isNil "SpyderAddons_civInteract_Logic") then {
 			SpyderAddons_civInteract_Logic = [] call ALIVE_fnc_hashCreate;
-			
+
 			//-- Get settings
 			_debug = _logic getVariable "Debug";
 			_factionEnemy = _logic getVariable "enemyFaction";
@@ -76,10 +76,9 @@ switch (_operation) do {
 			[SpyderAddons_civInteract_Logic, "Debug", _debug] call ALiVE_fnc_hashSet;
 			[SpyderAddons_civInteract_Logic, "Module", _logic] call ALiVE_fnc_hashSet;
 			[SpyderAddons_civInteract_Logic, "InsurgentFaction", _factionEnemy] call ALiVE_fnc_hashSet;
-
 		};
 	};
-	
+
 	//-- On load
 	case "openMenu": {
 		_arguments params ["_civ"];
@@ -91,7 +90,8 @@ switch (_operation) do {
 		if (!isNull findDisplay 923) exitWith {};
 
 		//-- Stop civilian
-		[[[_civ],{(_this select 0) disableAI "MOVE"}],"BIS_fnc_spawn",_civ,false,true] call BIS_fnc_MP;
+		//[[[_civ],{(_this select 0) disableAI "MOVE"}],"BIS_fnc_spawn",_civ,false,true] call BIS_fnc_MP;
+		_civ disableAI "MOVE";
 
 		//-- Remove data from handler -- Just in case something doesn't delete upon closing
 		[SpyderAddons_civInteract_Logic, "CurrentCivData", nil] call ALiVE_fnc_hashSet;
@@ -206,10 +206,10 @@ switch (_operation) do {
 	case "getCivInfo": {
 		_arguments params ["_player","_civ"];
 		private ["_opcom","_nearestObjective","_clusterID","_agentProfile","_hostileCivInfo","_objectiveInstallations","_objectiveActions"];
-		
+
 		_civPos = getPos _civ;
 		_insurgentFaction = [SpyderAddons_civInteract_Logic, "InsurgentFaction"] call ALiVE_fnc_hashGet;
-			
+
 		//-- Get nearest objective properties
 		{
 			if (_insurgentFaction in ([_x, "factions"] call ALiVE_fnc_hashGet)) then {
@@ -218,7 +218,8 @@ switch (_operation) do {
 				_objectives = [_objectives,[_civPos],{_Input0 distance2D ([_x, "center"] call CBA_fnc_HashGet)},"ASCEND"] call BIS_fnc_sortBy;
 				_nearestObjective = _objectives select 0;
 			};
-		} forEach OPCOM_instances;
+			false
+		} count OPCOM_instances;
 
 		if (!isNil "_opcom") then {
 			_objectiveInstallations = ["getObjectiveInstallations", [_opcom,_nearestObjective]] call SpyderAddons_fnc_civInteract;
@@ -227,11 +228,11 @@ switch (_operation) do {
 			_objectiveInstallations = [[],[],[],[]];
 			_objectiveActions = [[],[],[],[]];
 		};
-			
+
 		//-- Get civilian info
 		_civInfo = [];
 		_civID = _civ getVariable ["agentID", ""];
-			
+
 		if (_civID != "") then {
 			_civProfile = [ALIVE_agentHandler, "getAgent", _civID] call ALIVE_fnc_agentHandler;
 			_clusterID = _civProfile select 2 select 9;
@@ -241,18 +242,18 @@ switch (_operation) do {
 			_townHostility = [_cluster, "posture"] call ALIVE_fnc_hashGet;	//_townHostility = (_cluster select 2) select 9; (Different)
 			_civInfo pushBack [_homePos, _individualHostility, _townHostility];
 		};
-		
+
 		//-- Get nearby hostile civilian
 		_hostileCivInfo = [];
 		_insurgentCommands = ["alive_fnc_cc_suicide","alive_fnc_cc_suicidetarget","alive_fnc_cc_rogue","alive_fnc_cc_roguetarget","alive_fnc_cc_sabotage","alive_fnc_cc_getweapons"];
 		_agentsByCluster = [ALIVE_agentHandler, "agentsByCluster"] call ALIVE_fnc_hashGet;
 		_nearCivs = [_agentsByCluster, _clusterID] call ALIVE_fnc_hashGet;
-		
+
 		//-- {_x getVariable "ALiVE_insurgent"} would work as well but this method simulates a more community - focused base of knowledge
 		for "_i" from 0 to ((count (_nearCivs select 1)) - 1) do {
 			_agentID = (_nearCivs select 1) select _i;
 			_agentProfile = [_nearCivs, _agentID] call ALiVE_fnc_hashGet;
-				
+
 			if ([_agentProfile,"active"] call ALIVE_fnc_hashGet) then {
 				if ([_agentProfile, "type"] call ALiVE_fnc_hashGet == "agent") then {
 					_activeCommands = [_agentProfile,"activeCommands",[]] call ALIVE_fnc_hashGet;
@@ -269,7 +270,7 @@ switch (_operation) do {
 			};
 		};
 		if (count _hostileCivInfo > 0) then {_hostileCivInfo = _hostileCivInfo call BIS_fnc_selectRandom};
-		
+
 		_civData = [_objectiveInstallations, _objectiveActions, _civInfo,_hostileCivInfo];
 
 		//-- Send data to client
@@ -289,7 +290,7 @@ switch (_operation) do {
 		//-- Change local civilian hostility
 		private ["_townHostilityValue"];
 		_arguments params ["_civ","_value"];
-		if (count _arguments > 2) then {_townHostilityValue = _arguments select 2};		
+		if (count _arguments > 2) then {_townHostilityValue = _arguments select 2};
 
 		if (isNil "_townHostilityValue") then {
 			if (isNil {[SpyderAddons_civInteract_Logic, "CurrentCivData"] call ALiVE_fnc_hashGet}) exitWith {};
@@ -323,7 +324,7 @@ switch (_operation) do {
 			_hostility = _hostility + _value;
 			[_civProfile, "posture", _hostility] call ALiVE_fnc_hashSet;
 		};
-		
+
 	};
 
 	case "isIrritated": {
