@@ -67,7 +67,7 @@ switch (_operation) do {
 			waitUntil {sleep 1; time > 5};
 			["Civilian Interaction"] call SpyderAddons_fnc_openRequiresAlive;
 		};
-		
+
 		if (isNil QMOD(civInteractHandler)) then {
 			//-- Get settings
 			_debug = _logic getVariable "Debug";
@@ -78,7 +78,7 @@ switch (_operation) do {
 			[MOD(civInteractHandler), "InsurgentFaction", _factionEnemy] call ALiVE_fnc_hashSet;
 		};
 	};
-	
+
 	//-- On load
 	case "openMenu": {
 		_civ = _arguments;
@@ -92,12 +92,11 @@ switch (_operation) do {
 		//-- Stop civilian
 		[[[_civ],{(_this select 0) disableAI "MOVE"}],"BIS_fnc_spawn",_civ,false,true] call BIS_fnc_MP;
 		//_civ disableAI "MOVE"; //-- Needs further testing but wasn't reliable in MP (Arguments must be local -- unit is local to server (or hc))
-/*
+
 		//-- Remove data from handler -- Just in case something doesn't delete upon closing
 		[_logic, "CivData", nil] call ALiVE_fnc_hashSet;
 		[_logic, "Civ", nil] call ALiVE_fnc_hashSet;
 		[_logic, "Items", nil] call ALiVE_fnc_hashSet;
-*/
 		//-- Hash civilian to logic (must be done early so commandHandler has an object to use)
 		[_logic, "Civ", _civ] call ALiVE_fnc_hashSet;	//-- Unit object
 
@@ -117,10 +116,10 @@ switch (_operation) do {
 		};
 
 		[nil,"toggleSearchMenu"] call MAINCLASS;
-		ctrlShow [CIVINTERACT_CONFISCATEBUTTON, false];
+		CIVINTERACT_CONFISCATEBUTTON ctrlShow false;
 
 		//-- Display loading
-		lbAdd [CIVINTERACT_QUESTIONLIST, "Loading . . ."];
+		CIVINTERACT_QUESTIONLIST lbAdd "Loading . . .";
 
 		//-- Retrieve data
 		[nil,"getData",[player,_civ]] remoteExecCall [QUOTE(MAINCLASS),2];
@@ -232,10 +231,10 @@ switch (_operation) do {
 	case "getData": {
 		private ["_opcom","_nearestObjective","_civInfo","_clusterID","_agentProfile","_hostileCivInfo","_objectiveInstallations","_objectiveActions"];
 		_arguments params ["_player","_civ"];
-		
+
 		_civPos = getPos _civ;
 		_insurgentFaction = [MOD(civInteractHandler), "InsurgentFaction"] call ALiVE_fnc_hashGet;
-			
+
 		//-- Get nearest objective properties
 		for "_i" from 0 to (count OPCOM_instances - 1) step 1 do {
 			_opcom = OPCOM_instances select _i;
@@ -257,7 +256,7 @@ switch (_operation) do {
 
 		//-- Get civilian info
 		_civID = _civ getVariable ["agentID", ""];
-			
+
 		if (_civID != "") then {
 			_civProfile = [ALIVE_agentHandler, "getAgent", _civID] call ALIVE_fnc_agentHandler;
 			_clusterID = (_civProfile select 2) select 9;
@@ -267,7 +266,7 @@ switch (_operation) do {
 			_townHostility = [_cluster, "posture"] call ALIVE_fnc_hashGet;	//_townHostility = (_cluster select 2) select 9; (Different)
 			_civInfo = [_homePos, _individualHostility, _townHostility];
 		};
-		
+
 		//-- Get nearby hostile civilian
 		_hostileCivInfo = [];
 		_insurgentCommands = ["alive_fnc_cc_suicide","alive_fnc_cc_suicidetarget","alive_fnc_cc_rogue","alive_fnc_cc_roguetarget","alive_fnc_cc_sabotage","alive_fnc_cc_getweapons"];
@@ -277,7 +276,7 @@ switch (_operation) do {
 		for "_i" from 0 to ((count (_nearCivs select 1)) - 1) do {
 			_agentID = (_nearCivs select 1) select _i;
 			_agentProfile = [_nearCivs, _agentID] call ALiVE_fnc_hashGet;
-				
+
 			if ([_agentProfile,"active"] call ALIVE_fnc_hashGet) then {
 				if ([_agentProfile, "type"] call ALiVE_fnc_hashGet == "agent") then {
 					_activeCommands = [_agentProfile,"activeCommands",[]] call ALIVE_fnc_hashGet;
@@ -293,8 +292,9 @@ switch (_operation) do {
 				};
 			};
 		};
+
 		if (count _hostileCivInfo > 0) then {_hostileCivInfo = _hostileCivInfo call BIS_fnc_selectRandom};	//-- Ensure random hostile civ is picked if there are multiple
-		
+
 		_civData = [_objectiveInstallations, _objectiveActions, _civInfo,_hostileCivInfo];
 
 		//-- Send data to client
@@ -315,7 +315,7 @@ switch (_operation) do {
 		//-- Change local civilian hostility
 		private ["_townHostilityValue"];
 		_arguments params ["_civ","_value"];
-		if (count _arguments > 2) then {_townHostilityValue = _arguments select 2};		
+		if (count _arguments > 2) then {_townHostilityValue = _arguments select 2};
 
 		if (isNil "_townHostilityValue") then {
 			if (isNil {[SpyderAddons_civInteract_Logic, "CurrentCivData"] call ALiVE_fnc_hashGet}) exitWith {};
@@ -349,7 +349,7 @@ switch (_operation) do {
 			_hostility = _hostility + _value;
 			[_civProfile, "posture", _hostility] call ALiVE_fnc_hashSet;
 		};
-		
+
 	};
 
 	//-- REVISE
@@ -391,7 +391,7 @@ switch (_operation) do {
 		private ["_enable"];
 		if (ctrlVisible 9240) then {_enable = false} else {_enable = true};
 
-		ctrlShow [CIVINTERACT_SEARCHBUTTON, !_enable];
+		CIVINTERACT_SEARCHBUTTON ctrlShow !_enable;
 
 		{
 			ctrlShow [_x, _enable];
@@ -399,9 +399,9 @@ switch (_operation) do {
 
 		if (_enable) then {
 			["displayGear"] call MAINCLASS;
-			CIVINTERACT_GEARLISTCONTROL ctrlAddEventHandler ["LBSelChanged","['onGearSwitch'] call SpyderAddons_fnc_civInteract"];
+			CIVINTERACT_GEARLIST ctrlAddEventHandler ["LBSelChanged","[nil,'onGearSwitch'] call SpyderAddons_fnc_civInteract"];
 		} else {
-			ctrlShow [CIVINTERACT_CONFISCATEBUTTON, false];
+			CIVINTERACT_CONFISCATEBUTTON ctrlShow  false;
 		};
 	};
 
@@ -481,9 +481,9 @@ switch (_operation) do {
 		_index = lbCurSel CIVINTERACT_GEARLIST;
 
 		if (_index == -1) then {
-			ctrlShow [CIVINTERACT_CONFISCATEBUTTON, false];
+			CIVINTERACT_CONFISCATEBUTTON ctrlShow false;
 		} else {
-			ctrlShow [CIVINTERACT_CONFISCATEBUTTON, true];
+			CIVINTERACT_CONFISCATEBUTTON ctrlShow true;
 		};
 	};
 

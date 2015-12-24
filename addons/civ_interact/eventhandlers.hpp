@@ -1,3 +1,4 @@
+#include "script_component.hpp"
 class Extended_Init_EventHandlers {
 	class Civilian {
 		class ADDON {
