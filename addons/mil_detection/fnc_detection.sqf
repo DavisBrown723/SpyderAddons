@@ -148,7 +148,7 @@ switch (_operation) do {
 		_uniformFactionsIncognito = "(configName _x) in _incognitoUniforms" configClasses (configFile >> "CfgFactionClasses");
 
 		//-- Get faction headgear
-		if !(count _headgearIncognito == 0) then {
+		if !(count _headgearFactionsIncognito == 0) then {
 			_factionNames = [];
 			{_factionNames pushBack (configName _x)} forEach _headgearFactionsIncognito;
 			_gear = ["getFactionGear", ["headgear", _factionNames]] call MAINCLASS;
