@@ -29,7 +29,7 @@ if (isNil "SpyderAddons_fnc_civInteract") exitWith {["[SpyderAddons - Civ Intera
 
 ["[SpyderAddons - Civ Interact] Initialization starting"] call SpyderAddons_fnc_log;
 
-["init",_logic] call SpyderAddons_fnc_civInteract;
+[_logic,"init"] call SpyderAddons_fnc_civInteract;
 
 ["[SpyderAddons - Civ Interact] Initialization complete"] call SpyderAddons_fnc_log;
 

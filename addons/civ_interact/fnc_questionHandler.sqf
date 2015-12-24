@@ -1,3 +1,14 @@
+#include <\x\spyderaddons\addons\civ_interact\script_component.hpp>
+SCRIPT(responseHandler);
+
+/* -------------------------------------------------------------------------------------
+		             Revision Notes
+
+Change fnc name to responseHandler
+This file looks ugly and could use serious a serious rewrite and improvements
+
+------------------------------------------------------------------------------------- */
+
 /* ----------------------------------------------------------------------------
 Function: SpyderAddons_fnc_questionHandler
 

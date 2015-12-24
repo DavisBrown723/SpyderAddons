@@ -6,7 +6,7 @@ class Civ_Interact
 {
 	idd = 923;
 	movingEnable = 1;
-	onUnload = "['closeMenu'] call SpyderAddons_fnc_civInteract";
+	onUnload = "[SpyderAddons_civInteractHandler,'closeMenu'] call SpyderAddons_fnc_civInteract";
 	class controls 
 	{
 

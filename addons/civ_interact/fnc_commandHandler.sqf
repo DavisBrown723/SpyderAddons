@@ -1,3 +1,5 @@
+//-- MERGE INTO CIV INTERACT FNC
+
 /* ----------------------------------------------------------------------------
 Function: SpyderAddons_fnc_civilianCommands
 

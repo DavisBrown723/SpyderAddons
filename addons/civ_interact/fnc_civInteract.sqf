@@ -1,3 +1,6 @@
+#include <\x\spyderaddons\addons\civ_interact\script_component.hpp>
+SCRIPT(civInteract);
+
 /* ----------------------------------------------------------------------------
 Function: SpyderAddons_fnc_civInteract
 
@@ -13,9 +16,8 @@ Any - Result of the operation
 
 Examples:
 (begin example)
-[_operation, _arguments] call SpyderAddons_fnc_civInteract;
-["init",["WEST","LOP_ISTS"]] call SpyderAddons_fnc_civInteract; //-- Initialize civilian interraction
-_civData = ["getCivInfo",[_civ]] call SpyderAddons_fnc_civInteract; //-- Get data of civilian
+[_logic,_operation, _arguments] call SpyderAddons_fnc_civInteract;
+_civData = [_logic,"getData", [player,_civ]] call SpyderAddons_fnc_civInteract; //-- Get data of civilian
 (end)
 
 See Also:
@@ -28,6 +30,7 @@ nil
 ---------------------------------------------------------------------------- */
 
 params [
+	["_logic", objNull],
 	["_operation", ""],
 	["_arguments", []]
 ];
@@ -40,69 +43,68 @@ private ["_result"];
 #define MAIN_LOGIC SpyderAddons_civInteract_Logic
 
 //-- Define control ID's
-#define CIVINTERACT_DIALOG "Civ_Interact"
-#define CIVINTERACT_CIVNAME 9236
-#define CIVINTERACT_DETAIN 92311
-#define CIVINTERACT_QUESTIONLIST 9234
-#define CIVINTERACT_QUESTIONCONTROL (findDisplay 923 displayCtrl 9234)
-#define CIVINTERACT_RESPONSELIST (findDisplay 923 displayCtrl 9239)
-#define CIVINTERACT_INVENTORYCONTROLS [9240,9241,9243,9244]
-#define CIVINTERACT_SEARCHBUTTON 9242
-#define CIVINTERACT_GEARLIST 9244
-#define CIVINTERACT_GEARLISTCONTROL (findDisplay 923 displayCtrl 9244)
-#define CIVINTERACT_CONFISCATEBUTTON 9245
+#define CIVINTERACT_DISPLAY 		(findDisplay 923)
+#define CIVINTERACT_CIVNAME 		(CIVINTERACT_DISPLAY displayCtrl 9236)
+#define CIVINTERACT_DETAIN 		(CIVINTERACT_DISPLAY displayCtrl 92311)
+#define CIVINTERACT_QUESTIONLIST 		(CIVINTERACT_DISPLAY displayCtrl 9234)
+#define CIVINTERACT_RESPONSELIST 		(CIVINTERACT_DISPLAY displayCtrl 9239)
+#define CIVINTERACT_INVENTORYCONTROLS 	[9240,9241,9243,9244]
+#define CIVINTERACT_SEARCHBUTTON 	(CIVINTERACT_DISPLAY displayCtrl 9242)
+#define CIVINTERACT_GEARLIST 		(CIVINTERACT_DISPLAY displayCtrl 9244)
+#define CIVINTERACT_GEARLISTCONTROL 	(CIVINTERACT_DISPLAY displayCtrl 9244)
+#define CIVINTERACT_CONFISCATEBUTTON 	(CIVINTERACT_DISPLAY displayCtrl 9245)
 
 switch (_operation) do {
 
+	case "create": {
+		_result = [] call ALiVE_fnc_hashCreate;
+	};
+
 	//-- Create logic on all localities
 	case "init": {
-		_logic = _arguments;
-
 		//-- Make sure ALiVE is running
 		if ((hasInterface) and {!(isClass (configfile >> "CfgVehicles" >> "ALiVE_require"))}) exitWith {
 			waitUntil {sleep 1; time > 5};
 			["Civilian Interaction"] call SpyderAddons_fnc_openRequiresAlive;
 		};
 		
-		if (isNil "SpyderAddons_civInteract_Logic") then {
-			SpyderAddons_civInteract_Logic = [] call ALIVE_fnc_hashCreate;
-			
+		if (isNil QMOD(civInteractHandler)) then {
 			//-- Get settings
 			_debug = _logic getVariable "Debug";
 			_factionEnemy = _logic getVariable "enemyFaction";
 
-			//-- Initialize settings
-			//_logic setVariable ["class", MAINCLASS]; //-- Not currently needed (events not in use)
-			[SpyderAddons_civInteract_Logic, "Debug", _debug] call ALiVE_fnc_hashSet;
-			[SpyderAddons_civInteract_Logic, "Module", _logic] call ALiVE_fnc_hashSet;
-			[SpyderAddons_civInteract_Logic, "InsurgentFaction", _factionEnemy] call ALiVE_fnc_hashSet;
-
+			MOD(civInteractHandler) = [nil,"create"] call MAINCLASS;
+			[MOD(civInteractHandler), "Debug", _debug] call ALiVE_fnc_hashSet;
+			[MOD(civInteractHandler), "InsurgentFaction", _factionEnemy] call ALiVE_fnc_hashSet;
 		};
 	};
 	
 	//-- On load
 	case "openMenu": {
-		_arguments params ["_civ"];
+		_civ = _arguments;
 
 		//-- Exit if civ is armed
-		if ((primaryWeapon _civ != "") or (handgunWeapon _civ != "")) exitWith {};
+		if ((primaryWeapon _civ != "") or {handgunWeapon _civ != ""}) exitWith {};
 
 		//-- Close dialog if it happened to open twice
 		if (!isNull findDisplay 923) exitWith {};
 
 		//-- Stop civilian
 		[[[_civ],{(_this select 0) disableAI "MOVE"}],"BIS_fnc_spawn",_civ,false,true] call BIS_fnc_MP;
-
+		//_civ disableAI "MOVE"; //-- Needs further testing but wasn't reliable in MP (Arguments must be local -- unit is local to server (or hc))
+/*
 		//-- Remove data from handler -- Just in case something doesn't delete upon closing
-		[SpyderAddons_civInteract_Logic, "CurrentCivData", nil] call ALiVE_fnc_hashSet;
-		[SpyderAddons_civInteract_Logic, "CurrentCivilian", nil] call ALiVE_fnc_hashSet;
-		[SpyderAddons_civInteract_Logic, "Items", nil] call ALiVE_fnc_hashSet;
-
+		[_logic, "CivData", nil] call ALiVE_fnc_hashSet;
+		[_logic, "Civ", nil] call ALiVE_fnc_hashSet;
+		[_logic, "Items", nil] call ALiVE_fnc_hashSet;
+*/
 		//-- Hash civilian to logic (must be done early so commandHandler has an object to use)
-		[SpyderAddons_civInteract_Logic, "CurrentCivilian", _civ] call ALiVE_fnc_hashSet;				//-- Unit object
+		[_logic, "Civ", _civ] call ALiVE_fnc_hashSet;	//-- Unit object
 
 		//-- Open dialog
-		CreateDialog CIVINTERACT_DIALOG;
+		CreateDialog "Civ_Interact";
+
+		//-- Set civilian name
 		_role = ["getRole",_civ] call MAINCLASS;
 		if (_role != "none") then {
 			ctrlSetText [CIVINTERACT_CIVNAME, (format ["%1 (%2)", name _civ, _role])];
@@ -113,14 +115,15 @@ switch (_operation) do {
 		if (_civ getVariable "detained") then {
 			ctrlSetText [CIVINTERACT_DETAIN, "Release"];
 		};
-		["toggleSearchMenu"] call MAINCLASS;
+
+		[nil,"toggleSearchMenu"] call MAINCLASS;
 		ctrlShow [CIVINTERACT_CONFISCATEBUTTON, false];
 
 		//-- Display loading
 		lbAdd [CIVINTERACT_QUESTIONLIST, "Loading . . ."];
 
 		//-- Retrieve data
-		["getCivInfo",[player,_civ]] remoteExecCall ["SpyderAddons_fnc_civInteract",2];
+		[nil,"getData",[player,_civ]] remoteExecCall [QUOTE(MAINCLASS),2];
 	};
 
 	//-- Load data
@@ -130,9 +133,11 @@ switch (_operation) do {
 
 		_arguments params ["_objectiveInstallations","_objectiveActions","_civInfo","_hostileCivInfo"];
 
+		_logic = MOD(civInteractHandler);
+
 		//-- Create hash
 		_civData = [] call ALIVE_fnc_hashCreate;
-		_civ = [SpyderAddons_civInteract_Logic,"CurrentCivilian"] call ALiVE_fnc_hashGet;
+		_civ = [_logic,"Civ"] call ALiVE_fnc_hashGet;
 		_answersGiven = _civ getVariable ["AnswersGiven", []];
 
 		//-- Hash data to logic
@@ -142,43 +147,64 @@ switch (_operation) do {
 		[_civData, "HostileCivInfo", _hostileCivInfo] call ALiVE_fnc_hashSet;			//-- [_civ,_homePos,_activeCommands]
 		[_civData, "AnswersGiven", _answersGiven] call ALiVE_fnc_hashSet;			//-- Default []
 		[_civData, "Asked", 0] call ALiVE_fnc_hashSet;					//-- Default - 0
-		[SpyderAddons_civInteract_Logic, "CurrentCivData", _civData] call ALiVE_fnc_hashSet;
+		[_logic, "CivData", _civData] call ALiVE_fnc_hashSet;
+
+		[_logic,"enableMain"] call MAINCLASS;
+	};
+
+	case "enableMain": {
+		//-- Remove EH's
+		(COMMANDBOARD_DISPLAY displayCtrl COMMANDBOARD_MAINMENU) ctrlRemoveAllEventHandlers "LBSelChanged";
+
+		//-- Clear list
+		lbClear CIVINTERACT_QUESTIONLIST;
 
 		//-- Build question list
-		lbClear CIVINTERACT_QUESTIONLIST;
-		lbAdd [CIVINTERACT_QUESTIONLIST, "Where do you live?"];lbSetData [CIVINTERACT_QUESTIONLIST, 0, "Home"];
-		lbAdd [CIVINTERACT_QUESTIONLIST, "What town you do live in"];lbSetData [CIVINTERACT_QUESTIONLIST, 1, "Town"];
-		lbAdd [CIVINTERACT_QUESTIONLIST, "Have you seen any IED's lately?"];lbSetData [CIVINTERACT_QUESTIONLIST, 2, "IEDs"];
-		lbAdd [CIVINTERACT_QUESTIONLIST, "Have you seen any insurgent activity lately?"];lbSetData [CIVINTERACT_QUESTIONLIST, 3, "Insurgents"];
-		lbAdd [CIVINTERACT_QUESTIONLIST, "Do you know the location of any insurgent hideouts?"];lbSetData [CIVINTERACT_QUESTIONLIST, 4, "Hideouts"];
-		lbAdd [CIVINTERACT_QUESTIONLIST, "Have you seen any strange behavior lately?"];lbSetData [CIVINTERACT_QUESTIONLIST, 5, "StrangeBehavior"];
-		lbAdd [CIVINTERACT_QUESTIONLIST, "Do you support us?"];lbSetData [CIVINTERACT_QUESTIONLIST, 6, "Opinion"];
-		lbAdd [CIVINTERACT_QUESTIONLIST, "What is the opinion of our forces in this area?"];lbSetData [CIVINTERACT_QUESTIONLIST, 7, "TownOpinion"];
+		CIVINTERACT_QUESTIONLIST lbAdd "Where do you live?";
+		CIVINTERACT_QUESTIONLIST lbSetData [0, "Home"];
 
-		//-- Add threats? Can raise or lower civilian's posture level based on random chance and civ's current hostility
+		CIVINTERACT_QUESTIONLIST lbAdd "What town you do live in";
+		CIVINTERACT_QUESTIONLIST lbSetData [1, "Town"];
 
-		CIVINTERACT_QUESTIONCONTROL ctrlAddEventHandler ["LBSelChanged","
-			_index = lbCurSel 9234;
-			_question = lbData [9234, _index];
+		CIVINTERACT_QUESTIONLIST lbAdd "Have you seen any IED's lately?";
+		CIVINTERACT_QUESTIONLIST lbSetData [2, "IEDs"];
+
+		CIVINTERACT_QUESTIONLIST lbAdd "Have you seen any insurgent activity lately?";
+		CIVINTERACT_QUESTIONLIST lbSetData [3, "Insurgents"];
+
+		CIVINTERACT_QUESTIONLIST lbAdd "Do you know the location of any insurgent hideouts?";
+		CIVINTERACT_QUESTIONLIST lbSetData [4, "Hideouts"];
+
+		CIVINTERACT_QUESTIONLIST lbAdd "Have you seen any strange behavior lately?";
+		CIVINTERACT_QUESTIONLIST lbSetData [5, "StrangeBehavior"];
+
+		CIVINTERACT_QUESTIONLIST lbAdd "Do you support us?";
+		CIVINTERACT_QUESTIONLIST lbSetData [6, "Opinion"];
+
+		CIVINTERACT_QUESTIONLIST lbAdd "What is the opinion of our forces in this area?";
+		CIVINTERACT_QUESTIONLIST lbSetData [7, "TownOpinion"];
+
+		CIVINTERACT_QUESTIONLIST ctrlAddEventHandler ["LBSelChanged","
+			params ['_control','_index'];
+			_question = _control lbData _index;
 			[_question] call SpyderAddons_fnc_questionHandler;
 		"];
-
 	};
 
 	//-- Unload
 	case "closeMenu": {
-
 		//-- Close menu
 		closeDialog 0;
 
 		//-- Un-stop civilian
-		_civ = [SpyderAddons_civInteract_Logic, "CurrentCivilian"] call ALiVE_fnc_hashGet;
+		_civ = [_logic, "Civ"] call ALiVE_fnc_hashGet;
 		[[[_civ],{(_this select 0) enableAI "MOVE"}],"BIS_fnc_spawn",_civ,false,true] call BIS_fnc_MP;
+		//_civ enableAI "MOVE"; //-- Needs further testing but wasn't reliable in MP (Arguments must be local -- unit is local to server (or hc))
 
 		//-- Remove data from handler
-		[SpyderAddons_civInteract_Logic, "CurrentCivData", nil] call ALiVE_fnc_hashSet;
-		[SpyderAddons_civInteract_Logic, "CurrentCivilian", nil] call ALiVE_fnc_hashSet;
-		[SpyderAddons_civInteract_Logic, "Items", nil] call ALiVE_fnc_hashSet;
+		[_logic, "CivData", nil] call ALiVE_fnc_hashSet;
+		[_logic, "Civ", nil] call ALiVE_fnc_hashSet;
+		[_logic, "Items", nil] call ALiVE_fnc_hashSet;
 	};
 
 	case "getObjectiveInstallations": {
@@ -203,22 +229,23 @@ switch (_operation) do {
 		_result = [_ambush,_sabotage,_ied,_suicide];
 	};
 
-	case "getCivInfo": {
+	case "getData": {
+		private ["_opcom","_nearestObjective","_civInfo","_clusterID","_agentProfile","_hostileCivInfo","_objectiveInstallations","_objectiveActions"];
 		_arguments params ["_player","_civ"];
-		private ["_opcom","_nearestObjective","_clusterID","_agentProfile","_hostileCivInfo","_objectiveInstallations","_objectiveActions"];
 		
 		_civPos = getPos _civ;
-		_insurgentFaction = [SpyderAddons_civInteract_Logic, "InsurgentFaction"] call ALiVE_fnc_hashGet;
+		_insurgentFaction = [MOD(civInteractHandler), "InsurgentFaction"] call ALiVE_fnc_hashGet;
 			
 		//-- Get nearest objective properties
-		{
-			if (_insurgentFaction in ([_x, "factions"] call ALiVE_fnc_hashGet)) then {
-				_opcom = _x;
-				_objectives = ([_x, "objectives"] call ALiVE_fnc_hashGet);
+		for "_i" from 0 to (count OPCOM_instances - 1) step 1 do {
+			_opcom = OPCOM_instances select _i;
+
+			if (_insurgentFaction in ([_opcom, "factions"] call ALiVE_fnc_hashGet)) exitWith {
+				_objectives = ([_opcom, "objectives"] call ALiVE_fnc_hashGet);
 				_objectives = [_objectives,[_civPos],{_Input0 distance2D ([_x, "center"] call CBA_fnc_HashGet)},"ASCEND"] call BIS_fnc_sortBy;
 				_nearestObjective = _objectives select 0;
 			};
-		} forEach OPCOM_instances;
+		};
 
 		if (!isNil "_opcom") then {
 			_objectiveInstallations = ["getObjectiveInstallations", [_opcom,_nearestObjective]] call SpyderAddons_fnc_civInteract;
@@ -227,19 +254,18 @@ switch (_operation) do {
 			_objectiveInstallations = [[],[],[],[]];
 			_objectiveActions = [[],[],[],[]];
 		};
-			
+
 		//-- Get civilian info
-		_civInfo = [];
 		_civID = _civ getVariable ["agentID", ""];
 			
 		if (_civID != "") then {
 			_civProfile = [ALIVE_agentHandler, "getAgent", _civID] call ALIVE_fnc_agentHandler;
-			_clusterID = _civProfile select 2 select 9;
+			_clusterID = (_civProfile select 2) select 9;
 			_cluster = [ALIVE_clusterHandler, "getCluster", _clusterID] call ALIVE_fnc_clusterHandler;
 			_homePos = (_civProfile select 2) select 10;
 			_individualHostility = (_civProfile select 2) select 12;
 			_townHostility = [_cluster, "posture"] call ALIVE_fnc_hashGet;	//_townHostility = (_cluster select 2) select 9; (Different)
-			_civInfo pushBack [_homePos, _individualHostility, _townHostility];
+			_civInfo = [_homePos, _individualHostility, _townHostility];
 		};
 		
 		//-- Get nearby hostile civilian
@@ -247,8 +273,7 @@ switch (_operation) do {
 		_insurgentCommands = ["alive_fnc_cc_suicide","alive_fnc_cc_suicidetarget","alive_fnc_cc_rogue","alive_fnc_cc_roguetarget","alive_fnc_cc_sabotage","alive_fnc_cc_getweapons"];
 		_agentsByCluster = [ALIVE_agentHandler, "agentsByCluster"] call ALIVE_fnc_hashGet;
 		_nearCivs = [_agentsByCluster, _clusterID] call ALIVE_fnc_hashGet;
-		
-		//-- {_x getVariable "ALiVE_insurgent"} would work as well but this method simulates a more community - focused base of knowledge
+
 		for "_i" from 0 to ((count (_nearCivs select 1)) - 1) do {
 			_agentID = (_nearCivs select 1) select _i;
 			_agentProfile = [_nearCivs, _agentID] call ALiVE_fnc_hashGet;
@@ -268,12 +293,12 @@ switch (_operation) do {
 				};
 			};
 		};
-		if (count _hostileCivInfo > 0) then {_hostileCivInfo = _hostileCivInfo call BIS_fnc_selectRandom};
+		if (count _hostileCivInfo > 0) then {_hostileCivInfo = _hostileCivInfo call BIS_fnc_selectRandom};	//-- Ensure random hostile civ is picked if there are multiple
 		
 		_civData = [_objectiveInstallations, _objectiveActions, _civInfo,_hostileCivInfo];
 
 		//-- Send data to client
-		["loadData",_civData] remoteExecCall ["SpyderAddons_fnc_civInteract",_player];
+		[nil,"loadData",_civData] remoteExecCall [QUOTE(MAINCLASS),_player];
 	};
 
 	case "getRole": {
@@ -285,6 +310,7 @@ switch (_operation) do {
 		_result = ([_role] call CBA_fnc_capitalize);
 	};
 
+	//-- REVISE
 	case "UpdateHostility": {
 		//-- Change local civilian hostility
 		private ["_townHostilityValue"];
@@ -326,6 +352,7 @@ switch (_operation) do {
 		
 	};
 
+	//-- REVISE
 	case "isIrritated": {
 		_arguments params ["_hostile","_asked","_civ"];
 
@@ -359,6 +386,7 @@ switch (_operation) do {
 		};
 	};
 
+	//-- REVISE maybe
 	case "toggleSearchMenu": {
 		private ["_enable"];
 		if (ctrlVisible 9240) then {_enable = false} else {_enable = true};
@@ -377,42 +405,52 @@ switch (_operation) do {
 		};
 	};
 
+	//-- REVISE	//-- REVISE	//-- REVISE	//-- REVISE	//-- REVISE	//-- REVISE	//-- REVISE	//-- REVISE	//-- REVISE
 	case "displayGear": {
-		private ["_configPath"];
+		private ["_configPath","_index"];
 		_civ = [SpyderAddons_civInteract_Logic, "CurrentCivilian"] call ALiVE_fnc_hashGet;
 		lbClear CIVINTERACT_GEARLIST;
 		_itemClassnames = [];
+		_index = 0;
 
 		{
 			_item = _x;
-			if (_item == "") exitWith {};
+			if !(_item == "") then {
+				//-- Get config path
+				_configPath = configfile >> "CfgWeapons" >> _item;
+				if !(isClass _configPath) then {_configPath = configfile >> "CfgMagazines" >> _item};
+				if !(isClass _configPath) then {_configPath = configfile >> "CfgVehicles" >> _item};
+				if !(isClass _configPath) then {_configPath = configfile >> "CfgGlasses" >> _item};
 
-			//-- Get config path
-			_configPath = configfile >> "CfgWeapons" >> _item;
-			if !(isClass _configPath) then {_configPath = configfile >> "CfgMagazines" >> _item};
-			if !(isClass _configPath) then {_configPath = configfile >> "CfgVehicles" >> _item};
-			if !(isClass _configPath) then {_configPath = configfile >> "CfgGlasses" >> _item};
-
-			//-- Get item info
-			if (isClass _configPath) then {
-				_itemName = getText (_configPath >> "displayName");
-				_itemPic = getText (_configPath >> "picture");
-				_configName = configName _configPath;
-				lbAdd [CIVINTERACT_GEARLIST, _itemName];
-				lbSetPicture [CIVINTERACT_GEARLIST, _forEachIndex, _itemPic];
-				//lbSetData [CIVINTERACT_GEARLIST, _forEachIndex, _configName];	Why the hell does this not work
-				_itemClassnames pushBack _configName;
+				//-- Get item info
+				if (isClass _configPath) then {
+					_itemName = getText (_configPath >> "displayName");
+					_itemPic = getText (_configPath >> "picture");
+					_configName = configName _configPath;
+					lbAdd [CIVINTERACT_GEARLIST, _itemName];
+					lbSetPicture [CIVINTERACT_GEARLIST, _index, _itemPic];
+					//lbSetData [CIVINTERACT_GEARLIST, _index, _configName];	Why the hell does this not work
+					_itemClassnames pushBack _configName;
+					_index = _index + 1;
+				};
 			};
 		} forEach (uniformItems _civ + vestItems _civ + backpackItems _civ + assignedItems _civ);
+
 		[SpyderAddons_civInteract_Logic, "Items", _itemClassnames] call ALiVE_fnc_hashSet;
 
 		["onGearSwitch"] call MAINCLASS;
 	};
 
+	//-- REVISE	//-- REVISE	//-- REVISE	//-- REVISE	//-- REVISE	//-- REVISE	//-- REVISE	//-- REVISE	//-- REVISE
 	case "confiscate": {
 		_index = lbCurSel CIVINTERACT_GEARLIST;
 		_item = ([SpyderAddons_civInteract_Logic, "Items"] call ALiVE_fnc_hashGet) select _index;
 		_civ = [SpyderAddons_civInteract_Logic, "CurrentCivilian"] call ALiVE_fnc_hashGet;
+
+		//if (_item == vest _civ) exitWith {
+		//	removeVest _civ;
+		//	["displayGear"] call MAINCLASS;
+		//};
 
 		if (player canAddItemToBackpack _item) exitWith {
 			player addItemToBackpack _item;
@@ -438,6 +476,7 @@ switch (_operation) do {
 		hint "There is no room for this item in your inventory";
 	};
 
+	//-- REVISE
 	case "onGearSwitch": {
 		_index = lbCurSel CIVINTERACT_GEARLIST;
 
@@ -448,6 +487,7 @@ switch (_operation) do {
 		};
 	};
 
+	//-- REVISE file location switch maybe
 	case "getActivePlan": {
 		_activeCommand = _arguments;
 
