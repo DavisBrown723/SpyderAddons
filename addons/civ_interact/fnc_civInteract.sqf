@@ -40,7 +40,6 @@ private ["_result"];
 #define MAINCLASS SpyderAddons_fnc_civInteract
 #define COMMAND_HANDLER SpyderAddons_fnc_commandHandler
 #define QUESTION_HANDLER SpyderAddons_fnc_questionHandler
-#define MAIN_LOGIC SpyderAddons_civInteract_Logic
 
 //-- Define control ID's
 #define CIVINTERACT_DISPLAY 		(findDisplay 923)
