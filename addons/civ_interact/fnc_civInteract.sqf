@@ -72,6 +72,7 @@ switch (_operation) do {
 			_debug = _logic getVariable "Debug";
 			_factionEnemy = _logic getVariable "enemyFaction";
 
+			//-- Create interact handler object
 			MOD(civInteractHandler) = [nil,"create"] call MAINCLASS;
 			[MOD(civInteractHandler), "Debug", _debug] call ALiVE_fnc_hashSet;
 			[MOD(civInteractHandler), "InsurgentFaction", _factionEnemy] call ALiVE_fnc_hashSet;
