@@ -2,14 +2,14 @@ class CfgFunctions {
 	class PREFIX {
 		class COMPONENT {
 			
-			//-- Asymmetric
+			//////-- Asymmetric --//////
 			class getPositionSideHostility {
 				description = "Returns the hostility towards a side at a given location";
 				file = "\x\spyderaddons\addons\x_lib\functions\asymmetric\getPositionSideHostility.sqf";
 				recompile = RECOMPILE;
 			};
 
-			//-- Logging
+			//////-- Logging --//////
 			class log {
 				description = "Logs a value to the rpt";
 				file = "\x\spyderaddons\addons\x_lib\functions\logging\log.sqf";
@@ -26,14 +26,14 @@ class CfgFunctions {
 				recompile = RECOMPILE;
 			};
 
-			//-- Logistics
+			//////-- Logistics --//////
 			class addForcepool {
 				description = "Adjusts forcepool for the given faction";
 				file = "\x\spyderaddons\addons\x_lib\functions\logistics\addForcepool.sqf";
 				recompile = RECOMPILE;
 			};
 			
-			//-- Misc
+			//////-- Misc --//////
 			class getFactionMostPlayers {
 				description = "Returns the faction that contains the most players";
 				file = "\x\spyderaddons\addons\x_lib\functions\misc\getFactionMostPlayers.sqf";
@@ -49,8 +49,13 @@ class CfgFunctions {
 				file = "\x\spyderaddons\addons\x_lib\functions\misc\getNearAgents.sqf";
 				recompile = RECOMPILE;
 			};
+			class isFaction {
+				description = "Tests whether a string is a valid faction";
+				file = "\x\spyderaddons\addons\x_lib\functions\misc\isFaction.sqf";
+				recompile = RECOMPILE;
+			};
 			
-			//-- Objectives
+			//////-- Objectives --//////
 			class createObjective {
 				description = "Creates an ALiVE objective and registers it to opcoms of the given sides and factions";
 				file = "\x\spyderaddons\addons\x_lib\functions\objectives\createObjective.sqf";
@@ -62,7 +67,7 @@ class CfgFunctions {
 				recompile = RECOMPILE;
 			};
 			
-			//-- OPCOM
+			//////-- OPCOM --//////
 			class getOpcoms {
 				description = "Returns opcom handlers of given parameters";
 				file = "\x\spyderaddons\addons\x_lib\functions\opcom\getOpcoms.sqf";
@@ -74,7 +79,7 @@ class CfgFunctions {
 				recompile = RECOMPILE;
 			};
 			
-			//-- Profiles
+			//////-- Profiles --//////
 			class profilePatrol {
 				description = "Returns asymmetric opcom handlers";
 				file = "\x\spyderaddons\addons\x_lib\functions\profiles\profilePatrol.sqf";
@@ -86,7 +91,7 @@ class CfgFunctions {
 				recompile = RECOMPILE;
 			};
 
-			//-- UI
+			//////-- UI --//////
 			class openRequiresAlive {
 				description = "Opens the menu notifying the user that a module being used requires ALiVE to run";
 				file = "\x\spyderaddons\addons\x_lib\functions\ui\openRequiresAlive.sqf";
