@@ -1,3 +1,27 @@
+/* ----------------------------------------------------------------------------
+Function: SpyderAddons_fnc_openRequiresAlive
+
+Description:
+Opens a menu notifying the player that the passed module name 
+requires ALiVE to be running in order to function
+
+Parameters:
+String - Module name
+
+Returns:
+None
+
+Examples:
+(begin example)
+["Civilian Interaction"] call SpyderAddons_fnc_openRequiresAlive;
+(end)
+
+See Also:
+- nil
+
+Author: SpyderBlack723
+---------------------------------------------------------------------------- */
+
 params ["_module"];
 
 //-- Open the menu

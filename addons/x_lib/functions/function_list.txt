@@ -1,4 +1,4 @@
-//-- This is heavy WIP, some included functions may not work correctly (getAsymm..will fix when I'm not lazy) or are subject to change/removal
+//-- This is WIP, some included functions may not work correctly (getAsymm..will fix when I'm not lazy) or are subject to change/removal
 
 asymmetric
 
@@ -17,6 +17,9 @@ logistics
 misc
 
 	getFactionMostPlayers
+	getModuleArray
+	getNearAgents
+	isFaction
 
 objectives
 
@@ -29,3 +32,10 @@ opcom
 	getAsymmOpcoms
 
 profiles
+
+	isProfileAlive
+	profilePatrol
+
+ui
+
+	openRequiresAlive

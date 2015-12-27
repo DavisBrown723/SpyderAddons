@@ -5,7 +5,7 @@ Description:
 Inspects an array to the rpt
 
 Parameters:
-Mixed
+Array - Array to be inspected
 
 Returns:
 none

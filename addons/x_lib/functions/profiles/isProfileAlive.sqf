@@ -1,13 +1,32 @@
-private ["_result"];
+/* ----------------------------------------------------------------------------
+Function: SpyderAddons_fnc_isProfileAlive
+
+Description:
+Checks whether a profile is still "alive"
+
+Parameters:
+String - Profile ID
+
+Returns:
+Bool - Result
+
+Examples:
+(begin example)
+_result = [_id] SpyderAddons_fnc_isProfileAlive;
+(end)
+
+See Also:
+- nil
+
+Author: SpyderBlack723
+---------------------------------------------------------------------------- */
+
 params [
 	["_profileID", []]
 ];
-_result = false;
 
-if (_profileID isEqualTo []) exitWith {_result};
-
+if (_profileID isEqualTo []) exitWith {false};
 
 _profile = [ALIVE_profileHandler, "getProfile", _profileID] call ALIVE_fnc_profileHandler;
-if !(isNil "_profile") then {_result = true};
 
-_result
+!(isNil "_profile")

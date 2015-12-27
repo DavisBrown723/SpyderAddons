@@ -3,7 +3,6 @@ Function: SpyderAddons_fnc_log
 
 Description:
 Logs variables to the RPT
-For use with modules that don't require ALiVE (ALiVE_fnc_dump used otherwise)
 
 Parameters:
 Mixed
