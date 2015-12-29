@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="https://github.com/SpyderBlack723/SpyderAddons/blob/develop/images/LogoOfficial.png" width="265">
+    <img src="https://github.com/SpyderBlack723/SpyderAddons/blob/develop/images/LogoBlack.png" width="265">
 </p>
 
 <p align="center">
