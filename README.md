@@ -14,7 +14,7 @@ I started this project so that I could use it as a method of learning the addon 
 </p>
 
 <p align="center">
-     <a href="https://github.com/SpyderBlack723/SpyderAddons/wiki/Spyder-Addons">Wiki</a></strong></sup>
+     <a href="https://github.com/SpyderBlack723/SpyderAddons/wiki">Wiki</a></strong></sup>
 </p>
 
 #Features
