@@ -40,9 +40,11 @@ private ["_result"];
 switch (_operation) do {
 
 	case "init": {
+		private ["_spawnPosition"];
 		_arguments params ["_logic","_syncedUnits"];
 
 		_spawnMarker = _logic getVariable "SpawnPosition";
+		_spawnHeight = _logic getVariable "SpawnHeight";
 		_factions = [_logic getVariable "VehicleFactions"] call SpyderAddons_fnc_getModuleArray;
 		_whitelist = [_logic getVariable "VehiclesWhitelist"] call SpyderAddons_fnc_getModuleArray;
 		_blacklist = [_logic getVariable "VehiclesBlacklist"] call SpyderAddons_fnc_getModuleArray;
@@ -51,6 +53,8 @@ switch (_operation) do {
 
 		_spawnPosition = getMarkerPos _spawnMarker;
 		_spawnDir = markerDir _spawnMarker;
+
+		if (_spawnHeight != "") then {_spawnPosition = [_spawnPosition select 0, _spawnPosition select 1, (call compile _spawnHeight)]};
 
 		{
 			if (typeName _x == "OBJECT") then {
@@ -189,6 +193,7 @@ switch (_operation) do {
 		_spawnDir = _object getVariable "VehicleSpawner_SpawnDir";
 
 		_vehicle = _classname createVehicle _spawnPos;
+		_vehicle setPos _spawnPos; //-- createVehicle doesn't utilize spawnheight
 		_vehicle = _vehicle setDir _spawnDir;
 	};
 };

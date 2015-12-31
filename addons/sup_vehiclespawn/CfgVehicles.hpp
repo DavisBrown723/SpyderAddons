@@ -38,6 +38,12 @@ class CfgVehicles
 				defaultValue = "";
 			};
 
+			class SpawnHeight {
+				displayName = "Spawn Height";
+				description = "Height that vehicles will be spawned at";
+				defaultValue = "0";
+			};
+
 			class VehicleFactions {
 				displayName = "Vehicle Factions";
 				description = "Factions of vehicles that will be able to be spawned";
@@ -56,15 +62,15 @@ class CfgVehicles
 				defaultValue = "";
 			};
 
-			class VehiclesTypeBlacklist {
-				displayName = "Type Blacklist";
-				description = "Vehicles of these types will be excluded. Types are [Car, Truck, Armored, Tank, Helicopter, Plane]";
+			class VehiclesTypeWhitelist {
+				displayName = "Type Whitelist";
+				description = "Only vehicles of types defined here will be included. Some types are [Car, Truck, Armored, Tank, Helicopter, Plane]";
 				defaultValue = "";
 			};
 
-			class VehiclesTypeWhitelist {
-				displayName = "Type Whitelist";
-				description = "Only vehicles of types defined here will be included. Types are [Car, Truck, Armored, Tank, Helicopter, Plane]";
+			class VehiclesTypeBlacklist {
+				displayName = "Type Blacklist";
+				description = "Vehicles of these types will be excluded. Some types are [Car, Truck, Armored, Tank, Helicopter, Plane]";
 				defaultValue = "";
 			};
 		};
