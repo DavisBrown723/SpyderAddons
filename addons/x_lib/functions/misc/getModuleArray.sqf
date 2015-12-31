@@ -28,13 +28,13 @@ if (!(typeName _variable == "STRING") or (_variable isEqualTo "")) exitWith {[]}
 //-- Remove spaces
 _variable = [_variable, " ", ""] call CBA_fnc_replace;
 
-//-- Remove brackets
-_variable = [_variable, "[", ""] call CBA_fnc_replace;
-_variable = [_variable, "]", ""] call CBA_fnc_replace;
-
 //-- Remove quotations
 _variable = [_variable, """", ""] call CBA_fnc_replace;
 _variable = [_variable, "''", ""] call CBA_fnc_replace;
+
+//-- Remove brackets
+_variable = [_variable, "[", ""] call CBA_fnc_replace;
+_variable = [_variable, "]", ""] call CBA_fnc_replace;
 
 //-- Split array entries into strings
 _variable = [_variable, ","] call CBA_fnc_split;
