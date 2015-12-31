@@ -1,4 +1,5 @@
 #include <\x\spyderaddons\addons\mil_insurgency\script_component.hpp>
+SCRIPT(commandBoard);
 
 /* ----------------------------------------------------------------------------
 Function: SpyderAddons_fnc_insurgencyBoard

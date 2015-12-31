@@ -1,4 +1,5 @@
 #include <\x\spyderaddons\addons\mil_insurgency\script_component.hpp>
+SCRIPT(insurgency);
 
 /* ----------------------------------------------------------------------------
 Function: SpyderAddons_fnc_insurgency
