@@ -73,8 +73,8 @@ switch (_operation) do {
 	case "open": {
 		CreateDialog VEHICLESPAWNER_DIALOG;
 		["onLoad", _arguments] call MAINCLASS;
-		SpyderAddons_VehicleSpawner_Logic = [] call ALiVE_fnc_hashCreate;
-		[SpyderAddons_VehicleSpawner_Logic, "CurrentInfo", _arguments] call ALiVE_fnc_hashSet;
+		SpyderAddons_VehicleSpawner_Logic = [] call CBA_fnc_hashCreate;
+		[SpyderAddons_VehicleSpawner_Logic, "CurrentInfo", _arguments] call CBA_fnc_hashSet;
 	};
 
 	case "onLoad": {
@@ -188,7 +188,7 @@ switch (_operation) do {
 		_index = lbCurSel VEHICLESPAWNER_VEHICLELIST;
 		if (_index == -1) exitWith {};
 		_classname = lbData [VEHICLESPAWNER_VEHICLELIST, _index];
-		_object = ([SpyderAddons_VehicleSpawner_Logic, "CurrentInfo"] call ALiVE_fnc_hashGet) select 0;
+		_object = ([SpyderAddons_VehicleSpawner_Logic, "CurrentInfo"] call CBA_fnc_hashGet) select 0;
 		_spawnPos = _object getVariable "VehicleSpawner_SpawnPos";
 		_spawnDir = _object getVariable "VehicleSpawner_SpawnDir";
 
