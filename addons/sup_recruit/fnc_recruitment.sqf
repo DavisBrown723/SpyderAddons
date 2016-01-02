@@ -183,7 +183,9 @@ switch (_operation) do {
 			case "server": {
 				_data = _arguments select 1;
 				_data params ["_classname","_player"];
-				_unit = (group _player) createUnit [_classname, position _player, [], 15, "FORM"];
+				_pos = getPos _player;
+				_unit = (group _player) createUnit [_classname, _pos, [], 15, "FORM"];
+				_unit setPos _pos;	//-- Set's unit to proper height if needed
 				addSwitchableUnit _unit;
 			};
 		};
