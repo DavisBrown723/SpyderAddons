@@ -316,7 +316,7 @@ switch (_operation) do {
 			//-- Check if player has been spotted
 			{
 				_side = _x;
-				_side = [_side] call CBA_fnc_sideTextToObject;
+				_side = [nil,"sideTextToObject", _side] call MAINCLASS;
 
 				if !(_incognito) then {
 					if (_side knowsAbout player >= ([MAIN_LOGIC,"InfantryDetection"] call CBA_fnc_hashGet)) exitWith {
@@ -342,7 +342,7 @@ switch (_operation) do {
 			if !(vehicle player in ([MAIN_LOGIC,"IncognitoVehicles"] call CBA_fnc_hashGet)) then {
 				{
 					_side = _x;
-					_side = [_side] call CBA_fnc_sideTextToObject;
+					_side = [nil,"sideTextToObject", _side] call MAINCLASS;
 					if (_side knowsAbout vehicle player >= ([MAIN_LOGIC,"VehicleDetection"] call CBA_fnc_hashGet)) then {
 						_result = true;
 					};
@@ -350,7 +350,7 @@ switch (_operation) do {
 			} else {
 				{
 					_side = _x;
-					_side = [_side] call CBA_fnc_sideTextToObject;
+					_side = [nil,"sideTextToObject", _side] call MAINCLASS;
 					if (_side knowsAbout vehicle player >= ([MAIN_LOGIC,"IncognitoDetectionVehicle"] call CBA_fnc_hashGet)) then {
 						_result = true;
 					};
@@ -462,6 +462,20 @@ switch (_operation) do {
 
 		if (((getText (configFile >> "CfgVehicles" >> _vehicle >> "faction")) in _factionVehicleArray) or (_vehicle in _factionVehicleArray)) then {
 			_result = true;
+		};
+	};
+
+	case "sideTextToObject": {
+		_side = _arguments;
+
+		switch(_side) do {
+			case "EAST": {_result = east};
+			case "WEST": {_result = west};
+			case "GUER": {_result = guer};
+			case "CIV": {_result = civilian};
+			case "ENEMY": {_result = east};
+			case "UNKNOWN": {_result = civilian};
+			default {_result = civilian};
 		};
 	};
 };
