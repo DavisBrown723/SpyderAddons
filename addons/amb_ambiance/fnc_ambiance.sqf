@@ -41,7 +41,7 @@ params [
 switch (_operation) do {
 
 	case "create": {
-		_result = [] call ALiVE_fnc_hashCreate;
+		_result = [] call CBA_fnc_hashCreate;
 	};
 
 	case "init": {
@@ -160,11 +160,11 @@ switch (_operation) do {
 		if (isNil QMOD(ambianceHandler)) then {
 			MOD(ambianceHandler) = [nil,"create"] call MAINCLASS;
 			_logics = _locs;
-			[MOD(ambianceHandler),"Logics", _logics] call ALiVE_fnc_hashSet;
+			[MOD(ambianceHandler),"Logics", _logics] call CBA_fnc_hashSet;
 		} else {
-			_logics = [MOD(ambianceHandler),"Logics"] call ALiVE_fnc_hashGet;
+			_logics = [MOD(ambianceHandler),"Logics"] call CBA_fnc_hashGet;
 			{_logics pushBack _x} forEach _locs;
-			[MOD(ambianceHandler),"Logics", _logics] call ALiVE_fnc_hashSet;
+			[MOD(ambianceHandler),"Logics", _logics] call CBA_fnc_hashSet;
 		};
 	};
 
@@ -172,7 +172,7 @@ switch (_operation) do {
 		_timer = _arguments;
 
 		//-- This does not allow for multiple delays with multiple ambiance modules are placed, consider doing so at the cost of perf
-		if (isNil {[SpyderAddons_ambianceHandler,"perFrameID"] call ALiVE_fnc_hashGet}) then {
+		if (isNil {[SpyderAddons_ambianceHandler,"perFrameID"] call CBA_fnc_hashGet}) then {
 			_perFrameID = [{
 				{
 					_logic = _x;
@@ -190,10 +190,10 @@ switch (_operation) do {
 							[_logic,"Activate"] call SpyderAddons_fnc_ambiance;
 						};
 					};
-				} forEach ([SpyderAddons_ambianceHandler,"Logics"] call ALiVE_fnc_hashGet);
+				} forEach ([SpyderAddons_ambianceHandler,"Logics"] call CBA_fnc_hashGet);
 			}, _timer, []] call CBA_fnc_addPerFrameHandler;
 
-			[SpyderAddons_ambianceHandler,"perFrameID", _perFrameID] call ALiVE_fnc_hashSet
+			[SpyderAddons_ambianceHandler,"perFrameID", _perFrameID] call CBA_fnc_hashSet
 		};
 	};
 
@@ -398,7 +398,7 @@ switch (_operation) do {
 
 		switch true do {
 			case (_action > 4): {
-				_retreatPos = [_vehicle, 300, ((getDir _vehicle) - 180)] call BIS_fnc_relPos;	//-- *UPDATE 1.50* _retreatPos = _vehicle getRelPos [300, ((getDir _vehicle) - 180)];
+				_retreatPos = [_vehicle, 300, ((getDir _vehicle) - 180)] call BIS_fnc_relPos;	//-- *UPDATE 1.55* _retreatPos = _vehicle getRelPos [300, ((getDir _vehicle) - 180)];
 				(driver _vehicle) doMove _retreatPos;
 				_group setCombatMode "BLUE";
 				(driver _vehicle) forceSpeed 70;
