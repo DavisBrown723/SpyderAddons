@@ -48,7 +48,7 @@ switch (_operation) do {
 		if !(isServer) exitWith {};
 
 		private ["_logics"];
-		params ["_logic","_synced"];
+		_synced = _arguments;
 
 		//-- Get module parameters
 		_debug = call compile (_logic getVariable "debug");
@@ -123,9 +123,10 @@ switch (_operation) do {
 		//-- Get valid locations
 		_result = [];
 		_mapLocations = configfile >> "CfgWorlds" >> worldName >> "Names";
+		_mapLocations = _mapLocations;
 
-		for "_x" from 0 to (count _mapLocations - 1) do {
-			_location = _mapLocations select _x;
+		for "_i" from 0 to (count _mapLocations - 1) do {
+			_location = _mapLocations select _i;
 			_locationPos = getArray(_location >> "position");
 			_locationType = getText(_location >> "type");
 
@@ -149,6 +150,13 @@ switch (_operation) do {
 				};
 
 				if (_valid) then {_result pushBack _locationPos};
+			};
+
+			_synced = synchronizedObjects _logic;
+			for "_i" from 0 to (count _synced - 1) do {
+				_location = _synced select _i;
+				_locationPos = getPos _location;
+				_result pushBack _locationPos;
 			};
 
 		};

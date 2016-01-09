@@ -212,6 +212,18 @@ class CfgVehicles
 			description[] = {
 				"Allows mission makers to add subtle ambiance to their mission using a variety of highly customizable parameters",
 			};
+
+			sync[] = {"LocationArea_F"};
+
+			class LocationArea_F
+			{
+				description[] = {};
+				position = 0;
+				direction = 0;
+				optional = 1;
+				duplicate = 1;
+				synced[] = {"Anything"};
+			};
 		};
 	};
 };

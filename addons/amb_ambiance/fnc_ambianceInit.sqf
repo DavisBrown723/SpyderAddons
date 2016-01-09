@@ -30,7 +30,7 @@ if (isNil "SpyderAddons_fnc_insurgency") exitWith {["[%1 - %2] Main function mis
 
 ["[%1 - %2] Initialization starting", QUOTE(PREFIX),QUOTE(COMPONENT)] call SpyderAddons_fnc_log;
 
-[_logic,"init", [_logic,_syncedUnits]] call SpyderAddons_fnc_ambiance;
+[_logic,"init", _syncedUnits] call SpyderAddons_fnc_ambiance;
 
 ["[%1 - %2] Initialization complete", QUOTE(PREFIX),QUOTE(COMPONENT)] call SpyderAddons_fnc_log;
 
