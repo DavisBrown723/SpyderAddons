@@ -38,8 +38,6 @@ private ["_result"];
 
 //-- Define function shortcuts
 #define MAINCLASS SpyderAddons_fnc_civInteract
-#define COMMAND_HANDLER SpyderAddons_fnc_commandHandler
-#define QUESTION_HANDLER SpyderAddons_fnc_questionHandler
 
 //-- Define control ID's
 #define CIVINTERACT_DISPLAY 		(findDisplay 923)
@@ -52,6 +50,7 @@ private ["_result"];
 #define CIVINTERACT_GEARLIST 		(CIVINTERACT_DISPLAY displayCtrl 9244)
 #define CIVINTERACT_GEARLISTCONTROL 	(CIVINTERACT_DISPLAY displayCtrl 9244)
 #define CIVINTERACT_CONFISCATEBUTTON 	(CIVINTERACT_DISPLAY displayCtrl 9245)
+#define CIVINTERACT_OPENGEARCONTAINER	(CIVINTERACT_DISPLAY displayCtrl 9246)
 
 switch (_operation) do {
 
@@ -97,32 +96,26 @@ switch (_operation) do {
 		[_logic, "CivData", nil] call ALiVE_fnc_hashSet;
 		[_logic, "Civ", nil] call ALiVE_fnc_hashSet;
 		[_logic, "Items", nil] call ALiVE_fnc_hashSet;
+
 		//-- Hash civilian to logic (must be done early so commandHandler has an object to use)
 		[_logic, "Civ", _civ] call ALiVE_fnc_hashSet;	//-- Unit object
 
 		//-- Open dialog
 		CreateDialog "Civ_Interact";
 
-		//-- Set civilian name
-		_role = ["getRole",_civ] call MAINCLASS;
-		if (_role != "none") then {
-			ctrlSetText [CIVINTERACT_CIVNAME, (format ["%1 (%2)", name _civ, _role])];
-		} else {
-			ctrlSetText [CIVINTERACT_CIVNAME, name _civ];
-		};
-
 		if (_civ getVariable "detained") then {
-			ctrlSetText [CIVINTERACT_DETAIN, "Release"];
+			CIVINTERACT_DETAIN ctrlSetText "Release";
 		};
 
 		[nil,"toggleSearchMenu"] call MAINCLASS;
 		CIVINTERACT_CONFISCATEBUTTON ctrlShow false;
+		CIVINTERACT_OPENGEARCONTAINER ctrlShow false;
 
 		//-- Display loading
 		CIVINTERACT_QUESTIONLIST lbAdd "Loading . . .";
 
 		//-- Retrieve data
-		[nil,"getData",[player,_civ]] remoteExecCall [QUOTE(MAINCLASS),2];
+		[nil,"getData", [player,_civ]] remoteExecCall [QUOTE(MAINCLASS),2];
 	};
 
 	//-- Load data
@@ -147,6 +140,15 @@ switch (_operation) do {
 		[_civData, "AnswersGiven", _answersGiven] call ALiVE_fnc_hashSet;			//-- Default []
 		[_civData, "Asked", 0] call ALiVE_fnc_hashSet;					//-- Default - 0
 		[_logic, "CivData", _civData] call ALiVE_fnc_hashSet;
+
+		//-- Display persistent civ name
+		_name = _civInfo select 3;
+		_role = [nil,"getRole", _civ] call MAINCLASS;
+		if (_role == "None") then {
+			CIVINTERACT_CIVNAME ctrlSetText _name;
+		} else {
+			CIVINTERACT_CIVNAME ctrlSetText (format ["%1 (%2)", _name, _role]);
+		};
 
 		[_logic,"enableMain"] call MAINCLASS;
 	};
@@ -186,8 +188,8 @@ switch (_operation) do {
 		CIVINTERACT_QUESTIONLIST ctrlAddEventHandler ["LBSelChanged","
 			params ['_control','_index'];
 			_question = _control lbData _index;
-			[_question] call SpyderAddons_fnc_questionHandler;
 		"];
+//[SpyderAddons_civInteractHandler,_question] call SpyderAddons_fnc_responseHandler;
 	};
 
 	//-- Unload
@@ -203,7 +205,7 @@ switch (_operation) do {
 		//-- Remove data from handler
 		[_logic, "CivData", nil] call ALiVE_fnc_hashSet;
 		[_logic, "Civ", nil] call ALiVE_fnc_hashSet;
-		[_logic, "Items", nil] call ALiVE_fnc_hashSet;
+		//[_logic, "Items", nil] call ALiVE_fnc_hashSet; 	//-- REMOVE AFTER FIX
 	};
 
 	case "getObjectiveInstallations": {
@@ -229,7 +231,7 @@ switch (_operation) do {
 	};
 
 	case "getData": {
-		private ["_opcom","_nearestObjective","_civInfo","_clusterID","_agentProfile","_hostileCivInfo","_objectiveInstallations","_objectiveActions"];
+		private ["_opcom","_nearestObjective","_civInfo","_clusterID","_agentProfile","_hostileCivInfo","_name","_objectiveInstallations","_objectiveActions"];
 		_arguments params ["_player","_civ"];
 
 		_civPos = getPos _civ;
@@ -264,7 +266,15 @@ switch (_operation) do {
 			_homePos = (_civProfile select 2) select 10;
 			_individualHostility = (_civProfile select 2) select 12;
 			_townHostility = [_cluster, "posture"] call ALIVE_fnc_hashGet;	//_townHostility = (_cluster select 2) select 9; (Different)
-			_civInfo = [_homePos, _individualHostility, _townHostility];
+
+			if (!isNil {[_civProfile,"SpyderAddons_PersistentName"] call ALiVE_fnc_hashGet}) then {
+				_name = [_civProfile,"SpyderAddons_PersistentName"] call ALiVE_fnc_hashGet;
+			} else {
+				[_civProfile,"SpyderAddons_PersistentName", name _civ] call ALiVE_fnc_hashSet;
+				_name = name _civ;
+			};
+
+			_civInfo = [_homePos, _individualHostility, _townHostility,_name];
 		};
 
 		//-- Get nearby hostile civilian
@@ -298,7 +308,7 @@ switch (_operation) do {
 		_civData = [_objectiveInstallations, _objectiveActions, _civInfo,_hostileCivInfo];
 
 		//-- Send data to client
-		[nil,"loadData",_civData] remoteExecCall [QUOTE(MAINCLASS),_player];
+		[nil,"loadData", _civData] remoteExecCall [QUOTE(MAINCLASS),_player];
 	};
 
 	case "getRole": {
@@ -310,83 +320,6 @@ switch (_operation) do {
 		_result = ([_role] call CBA_fnc_capitalize);
 	};
 
-	//-- REVISE
-	case "UpdateHostility": {
-		//-- Change local civilian hostility
-		private ["_townHostilityValue"];
-		_arguments params ["_civ","_value"];
-		if (count _arguments > 2) then {_townHostilityValue = _arguments select 2};
-
-		if (isNil "_townHostilityValue") then {
-			if (isNil {[SpyderAddons_civInteract_Logic, "CurrentCivData"] call ALiVE_fnc_hashGet}) exitWith {};
-
-			_civData = [SpyderAddons_civInteract_Logic, "CurrentCivData"] call ALiVE_fnc_hashGet;
-			_civInfo = ([_civData, "CivInfo", _civInfo] call ALiVE_fnc_hashGet) select 0;
-			_civInfo params ["_homePos","_individualHostility","_townHostility"];
-
-			_individualHostility = _individualHostility + _value;
-			_townHostilityValue = floor random 4;
-			_townHostility = _townHostility + _townHostilityValue;
-			[_civData, "CivInfo", [[_homePos, _individualHostility, _townHostility]]] call ALiVE_fnc_hashSet;
-			[SpyderAddons_civInteract_Logic, "CurrentCivData", _civData] call ALiVE_fnc_hashSet;
-		};
-
-		//-- Change civilian posture globally
-		if (isNil "_townHostilityValue") exitWith {["UpdateHostility", [_civ,_value,_townHostilityValue]] remoteExecCall ["SpyderAddons_fnc_civInteract",2]};
-
-		_civID = _civ getVariable ["agentID", ""];
-		if (_civID != "") then {
-			_civProfile = [ALIVE_agentHandler, "getAgent", _civID] call ALIVE_fnc_agentHandler;
-			_clusterID = _civProfile select 2 select 9;
-
-			//-- Set town hostility
-			_cluster = [ALIVE_clusterHandler, "getCluster", _clusterID] call ALIVE_fnc_clusterHandler;
-			_clusterHostility = [_cluster, "posture"] call ALIVE_fnc_hashGet;
-			[_cluster, "posture", (_clusterHostility + _townHostilityValue)] call ALIVE_fnc_hashSet;
-
-			//-- Set individual hostility
-			_hostility = (_civProfile select 2) select 12;
-			_hostility = _hostility + _value;
-			[_civProfile, "posture", _hostility] call ALiVE_fnc_hashSet;
-		};
-
-	};
-
-	//-- REVISE
-	case "isIrritated": {
-		_arguments params ["_hostile","_asked","_civ"];
-
-		//-- Raise hostility if civilian is irritated
-		if !(_hostile) then {
-			if (floor random 100 < (3 * _asked)) then {
-				["UpdateHostility", [_civ, 10]] call MAINCLASS;
-				if (floor random 70 < (_asked * 5)) then {
-					_response1 = format [" *%1 grows visibly annoyed*", name _civ];
-					_response2 = format [" *%1 appears uninterested in the conversation*", name _civ];
-					_response3 = " Please leave me alone now.";
-					_response4 = " I do not want to talk to you anymore.";
-					_response5 = " Can I go now?";
-					_response = [_response1, _response2, _response3, _response4, _response5] call BIS_fnc_selectRandom;
-					CIVINTERACT_RESPONSELIST ctrlSetText ((ctrlText CIVINTERACT_RESPONSELIST) + _response);
-				};
-			};
-		} else {
-			if (floor random 100 < (8 * _asked)) then {
-				["UpdateHostility", [_civ, 10]] call MAINCLASS;
-				if (floor random 70 < (_asked * 5)) then {
-					_response1 = format [" *%1 looks anxious*", name _civ];
-					_response2 = format [" *%1 looks distracted*", name _civ];
-					_response3 = " Are you done yet?";
-					_response4 = " You ask too many questions.";
-					_response5 = " You need to leave now.";
-					_response = [_response1, _response2, _response3,_response4, _response5] call BIS_fnc_selectRandom;
-					CIVINTERACT_RESPONSELIST ctrlSetText ((ctrlText CIVINTERACT_RESPONSELIST) + _response);
-				};
-			};
-		};
-	};
-
-	//-- REVISE maybe
 	case "toggleSearchMenu": {
 		private ["_enable"];
 		if (ctrlVisible 9240) then {_enable = false} else {_enable = true};
@@ -398,152 +331,300 @@ switch (_operation) do {
 		} forEach CIVINTERACT_INVENTORYCONTROLS;
 
 		if (_enable) then {
-			["displayGear"] call MAINCLASS;
-			CIVINTERACT_GEARLIST ctrlAddEventHandler ["LBSelChanged","[nil,'onGearSwitch'] call SpyderAddons_fnc_civInteract"];
+			[MOD(civInteractHandler),"displayGearContainers"] call MAINCLASS;
 		} else {
 			CIVINTERACT_CONFISCATEBUTTON ctrlShow  false;
+			CIVINTERACT_OPENGEARCONTAINER ctrlShow false;
 		};
 	};
 
-	//-- REVISE	//-- REVISE	//-- REVISE	//-- REVISE	//-- REVISE	//-- REVISE	//-- REVISE	//-- REVISE	//-- REVISE
-	case "displayGear": {
+	case "displayGearContainers": {
 		private ["_configPath","_index"];
-		_civ = [SpyderAddons_civInteract_Logic, "CurrentCivilian"] call ALiVE_fnc_hashGet;
+		_civ = [SpyderAddons_civInteractHandler, "Civ"] call ALiVE_fnc_hashGet;
 		lbClear CIVINTERACT_GEARLIST;
-		_itemClassnames = [];
 		_index = 0;
 
+
+		CIVINTERACT_OPENGEARCONTAINER ctrlSetText "View Contents";
+		CIVINTERACT_OPENGEARCONTAINER buttonSetAction "[nil,'openGearContainer'] call SpyderAddons_fnc_civInteract";
+
 		{
-			_item = _x;
-			if !(_item == "") then {
+			if (_x != "") then {
 				//-- Get config path
-				_configPath = configfile >> "CfgWeapons" >> _item;
-				if !(isClass _configPath) then {_configPath = configfile >> "CfgMagazines" >> _item};
-				if !(isClass _configPath) then {_configPath = configfile >> "CfgVehicles" >> _item};
-				if !(isClass _configPath) then {_configPath = configfile >> "CfgGlasses" >> _item};
+				_configPath = nil;
+				_configPath = configfile >> "CfgWeapons" >> _x;
+				if !(isClass _configPath) then {_configPath = configfile >> "CfgMagazines" >> _x};
+				if !(isClass _configPath) then {_configPath = configfile >> "CfgVehicles" >> _x};
+				if !(isClass _configPath) then {_configPath = configfile >> "CfgGlasses" >> _x};
 
 				//-- Get item info
 				if (isClass _configPath) then {
 					_itemName = getText (_configPath >> "displayName");
 					_itemPic = getText (_configPath >> "picture");
-					_configName = configName _configPath;
-					lbAdd [CIVINTERACT_GEARLIST, _itemName];
-					lbSetPicture [CIVINTERACT_GEARLIST, _index, _itemPic];
-					//lbSetData [CIVINTERACT_GEARLIST, _index, _configName];	Why the hell does this not work
-					_itemClassnames pushBack _configName;
+
+					CIVINTERACT_GEARLIST lbAdd _itemName;
+					CIVINTERACT_GEARLIST lbSetPicture [_index, _itemPic];
+					CIVINTERACT_GEARLIST lbSetData [_index, (configName _configPath)];
 					_index = _index + 1;
 				};
 			};
-		} forEach (uniformItems _civ + vestItems _civ + backpackItems _civ + assignedItems _civ);
+		} forEach ([headgear _civ,goggles _civ,uniform _civ,vest _civ,backpack _civ] + (assignedItems _civ));
 
-		[SpyderAddons_civInteract_Logic, "Items", _itemClassnames] call ALiVE_fnc_hashSet;
+		[MOD(civInteractHandler),"CurrentGearMode", "Containers"] call ALiVE_fnc_hashSet;
 
-		["onGearSwitch"] call MAINCLASS;
+		CIVINTERACT_GEARLIST ctrlAddEventHandler ["LBSelChanged",{[nil,"onGearClick", _this] call SpyderAddons_fnc_civInteract}];
 	};
 
-	//-- REVISE	//-- REVISE	//-- REVISE	//-- REVISE	//-- REVISE	//-- REVISE	//-- REVISE	//-- REVISE	//-- REVISE
-	case "confiscate": {
-		_index = lbCurSel CIVINTERACT_GEARLIST;
-		_item = ([SpyderAddons_civInteract_Logic, "Items"] call ALiVE_fnc_hashGet) select _index;
-		_civ = [SpyderAddons_civInteract_Logic, "CurrentCivilian"] call ALiVE_fnc_hashGet;
+	case "openGearContainer": {
+		_civ = [MOD(civInteractHandler), "Civ"] call ALiVE_fnc_hashGet;
+		_data = CIVINTERACT_GEARLIST lbData (lbCurSel CIVINTERACT_GEARLIST);
 
-		//if (_item == vest _civ) exitWith {
-		//	removeVest _civ;
-		//	["displayGear"] call MAINCLASS;
-		//};
+		if (_data == backpack _civ) exitWith {
+			[nil,"displayContainerItems", backpackItems _civ] call MAINCLASS;
+			[MOD(civInteractHandler),"CurrentGearMode", "Backpack"] call ALiVE_fnc_hashSet;
+			
+		};
+
+		if (_data == vest _civ) exitWith {
+			[nil,"displayContainerItems", vestItems _civ] call MAINCLASS;
+			[MOD(civInteractHandler),"CurrentGearMode", "Vest"] call ALiVE_fnc_hashSet;
+		};
+
+		if (_data == uniform _civ) exitWith {
+			[nil,"displayContainerItems", uniformItems _civ] call MAINCLASS;
+			[MOD(civInteractHandler),"CurrentGearMode", "Uniform"] call ALiVE_fnc_hashSet;
+		};
+
+		CIVINTERACT_OPENGEARCONTAINER ctrlShow false;
+	};
+
+	case "displayContainerItems": {
+		private ["_configPath","_index"];
+		_items = _arguments;
+		lbClear CIVINTERACT_GEARLIST;
+		_index = 0;
+
+		{
+			//-- Get config path
+			_configPath = nil;
+			_configPath = configfile >> "CfgWeapons" >> _x;
+			if !(isClass _configPath) then {_configPath = configfile >> "CfgMagazines" >> _x};
+			if !(isClass _configPath) then {_configPath = configfile >> "CfgVehicles" >> _x};
+			if !(isClass _configPath) then {_configPath = configfile >> "CfgGlasses" >> _x};
+
+			//-- Get item info
+			if (isClass _configPath) then {
+				_itemName = getText (_configPath >> "displayName");
+				_itemPic = getText (_configPath >> "picture");
+
+				CIVINTERACT_GEARLIST lbAdd _itemName;
+				CIVINTERACT_GEARLIST lbSetPicture [_index, _itemPic];
+				CIVINTERACT_GEARLIST lbSetData [_index, (configName _configPath)];
+				_index = _index + 1;
+			};	
+		} forEach _arguments;
+
+		CIVINTERACT_CONFISCATEBUTTON ctrlShow false;
+
+		CIVINTERACT_OPENGEARCONTAINER ctrlSetText "Close Contents";
+		CIVINTERACT_OPENGEARCONTAINER buttonSetAction "[nil,'displayGearContainers'] call SpyderAddons_fnc_civInteract";
+	};
+
+	case "onGearClick": {
+		_index = lbCurSel CIVINTERACT_GEARLIST;
+		_data = CIVINTERACT_GEARLIST lbData _index;
+		_civ = [MOD(civInteractHandler),"Civ"] call ALiVE_fnc_hashGet;
+
+		if (_index == -1) then {
+			CIVINTERACT_CONFISCATEBUTTON ctrlShow false;
+			CIVINTERACT_OPENGEARCONTAINER ctrlShow false;
+		} else {
+			CIVINTERACT_CONFISCATEBUTTON ctrlShow true;
+
+			_civ = [MOD(civInteractHandler),"Civ"] call ALiVE_fnc_hashGet;
+
+			if (_data in [backpack _civ,vest _civ,uniform _civ]) then {
+				CIVINTERACT_OPENGEARCONTAINER ctrlShow true;
+			} else {
+				CIVINTERACT_OPENGEARCONTAINER ctrlShow false;
+			};
+		};
+	};
+
+	case "addToInventory": {
+		_arguments params ["_receiver","_item"];
+		_result = false;
+
+		if (_receiver canAddItemToBackpack _item) then {
+			player addItemToBackpack _item;
+			_result = true;
+		} else {
+			if (_receiver canAddItemToVest _item) then {
+				player addItemToVest _item;
+				_result = true;
+			} else {
+				if (_receiver canAddItemToUniform _item) then {
+					player addItemToUniform _item;
+					_result = true;
+				};
+			};
+		};
+	};
+
+	case "refreshContainer": {
+		_container = [_logic,"CurrentGearMode"] call ALiVE_fnc_hashGet;
+		_civ = [_logic,"Civ"] call ALiVE_fnc_hashGet;
+
+		switch (_container) do {
+			case "Backpack": {
+				[nil,"displayContainerItems", backpackItems _civ] call MAINCLASS;
+			};
+			case "Vest": {
+				[nil,"displayContainerItems", vestItems _civ] call MAINCLASS;
+			};
+			case "Uniform": {
+				[nil,"displayContainerItems", uniformItems _civ] call MAINCLASS;
+			};
+			Default {
+				[nil,"displayGearContainers"] call MAINCLASS;
+			};
+		};
+	};
+
+	case "confiscate": {
+		private ["_exit"];
+		_index = lbCurSel CIVINTERACT_GEARLIST;
+		_item = CIVINTERACT_GEARLIST lbData _index;
+		_civ = [MOD(civInteractHandler), "Civ"] call ALiVE_fnc_hashGet;
+		_exit = false;
+
+		switch true do {
+			case (_item == backpack _civ): {
+				_items = backpackItems _civ;
+				_newBackpack = (backpack _civ) createVehicle (getPos _civ);
+				removeBackpackGlobal _civ;
+				{_newBackpack addItemCargoGlobal [_x,1]} forEach _items;
+
+				_exit = true;
+			};
+			case (_item == vest _civ): {
+				if !([nil,"addToInventory", [player,_item]] call MAINCLASS) then {
+					_item createVehicle (getPos _civ);
+				};
+
+				removeVest _civ;
+				_exit = true;
+			};
+			case (_item == uniform _civ): {
+				if !([nil,"addToInventory", [player,_item]] call MAINCLASS) then {
+					_item createVehicle (getPos _civ);
+				};
+
+				removeUniform _civ;
+				_exit = true;
+			};
+			case (_item == headgear _civ): {
+				if !([nil,"addToInventory", [player,_item]] call MAINCLASS) then {
+					_item createVehicle (getPos _civ);
+				};
+
+				removeHeadgear _civ;
+				_exit = true;
+			};
+			case (_item == goggles _civ): {
+				if !([nil,"addToInventory", [player,_item]] call MAINCLASS) then {
+					_item createVehicle (getPos _civ);
+				};
+				removeGoggles _civ;
+				_exit = true;
+			};
+		};
+
+		if (_exit) exitWith {[MOD(civInteractHandler),"refreshContainer"] call MAINCLASS};
 
 		if (player canAddItemToBackpack _item) exitWith {
 			player addItemToBackpack _item;
 			_civ removeWeaponGlobal _item;_civ removeMagazineGlobal _item;_civ removeItem _item;
-			["displayGear"] call MAINCLASS;
+			[_logic,"displayGear"] call MAINCLASS;
 			ctrlShow [CIVINTERACT_CONFISCATEBUTTON, false];
+
+			[MOD(civInteractHandler),"refreshContainer"] call MAINCLASS;
 		};
 
 		if (player canAddItemToVest _item) exitWith {
 			player addItemToVest _item;
 			_civ removeWeaponGlobal _item;_civ removeMagazineGlobal _item;_civ removeItem _item;
-			["displayGear"] call MAINCLASS;
+			[_logic,"displayGear"] call MAINCLASS;
 			ctrlShow [CIVINTERACT_CONFISCATEBUTTON, false];
+
+			[MOD(civInteractHandler),"refreshContainer"] call MAINCLASS;
 		};
 
 		if (player canAddItemToUniform _item) exitWith {
 			player addItemToUniform _item;
 			_civ removeWeaponGlobal _item;_civ removeMagazineGlobal _item;_civ removeItem _item;
-			["displayGear"] call MAINCLASS;
+			[_logic,"displayGear"] call MAINCLASS;
 			ctrlShow [CIVINTERACT_CONFISCATEBUTTON, false];
+
+			[MOD(civInteractHandler),"refreshContainer"] call MAINCLASS;
 		};
 
 		hint "There is no room for this item in your inventory";
 	};
 
-	//-- REVISE
-	case "onGearSwitch": {
-		_index = lbCurSel CIVINTERACT_GEARLIST;
+	case "Detain": {
+		//-- Function is exactly the same as ALiVE arrest/release --> Author: Highhead
+		_civ = [_logic, "Civ"] call ALiVE_fnc_hashGet;
 
-		if (_index == -1) then {
-			CIVINTERACT_CONFISCATEBUTTON ctrlShow false;
-		} else {
-			CIVINTERACT_CONFISCATEBUTTON ctrlShow true;
+		closeDialog 0;
+
+		if (!isNil "_civ") then {
+			if !(_civ getVariable ["detained", false]) then {
+				//-- Join caller group
+				[_civ] joinSilent (group player);
+				_civ setVariable ["detained", true, true];
+			} else {
+				//-- Join civilian group
+				[_civ] joinSilent (createGroup civilian);
+				_civ setVariable ["detained", false, true];
+			};
 		};
 	};
 
-	//-- REVISE file location switch maybe
-	case "getActivePlan": {
-		_activeCommand = _arguments;
+	case "getDown": {
+		_civ = [_logic, "Civ"] call ALiVE_fnc_hashGet;
 
-		switch (toLower _activeCommand) do {
-			case "alive_fnc_cc_suicide": {
-				_activePlan1 = "carrying out a suicide bombing";
-				_activePlan2 = "strapping himself with explosives";
-				_activePlan3 = "planning a bombing";
-				_activePlan4 = "getting ready to bomb your forces";
-				_activePlan5 = "about to bomb your forces";
-				_result = [_activePlan1,_activePlan2,_activePlan3,_activePlan4,_activePlan5] call BIS_fnc_selectRandom;
-			};
-			case "alive_fnc_cc_suicidetarget": {
-				_activePlan1 = "planning on carrying out a suicide bombing";
-				_activePlan2 = "strapping himself with explosives";
-				_activePlan3 = "planning a bombing";
-				_activePlan4 = "getting ready to bomb your forces";
-				_activePlan5 = "about to bomb your forces";
-				_result = [_activePlan1,_activePlan2,_activePlan3,_activePlan4,_activePlan5] call BIS_fnc_selectRandom;
-			};
-			case "alive_fnc_cc_rogue": {
-				_activePlan1 = "storing a weapon in his house";
-				_activePlan2 = "stockpiling weapons";
-				_activePlan3 = "planning on shooting a patrol";
-				_activePlan4 = "looking for patrols to shoot at";
-				_activePlan5 = "paid to shoot at your forces";
-				_result = [_activePlan1,_activePlan2,_activePlan3,_activePlan4,_activePlan5] call BIS_fnc_selectRandom;
-			};
-			case "alive_fnc_cc_roguetarget": {
-				_activePlan1 = "storing a weapon in his house";
-				_activePlan2 = "stockpiling weapons";
-				_activePlan3 = "planning on shooting a patrol";
-				_activePlan4 = "looking for somebody to shoot at";
-				_activePlan5 = "paid to shoot at your forces";
-				_result = [_activePlan1,_activePlan2,_activePlan3,_activePlan4,_activePlan5] call BIS_fnc_selectRandom;
-			};
-			case "alive_fnc_cc_sabotage": {
-				_activePlan1 = "planning on sabotaging a building";
-				_activePlan2 = "blowing up a building";
-				_activePlan3 = "planting explosives nearby";
-				_activePlan4 = "getting ready to plant explosives";
-				_activePlan5 = "paid to shoot at your forces";
-				_result = [_activePlan1,_activePlan2,_activePlan3,_activePlan4,_activePlan5] call BIS_fnc_selectRandom;
-			};
-			case "alive_fnc_cc_getweapons": {
-				_activePlan1 = "retrieving weapons from a nearby weapons depot";
-				_activePlan2 = "planning on joining the insurgents";
-				_activePlan3 = "getting ready to go to a nearby insurgent recruitment center";
-				_activePlan4 = "getting ready to retrieve weapons from a cache";
-				_activePlan5 = "paid to attack your forces";
-				_activePlan6 = "forced to join the insurgents";
-				_activePlan7 = "preparing to attack your forces";
-				_result = [_activePlan1,_activePlan2,_activePlan3,_activePlan4,_activePlan5] call BIS_fnc_selectRandom;
+		closeDialog 0;
+
+		if (!isNil "_civ") then {
+			[_civ] spawn {
+				params ["_civ"];
+				sleep 1;
+				_civ disableAI "MOVE";
+				_civ setUnitPos "DOWN";
+				sleep (10 + (ceil random 20));
+				_civ enableAI "MOVE";
+				_civ setUnitPos "AUTO";
 			};
 		};
 	};
+
+	case "goAway": {
+		_civ = [_logic, "Civ"] call ALiVE_fnc_hashGet;
+
+		closeDialog 0;
+
+		if (!isNil "_civ") then {
+			[_civ] spawn {
+				params ["_civ"];
+				sleep 1;
+				_civ setUnitPos "AUTO";
+				_fleePos = [position _civ, 30, 50, 1, 0, 1, 0] call BIS_fnc_findSafePos;
+				_civ doMove _fleePos;
+			};
+		};
+	};
+
 };
 
 //-- Return result if any exists

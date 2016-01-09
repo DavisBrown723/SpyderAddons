@@ -1,19 +1,11 @@
 #include <\x\spyderaddons\addons\civ_interact\script_component.hpp>
 SCRIPT(responseHandler);
 
-/* -------------------------------------------------------------------------------------
-		             Revision Notes
-
-Change fnc name to responseHandler
-This file looks ugly and could use serious a serious rewrite and improvements
-
-------------------------------------------------------------------------------------- */
-
 /* ----------------------------------------------------------------------------
-Function: SpyderAddons_fnc_questionHandler
+Function: SpyderAddons_fnc_responseHandler
 
 Description:
-Main handler for questions
+Main handler for civilian responses
 
 Parameters:
 String - Question
@@ -23,9 +15,9 @@ none
 
 Examples:
 (begin example)
-["Home"] call SpyderAddons_fnc_questionHandler; //-- Ask where they live
-["Insurgents"] call SpyderAddons_fnc_questionHandler; //-- Ask if they've seen any insurgents
-["StrangeBehavior"] call SpyderAddons_fnc_questionHandler; //-- Ask if they've seen any strange behavior
+["Home"] call SpyderAddons_fnc_responseHandler; 		//-- Ask where they live
+["Insurgents"] call SpyderAddons_fnc_responseHandler; 		//-- Ask if they've seen any insurgents
+["StrangeBehavior"] call SpyderAddons_fnc_responseHandler; 	//-- Ask if they've seen any strange behavior
 (end)
 
 Notes:
@@ -36,6 +28,9 @@ Some responses are shared by the hostile and non-hostile sections, this is done 
 See Also:
 - nil
 
+Notes:
+ - This file isn't really true to OO methods. It helps to organize functions however.
+
 Author:
 SpyderBlack723
 
@@ -45,20 +40,25 @@ nil
 
 private ["_civData","_civInfo","_hostile","_hostility","_asked","_civ","_answerGiven"];
 params [
-	["_question", ""]
+	["_logic", objNull],
+	["_operation", ""],
+	["_arguments", []]
 ];
 
 //-- Define control ID's
-#define MAINCLASS SpyderAddons_fnc_civInteract
-#define QUESTION_HANDLER SpyderAddons_fnc_questionHandler
+#define MAINCLASS SpyderAddons_fnc_responseHandler
 #define CIVINTERACT_RESPONSELIST (findDisplay 923 displayCtrl 9239)
 
+//-- Clear previous responses
+CIVINTERACT_RESPONSELIST ctrlSetText "";
+
 //-- Get civ hostility
-_hostile =  false;
-_civData = [SpyderAddons_civInteract_Logic, "CurrentCivData"] call ALiVE_fnc_hashGet;
+_hostile =  false;	//-- Innocent until proven guilty
+
+//-- Gather civilian data
+_civData = [_logic, "CurrentCivData"] call ALiVE_fnc_hashGet;
 _civInfo = [_civData, "CivInfo"] call ALiVE_fnc_hashGet;_civInfo = _civInfo select 0;
-_civ = [SpyderAddons_civInteract_Logic, "CurrentCivilian"] call ALiVE_fnc_hashGet;
-_civName = name _civ;
+_civ = [_logic, "Civ"] call ALiVE_fnc_hashGet;
 
 //-- Set questions asked
 _asked = ([_civData, "Asked"] call ALiVE_fnc_hashGet) + 1;	
@@ -75,16 +75,13 @@ if (!isNil {[_civData, "Hostile"] call ALiVE_fnC_hashGet}) then {
 };
 
 //-- Hash new data to logic
-[SpyderAddons_civInteract_Logic, "CurrentCivData", _civData] call ALiVE_fnc_hashSet;
+//[SpyderAddons_civInteract_Logic, "CurrentCivData", _civData] call ALiVE_fnc_hashSet; //-- Is this needed?
 
 //-- Get previous responses
 _answersGiven = [_civData, "AnswersGiven"] call ALiVE_fnc_hashGet;
 
-//-- Clear previous responses
-CIVINTERACT_RESPONSELIST ctrlSetText "";
-
 //-- Check if question has already been answered
-if ((_question in _answersGiven) and (floor random 100 < 75)) exitWith {
+if ((_operation in _answersGiven) and (floor random 100 < 75)) exitWith {
 	_response1 = "I'm not telling you again.";
 	_response2 = "Haven't we already discussed this?";
 	_response3 = "I have already answered that.";
@@ -97,26 +94,26 @@ if ((_question in _answersGiven) and (floor random 100 < 75)) exitWith {
 	CIVINTERACT_RESPONSELIST ctrlSetText _response;
 		
 	//-- Check if civilian is irritated
-	["isIrritated", [_hostile,_asked,_civ]] call MAINCLASS;
+	[_logic,"isIrritated", [_hostile,_asked,_civ]] call MAINCLASS;
 };
 
-switch (_question) do {
+switch (_operation) do {
 
 	//-- Where is your home located
 	case "Home": {
 		_homePos = _civInfo select 0;
 
 		if (!(_hostile) and (floor random 100 > 15)) then {
-			_response1 = format ["I live over there, I'll show you (%1's house has been marked on the map).", _civName];
-			_response2 = format ["I live nearby (%1's house has been marked on the map).", _civName];
-			_response3 = format ["I will point it out for you (%1's house has been marked on the map).", _civName];
-			_response4 = format ["I live right over there (%1's house has been marked on the map).", _civName];
+			_response1 = format ["I live over there, I'll show you (%1's house has been marked on the map).", name _civ];
+			_response2 = format ["I live nearby (%1's house has been marked on the map).", name _civ];
+			_response3 = format ["I will point it out for you (%1's house has been marked on the map).", name _civ];
+			_response4 = format ["I live right over there (%1's house has been marked on the map).", name _civ];
 			_response = [_response1,_response2,_response3,_response4] call BIS_fnc_selectRandom;
 			CIVINTERACT_RESPONSELIST ctrlSetText _response;
 
 			//-- Create marker on home
 			_answersGiven pushBack "Home";_answerGiven = true;
-			_markerName = format ["%1's home", _civName];
+			_markerName = format ["%1's home", name _civ];
 			_marker = [str _homePos, _homePos, "ICON", [.35, .35], "ColorCIV", _markerName, "mil_circle", "Solid", 0, .5] call ALIVE_fnc_createMarkerGlobal;
 			_marker spawn {sleep 30;deleteMarker _this};
 		} else {
@@ -535,7 +532,7 @@ switch (_question) do {
 			_hostileCivInfo params ["_hostileCiv","_homePos","_activeCommands"];
 			_activeCommand = _activeCommands call BIS_fnc_selectRandom;
 			_activeCommand = _activeCommand select 0;
-			_activePlan = ["getActivePlan",_activeCommand] call MAINCLASS;
+			_activePlan = [_logic,"getActivePlan",_activeCommand] call MAINCLASS;
 
 			if (isNil "_activePlan") exitWith {CIVINTERACT_RESPONSELIST ctrlSetText "I can't talk about this right now."};
 
@@ -627,7 +624,7 @@ switch (_question) do {
 			CIVINTERACT_RESPONSELIST ctrlSetText _response;
 
 			//-- Check if civilian is irritated
-			["isIrritated", [_hostile,_asked,_civ]] call MAINCLASS;
+			[_logic,"isIrritated", [_hostile,_asked,_civ]] call MAINCLASS;
 		};
 
 		if !(_hostile) then {
@@ -775,7 +772,7 @@ switch (_question) do {
 			CIVINTERACT_RESPONSELIST ctrlSetText _response;
 
 			//-- Check if civilian is irritated
-			["isIrritated", [_hostile,_asked,_civ]] call MAINCLASS;
+			[_logic,"isIrritated", [_hostile,_asked,_civ]] call MAINCLASS;
 		};
 
 		//-- This really needs to be a switch, couldn't get it to work properly the first time
@@ -906,15 +903,144 @@ switch (_question) do {
 		};
 	};
 
+	case "isIrritated": {
+		_arguments params ["_hostile","_asked","_civ"];
+
+		//-- Raise hostility if civilian is irritated
+		if !(_hostile) then {
+			if (floor random 100 < (3 * _asked)) then {
+				[_logic,"UpdateHostility", [_civ, 10]] call MAINCLASS;
+				if (floor random 70 < (_asked * 5)) then {
+					_response1 = format [" *%1 grows visibly annoyed*", name _civ];
+					_response2 = format [" *%1 appears uninterested in the conversation*", name _civ];
+					_response3 = " Please leave me alone now.";
+					_response4 = " I do not want to talk to you anymore.";
+					_response5 = " Can I go now?";
+					_response = [_response1, _response2, _response3, _response4, _response5] call BIS_fnc_selectRandom;
+					CIVINTERACT_RESPONSELIST ctrlSetText ((ctrlText CIVINTERACT_RESPONSELIST) + _response);
+				};
+			};
+		} else {
+			if (floor random 100 < (8 * _asked)) then {
+				[_logic,"UpdateHostility", [_civ, 10]] call MAINCLASS;
+				if (floor random 70 < (_asked * 5)) then {
+					_response1 = format [" *%1 looks anxious*", name _civ];
+					_response2 = format [" *%1 looks distracted*", name _civ];
+					_response3 = " Are you done yet?";
+					_response4 = " You ask too many questions.";
+					_response5 = " You need to leave now.";
+					_response = [_response1, _response2, _response3,_response4, _response5] call BIS_fnc_selectRandom;
+					CIVINTERACT_RESPONSELIST ctrlSetText ((ctrlText CIVINTERACT_RESPONSELIST) + _response);
+				};
+			};
+		};
+	};
+
+	case "UpdateHostility": {
+		//-- Change local civilian hostility
+		private ["_townHostilityValue"];
+		_arguments params ["_civ","_value"];
+		if (count _arguments > 2) then {_townHostilityValue = _arguments select 2};
+
+		if (isNil "_townHostilityValue") then {
+			if (isNil {[SpyderAddons_civInteract_Logic, "CurrentCivData"] call ALiVE_fnc_hashGet}) exitWith {};
+
+			_civData = [SpyderAddons_civInteract_Logic, "CurrentCivData"] call ALiVE_fnc_hashGet;
+			_civInfo = ([_civData, "CivInfo", _civInfo] call ALiVE_fnc_hashGet) select 0;
+			_civInfo params ["_homePos","_individualHostility","_townHostility"];
+
+			_individualHostility = _individualHostility + _value;
+			_townHostilityValue = floor random 4;
+			_townHostility = _townHostility + _townHostilityValue;
+			[_civData, "CivInfo", [[_homePos, _individualHostility, _townHostility]]] call ALiVE_fnc_hashSet;
+			[SpyderAddons_civInteract_Logic, "CurrentCivData", _civData] call ALiVE_fnc_hashSet;
+		};
+
+		//-- Change civilian posture globally
+		if (isNil "_townHostilityValue") exitWith {["UpdateHostility", [_civ,_value,_townHostilityValue]] remoteExecCall ["SpyderAddons_fnc_civInteract",2]};
+
+		_civID = _civ getVariable ["agentID", ""];
+		if (_civID != "") then {
+			_civProfile = [ALIVE_agentHandler, "getAgent", _civID] call ALIVE_fnc_agentHandler;
+			_clusterID = _civProfile select 2 select 9;
+
+			//-- Set town hostility
+			_cluster = [ALIVE_clusterHandler, "getCluster", _clusterID] call ALIVE_fnc_clusterHandler;
+			_clusterHostility = [_cluster, "posture"] call ALIVE_fnc_hashGet;
+			[_cluster, "posture", (_clusterHostility + _townHostilityValue)] call ALIVE_fnc_hashSet;
+
+			//-- Set individual hostility
+			_hostility = (_civProfile select 2) select 12;
+			_hostility = _hostility + _value;
+			[_civProfile, "posture", _hostility] call ALiVE_fnc_hashSet;
+		};
+	};
+
+	case "getActivePlan": {
+		_activeCommand = _arguments;
+
+		switch (toLower _activeCommand) do {
+			case "alive_fnc_cc_suicide": {
+				_activePlan1 = "carrying out a suicide bombing";
+				_activePlan2 = "strapping himself with explosives";
+				_activePlan3 = "planning a bombing";
+				_activePlan4 = "getting ready to bomb your forces";
+				_activePlan5 = "about to bomb your forces";
+				_result = [_activePlan1,_activePlan2,_activePlan3,_activePlan4,_activePlan5] call BIS_fnc_selectRandom;
+			};
+			case "alive_fnc_cc_suicidetarget": {
+				_activePlan1 = "planning on carrying out a suicide bombing";
+				_activePlan2 = "strapping himself with explosives";
+				_activePlan3 = "planning a bombing";
+				_activePlan4 = "getting ready to bomb your forces";
+				_activePlan5 = "about to bomb your forces";
+				_result = [_activePlan1,_activePlan2,_activePlan3,_activePlan4,_activePlan5] call BIS_fnc_selectRandom;
+			};
+			case "alive_fnc_cc_rogue": {
+				_activePlan1 = "storing a weapon in his house";
+				_activePlan2 = "stockpiling weapons";
+				_activePlan3 = "planning on shooting a patrol";
+				_activePlan4 = "looking for patrols to shoot at";
+				_activePlan5 = "paid to shoot at your forces";
+				_result = [_activePlan1,_activePlan2,_activePlan3,_activePlan4,_activePlan5] call BIS_fnc_selectRandom;
+			};
+			case "alive_fnc_cc_roguetarget": {
+				_activePlan1 = "storing a weapon in his house";
+				_activePlan2 = "stockpiling weapons";
+				_activePlan3 = "planning on shooting a patrol";
+				_activePlan4 = "looking for somebody to shoot at";
+				_activePlan5 = "paid to shoot at your forces";
+				_result = [_activePlan1,_activePlan2,_activePlan3,_activePlan4,_activePlan5] call BIS_fnc_selectRandom;
+			};
+			case "alive_fnc_cc_sabotage": {
+				_activePlan1 = "planning on sabotaging a building";
+				_activePlan2 = "blowing up a building";
+				_activePlan3 = "planting explosives nearby";
+				_activePlan4 = "getting ready to plant explosives";
+				_activePlan5 = "paid to shoot at your forces";
+				_result = [_activePlan1,_activePlan2,_activePlan3,_activePlan4,_activePlan5] call BIS_fnc_selectRandom;
+			};
+			case "alive_fnc_cc_getweapons": {
+				_activePlan1 = "retrieving weapons from a nearby weapons depot";
+				_activePlan2 = "planning on joining the insurgents";
+				_activePlan3 = "getting ready to go to a nearby insurgent recruitment center";
+				_activePlan4 = "getting ready to retrieve weapons from a cache";
+				_activePlan5 = "paid to attack your forces";
+				_activePlan6 = "forced to join the insurgents";
+				_activePlan7 = "preparing to attack your forces";
+				_result = [_activePlan1,_activePlan2,_activePlan3,_activePlan4,_activePlan5] call BIS_fnc_selectRandom;
+			};
+		};
+	};
+
 };
 
 //-- Check if civilian is irritated
-["isIrritated", [_hostile,_asked,_civ]] call MAINCLASS;
+[_logic,"isIrritated", [_hostile,_asked,_civ]] call MAINCLASS;
 
 if (_answerGiven) then {
 	[_civData, "AnswersGiven", _answersGiven] call ALiVE_fnc_hashSet;
-	_civ setVariable ["AnswersGiven",_answersGiven];
-	_civ setVariable ["AnswersGiven",_answersGiven, false]; //-- Broadcasting could bring server perf loss with high use (set false to true at risk)
+	_civ setVariable ["AnswersGiven",_answersGiven, true];
 };
 
 

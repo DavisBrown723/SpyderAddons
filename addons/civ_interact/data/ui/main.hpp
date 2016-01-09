@@ -93,7 +93,7 @@ class Civ_Interact
 		class CivInteract_Detain: CivInteract_RscButton
 		{
 			idc = 92311;
-			action = "['Detain'] call SpyderAddons_fnc_commandHandler";
+			action = "[SpyderAddons_civInteractHandler,'Detain'] call SpyderAddons_fnc_civInteract";
 
 			text = "Detain";
 			x = 13.75 * GUI_GRID_W + GUI_GRID_X;
@@ -106,7 +106,7 @@ class Civ_Interact
 		class CivInteract_GetDown: CivInteract_RscButton
 		{
 			idc = 92312;
-			action = "['getDown'] call SpyderAddons_fnc_commandHandler";
+			action = "[SpyderAddons_civInteractHandler,'getDown'] call SpyderAddons_fnc_civInteract";
 
 			text = "Get Down";
 			x = 18.5 * GUI_GRID_W + GUI_GRID_X;
@@ -120,7 +120,7 @@ class Civ_Interact
 		class CivInteract_GoAway: CivInteract_RscButton
 		{
 			idc = 92313;
-			action = "['goAway'] call SpyderAddons_fnc_commandHandler";
+			action = "[SpyderAddons_civInteractHandler,'goAway'] call SpyderAddons_fnc_civInteract";
 
 			text = "Go Away";
 			x = 23.25 * GUI_GRID_W + GUI_GRID_X;
@@ -172,7 +172,7 @@ class Civ_Interact
 		class CivInteract_Search: CivInteract_RscButton
 		{
 			idc = 9242;
-			action = "['toggleSearchMenu'] call SpyderAddons_fnc_civInteract";
+			action = "[nil,'toggleSearchMenu'] call SpyderAddons_fnc_civInteract";
 
 			text = "Search";
 			x = 28 * GUI_GRID_W + GUI_GRID_X;
@@ -186,7 +186,7 @@ class Civ_Interact
 		class CivInteract_inventory_Close: CivInteract_RscButton
 		{
 			idc = 9243;
-			action = "['toggleSearchMenu'] call SpyderAddons_fnc_civInteract";
+			action = "[nil,'toggleSearchMenu'] call SpyderAddons_fnc_civInteract";
 
 			text = "Close";
 			x = 33 * GUI_GRID_W + GUI_GRID_X;
@@ -214,15 +214,31 @@ class Civ_Interact
 			h = 20 * GUI_GRID_H;
 			colorBackground[] = {0.173,0.173,0.173,0.8};
 			colorActive[] = {0.173,0.173,0.173,0.8};
+			sizeEx = .7 * GUI_GRID_H;
+			rowHeight = .05;
 		};
 		class CivInteract_inventory_Confiscate: CivInteract_RscButton
 		{
 			idc = 9245;
-			action = "['confiscate'] call SpyderAddons_fnc_civInteract";
+			action = "[nil,'confiscate'] call SpyderAddons_fnc_civInteract";
 
 			text = "Confiscate";
 			x = 33 * GUI_GRID_W + GUI_GRID_X;
 			y = 25.5 * GUI_GRID_H + GUI_GRID_Y;
+			w = 12.5 * GUI_GRID_W;
+			h = 1 * GUI_GRID_H;
+			colorBackground[] = {0,0,0,0.5};
+			colorActive[] = {0,0,0,0.5};
+			sizeEx = .8 * GUI_GRID_H;
+		};
+		class CivInteract_inventory_OpenContainer: CivInteract_RscButton
+		{
+			idc = 9246;
+			action = "[nil,'openGearContainer'] call SpyderAddons_fnc_civInteract";
+
+			text = "View Contents";
+			x = 33 * GUI_GRID_W + GUI_GRID_X;
+			y = 26.8 * GUI_GRID_H + GUI_GRID_Y;
 			w = 12.5 * GUI_GRID_W;
 			h = 1 * GUI_GRID_H;
 			colorBackground[] = {0,0,0,0.5};
