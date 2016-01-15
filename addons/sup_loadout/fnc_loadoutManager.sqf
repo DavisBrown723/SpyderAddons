@@ -1,3 +1,6 @@
+#include <\x\spyderaddons\addons\sup_loadout\script_component.hpp>
+SCRIPT(loadoutManager);
+
 /* ----------------------------------------------------------------------------
 Function: SpyderAddons_fnc_loadoutManager
 
@@ -27,29 +30,40 @@ nil
 ---------------------------------------------------------------------------- */
 
 params [
+	["_logic", objNull],
 	["_operation", ""],
 	["_arguments", []]
 ];
 private ["_result"];
 
+//-- Define Class
+#define MAINCLASS SpyderAddons_fnc_loadoutManager
+
 //-- Define control ID's
-#define LOADOUTMANAGER_MAINDIALOG "Loadout_Manager"
-#define LOADOUTMANAGER_TRANSFERLOADOUT "Transfer_Loadout"
-#define LOADOUTMANAGER_RECEIVELOADOUT "Receive_Loadout"
-#define LOADOUTMANAGER_CLASSLIST 7217
-#define LOADOUTMANAGER_GEARTITLE 72123
-#define LOADOUTMANAGER_EDIT 7215
-#define LOADOUTMANAGER_GEARTITLE 72123
-#define LOADOUTMANAGER_GEARLIST 72124
-#define LOADOUTMANAGER_UNITLIST 7199
-#define LOADOUTMANAGER_TEXTBOX 7185
-#define LOADOUTMANAGER_MAINCONTROLS allControls findDisplay 721
-#define LOADOUTMANAGER_ARSENALBUTTON 72120
+#define LOADOUTMANAGER_DISPLAY (findDisplay 721)
+
+#define LOADOUTMANAGER_LEFTTITLE (LOADOUTMANAGER_DISPLAY displayCtrl 7210)
+#define LOADOOUTMANAGER_LEFTINSTRUCTIONS (LOADOUTMANAGER_DISPLAY displayCtrl 7212)
+#define LOADOUTMANAGER_LEFTLIST (LOADOUTMANAGER_DISPLAY displayCtrl 7214)
+
+#define LOADOUTMANAGER_RIGHTTITLE (LOADOUTMANAGER_DISPLAY displayCtrl 7211)
+#define LOADOUTMANAGER_RIGHTINSTRUCTIONS (LOADOUTMANAGER_DISPLAY displayCtrl 7213)
+#define LOADOUTMANAGER_RIGHTLIST (LOADOUTMANAGER_DISPLAY displayCtrl 7222)
+
+#define LOADOUTMANAGER_INPUTBOX (LOADOUTMANAGER_DISPLAY displayCtrl 7223)
+
+#define LOADOUTMANAGER_LOADCLASS (LOADOUTMANAGER_DISPLAY displayCtrl 7216)
+#define LOADOUTMANAGER_SAVECLASS (LOADOUTMANAGER_DISPLAY displayCtrl 7217)
+#define LOADOUTMANAGER_TRANSFER (LOADOUTMANAGER_DISPLAY displayCtrl 7219)
+#define LOADOUTMANAGER_LOADONRESPAWN (LOADOUTMANAGER_DISPLAY displayCtrl 7220)
+
+#define LOADOUTMANAGER_BLANKBUTTON (LOADOUTMANAGER_DISPLAY displayCtrl 7224)
+#define LOADOUTMANAGER_ARSENAL (LOADOUTMANAGER_DISPLAY displayCtrl 7226)
 
 switch (_operation) do {
 
 	case "init": {
-		_arguments params ["_logic","_syncedUnits"];
+		_syncedUnits = _arguments;
 
 		//-- Get module parameters
 		_transfer = call compile (_logic getVariable "Transfer");
@@ -57,97 +71,258 @@ switch (_operation) do {
 
 		{
 			if (typeName _x == "OBJECT") then {
-				_x setVariable ["LoadoutManager_Transfer", _transfer];
-				_x setVariable ["LoadoutManager_Arsenal", _arsenal];
-				_x addAction ["Access Loadout Manager", {["open",_this] call SpyderAddons_fnc_loadoutManager}];
+				_x setVariable ["LoadoutManager_Settings", [_arsenal,_transfer]];
+				_x addAction ["Access Loadout Manager", {[nil,"open", _this] call SpyderAddons_fnc_loadoutManager}];
 			};
 		} forEach _syncedUnits;
+
+		MOD(loadoutManagerHandler) = [] call CBA_fnc_hashCreate;
 	};
 	
 	case "open": {
-		_arguments params ["_object","_caller"];
+		private ["_settings"];
+		_arguments params [
+			["_object", nil]
+		];
 
-		//-- Create temporary logic
-		SpyderAddons_LoadoutManager_Logic = [] call CBA_fnc_hashCreate;
-		[SpyderAddons_LoadoutManager_Logic, "Object", _object] call CBA_fnc_hashSet;
-		[SpyderAddons_LoadoutManager_Logic, "Caller", _caller] call CBA_fnc_hashSet;
-
-		CreateDialog LOADOUTMANAGER_MAINDIALOG;
-		["onLoad"] call SpyderAddons_fnc_loadoutManager;
+		CreateDialog "Loadout_Manager";
+		[MOD(loadoutManagerHandler),"onLoad", _object] call MAINCLASS;
 	};
 
 	case "onLoad": {
+		private ["_arsenal","_transfer"];
+
+		if (typeName _arguments == "OBJECT") then {
+			_object = _arguments;
+			_settings = _object getVariable "LoadoutManager_Settings";
+			_arsenal = _settings select 0;
+			_transfer = _settings select 1;
+
+			[_logic,"Settings", [_arsenal,_transfer]] call CBA_fnc_hashSet;
+		} else {
+			_settings = [_logic,"Settings"] call CBA_fnc_hashGet;
+			_arsenal = _settings select 0;
+			_transfer = _settings select 1;
+		};
+
 		//-- Check if arsenal is enabled
-		_object = [SpyderAddons_LoadoutManager_Logic, "Object"] call CBA_fnc_hashGet;
-		_arsenal = _object getVariable "LoadoutManager_Arsenal";
-		ctrlEnable [LOADOUTMANAGER_ARSENALBUTTON, _arsenal];
+		LOADOUTMANAGER_ARSENAL ctrlEnable _arsenal;
+		LOADOUTMANAGER_TRANSFER ctrlEnable _transfer;
+		LOADOUTMANAGER_BLANKBUTTON ctrlShow false;
 
-		ctrlShow [LOADOUTMANAGER_GEARTITLE, false];
+		//-- Display main folder
+		_loadoutDirectory = profileNamespace getVariable "SpyderAddons_Loadouts";
+		if (isNil "_loadoutDirectory") then {profileNamespace setVariable ["SpyderAddons_Loadouts", ([] call CBA_fnc_hashCreate)]};
 
-		["buildClassList"] call SpyderAddons_fnc_loadoutManager;
+		[_logic,"displayFolder", _loadoutDirectory] call SpyderAddons_fnc_loadoutManager;
 
-		(findDisplay 721 displayCtrl LOADOUTMANAGER_CLASSLIST)  ctrlAddEventHandler ["LBSelChanged","
-			_slotNum = format ['%1', [lbCurSel 7217] select 0];
-			_loadout = profileNamespace getVariable format ['LoadoutManagerLoadout_%1',_slotNum];
-
-			if (!isNil '_loadout') then {
-				_slotName = _loadout select 0;
-				ctrlSetText [7215, _slotName];
-			} else {
-				_slotNum = format ['Loadout %1', [lbCurSel 7217] select 0];
-				ctrlSetText [7215, _slotNum];
-			};
-
-			if (!isNil '_loadout') then {
-				['displayGear', [_loadout]] call SpyderAddons_fnc_loadoutManager;
-
-				_object = [SpyderAddons_LoadoutManager_Logic, 'Object'] call CBA_fnc_hashGet;
-				_transfer = _object getVariable 'LoadoutManager_Transfer';
-				ctrlEnable [72122, _transfer];
-
-				{ctrlEnable [_x, true]} forEach [7218, 7219, 72121, 72125];
-			} else {
-				['displayGear'] call SpyderAddons_fnc_loadoutManager;
-				{ctrlEnable [_x, false]} forEach [7218, 7219, 72121, 72125, 72122];
-			};
-		"];
-
-
-		lbSetCurSel [LOADOUTMANAGER_CLASSLIST,0];
+		LOADOUTMANAGER_LEFTLIST ctrlAddEventHandler ["LBSelChanged","[SpyderAddons_loadoutManagerHandler,'onLeftListSwitch'] call SpyderAddons_fnc_loadoutManager"];
 	};
 
-	case "buildClassList": {
+	case "onUnload": {
+		[_logic,"TransferData", nil] call CBA_fnc_hashSet;
+		[_logic,"CurrentFolder", nil] call CBA_fnc_hashSet;
+		[_logic,"ParentFolder", nil] call CBA_fnc_hashSet;
+	};
+
+	case "onLeftListSwitch": {
+		_currentFolder = [_logic,"CurrentFolder"] call CBA_fnc_hashGet;
+
+		lbClear LOADOUTMANAGER_RIGHTLIST;
+		LOADOUTMANAGER_RIGHTLIST ctrlRemoveAllEventHandlers "LBSelChanged";
+
+		_index = lbCurSel LOADOUTMANAGER_LEFTLIST;
+		_slotName = LOADOUTMANAGER_LEFTLIST lbText _index;
+		_slotData = [_currentFolder,_slotName] call CBA_fnc_hashGet;
+
+		LOADOUTMANAGER_INPUTBOX ctrlSetText _slotName;
+		LOADOOUTMANAGER_LEFTINSTRUCTIONS ctrlSetText "";
+		LOADOUTMANAGER_RIGHTINSTRUCTIONS ctrlSetText "";
+		LOADOUTMANAGER_BLANKBUTTON ctrlShow false;
+
+		if ([_slotData] call CBA_fnc_isHash) then {
+			//-- Selected folder
+			[nil,"displayFolderContents", _slotData] call SpyderAddons_fnc_loadoutManager;
+
+			LOADOUTMANAGER_RIGHTTITLE ctrlSetText "Folder Contents";
+
+			LOADOUTMANAGER_LOADCLASS ctrlSetText "Open Folder";
+			LOADOUTMANAGER_LOADCLASS buttonSetAction "[SpyderAddons_loadoutManagerHandler,'openFolder'] call SpyderAddons_fnc_loadoutManager";
+
+			LOADOUTMANAGER_LOADONRESPAWN ctrlEnable false;
+		} else {
+			//-- Selected loadout
+			[nil,"displayClassContents", _slotData] call SpyderAddons_fnc_loadoutManager;
+
+			LOADOUTMANAGER_RIGHTTITLE ctrlSetText "Loadout Contents";
+
+			LOADOUTMANAGER_LOADCLASS ctrlSetText "Load Class";
+			LOADOUTMANAGER_LOADCLASS buttonSetAction "";
+
+			LOADOUTMANAGER_LOADONRESPAWN ctrlEnable true;
+		};
+	};
+
+	case "openFolder": {
+
+		_currentFolder = [_logic,"CurrentFolder"] call CBA_fnc_hashGet;
+		[_logic,"ParentFolder", _currentFolder] call CBA_fnc_hashSet;
+
+		_index = lbCurSel LOADOUTMANAGER_LEFTLIST;
+		_slotName = LOADOUTMANAGER_LEFTLIST lbText _index;
+
+		_newFolder = [_currentFolder,_slotName] call CBA_fnc_hashGet;
+		[_logic,"displayFolder", _newFolder] call MAINCLASS;
+	};
+
+	case "loadOldFormatClasses": {
+
+	};
+
+	case "createFolder": {
+		_folderName = ctrlText LOADOUTMANAGER_INPUTBOX;
+		_currentFolder = [_logic,"CurrentFolder"] call CBA_fnc_hashGet;
+		
+		if (_folderName in (_currentFolder select 1)) then {
+			LOADOOUTMANAGER_LEFTINSTRUCTIONS ctrlSetText "Folder already exists";
+		} else {
+			LOADOUTMANAGER_LEFTLIST lbAdd _folderName;
+			[_currentFolder,_folderName, ([] call CBA_fnc_hashCreate)] call CBA_fnc_hashSet;
+		};
+
+		[_logic,"displayFolder", _currentFolder] call MAINCLASS;
+	};
+
+	case "deleteSlot": {
+		_index = lbCurSel LOADOUTMANAGER_LEFTLIST;
+		_currentFolder = [_logic,"CurrentFolder"] call CBA_fnc_hashGet;
+		_slotName = LOADOUTMANAGER_LEFTLIST lbText _index;
+
+		LOADOUTMANAGER_LEFTLIST lbDelete _index;
+		[_currentFolder, _slotName] call CBA_fnc_hashRem;
+
+		[_logic,"displayFolder", _currentFolder] call MAINCLASS;
+
+		lbClear LOADOUTMANAGER_RIGHTLIST;
+		LOADOUTMANAGER_RIGHTTITLE ctrlSetText "";
+		LOADOUTMANAGER_RIGHTINSTRUCTIONS ctrlSetText "";
+	};
+
+	case "displayFolder": {
+		_folder = _arguments;
+		[_logic,"CurrentFolder", _folder] call CBA_fnc_hashSet;
 
 		//-- Flush list
-		lbClear LOADOUTMANAGER_CLASSLIST;
+		lbClear LOADOUTMANAGER_LEFTLIST;
+		lbClear LOADOUTMANAGER_RIGHTLIST;
 
-		//-- Build new list
-		for "_i" from 0 to 15 do {
-			_loadout = profileNamespace getVariable format ["LoadoutManagerLoadout_%1",_i];
-			if(!isNil {_loadout select 0}) then {
-				lbAdd [LOADOUTMANAGER_CLASSLIST, _loadout select 0];
+		_keys = _folder select 1;
+		{
+			_name = _keys select _forEachIndex;
+
+			if ([_x] call CBA_fnc_isHash) then {
+				LOADOUTMANAGER_LEFTLIST lbAdd _name;
+				LOADOUTMANAGER_LEFTLIST lbSetPicture [_forEachIndex, "x\spyderaddons\addons\sup_loadout\data\images\folder.paa"];
 			} else {
-				_slotName = format ["Loadout %1", _i];
-				lbAdd [LOADOUTMANAGER_CLASSLIST, _slotName];
+				LOADOUTMANAGER_LEFTLIST lbAdd _name;
 			};
-		};
+		} forEach (_folder select 2);
 	};
-	
+
+	case "displayFolderContents": {
+		_folder = _arguments;
+
+		_keys = _folder select 1;
+		{
+			_name = _keys select _forEachIndex;
+
+			if ([_x] call CBA_fnc_isHash) then {
+				LOADOUTMANAGER_RIGHTLIST lbAdd _name;
+				LOADOUTMANAGER_RIGHTLIST lbSetPicture [_forEachIndex, "x\spyderaddons\addons\sup_loadout\data\images\folder.paa"];
+			} else {
+				LOADOUTMANAGER_RIGHTLIST lbAdd _name;
+			};
+		} forEach (_folder select 2);
+	};
+
+	case "moveClass": {
+		//-- Possibly make a new dialog that has a tree of folders where the user can select one and the class will move to that location <-- Would require recursive function to find all folders
+		//-- Possibly add the ability to drag and drop classes and folders
+	};
+
+	case "saveClass": {
+		_name = ctrlText LOADOUTMANAGER_INPUTBOX;
+		_currentFolder = [_logic,"CurrentFolder"] call CBA_fnc_hashGet;
+
+		_loadout = [nil,"getLoadout", player] call MAINCLASS;
+		[_currentFolder,_name,_loadout] call CBA_fnc_hashSet;
+
+		[_logic,"displayFolder", _currentFolder] call MAINCLASS;
+	};
+
 	case "loadClass": {
-		private ["_unit","_loadout"];
+		_currentFolder = [_logic,"CurrentFolder"] call CBA_fnc_hashGet;
+systemChat "Loading loadout";
+		_index = lbCurSel LOADOUTMANAGER_LEFTLIST;
+		_slotName = LOADOUTMANAGER_LEFTLIST lbText _index;
+		_loadout = [_currentFolder,_slotName] call CBA_fnc_hashGet;
 
-		//-- Retrieve loadout if none was passed
-		if (count _arguments == 0) then {
-			_slot = lbCurSel LOADOUTMANAGER_CLASSLIST;
-			_loadout = profileNameSpace getVariable format ["LoadoutManagerLoadout_%1",_slot];
-		} else {
-			_unit = _arguments select 0;
-			_loadout = _arguments select 1;
-		};
+		[_logic,"equipLoadout", [player,_loadout]] call MAINCLASS;
+	};
 
-		if (isNil "_unit") then {_unit = player};
-
+	case "equipLoadout": {
+		_arguments params ["_unit","_loadout"];
+systemChat "Equipping loadout";
 		//-- Strip the unit down
+		[nil,"removeAllGear", _unit] call MAINCLASS;
+
+		//-- Define Gear
+		_loadout params [
+				"_uniform",
+				"_vest",
+				"_backpack",
+				"_headgear",
+				"_goggles",
+				"_uniformItems",
+				"_vestItems",
+				"_backpackItems",
+				"_weapons",
+				"_primaryWeaponItems",
+				"_primaryWeaponMagazine",
+				"_handgunItems",
+				"_handgunMagazine",
+				"_secondaryWeaponItems",
+				"_secondaryWeaponMagazine",
+				"_assignedItems"
+		];
+
+		//-- Add Gear
+		_unit addUniform _uniform;
+		_unit addVest _vest;
+		_unit addBackpack _backpack;
+		_unit addHeadgear _headgear;
+		_unit addGoggles _goggles;
+
+		{_unit addItemToBackpack _x} forEach _backpackitems;
+		{_unit addItemToUniform _x} forEach _uniformitems;
+		{_unit addItemToVest _x} forEach _vestitems;
+
+		{_unit addMagazine _x} forEach _primaryWeaponMagazine;
+		{_unit addMagazine _x} forEach _handgunMagazine;
+		{_unit addMagazine _x} forEach _secondaryWeaponMagazine;
+
+		{_unit addWeapon _x} forEach _weapons;
+
+		{_unit addPrimaryWeaponItem _x} forEach _primaryWeaponItems;
+		{_unit addHandgunItem _x} forEach _handgunItems;
+		{_unit addSecondaryWeaponItem _x} forEach _secondaryWeaponItems;
+
+		{_unit linkItem _x} forEach _assigneditems; 
+	};
+
+	case "removeAllGear": {
+		_unit = _arguments;
+
 		RemoveAllWeapons _unit;
 		{_unit removeMagazine _x} foreach (magazines _unit);
 		removeUniform _unit;
@@ -156,129 +331,94 @@ switch (_operation) do {
 		removeGoggles _unit;
 		removeHeadGear _unit;
 		removeAllAssignedItems _unit;
+	};
+
+	case "getLoadout": {
+		_unit = _arguments;
+
+		_uniform = uniform _unit;
+		_vest = vest _unit;
+		_backpack = backpack _unit;
+		_headgear = headgear _unit;
+		_goggles = goggles _unit;
+
+		_uniformItems = uniformItems _unit;
+		_vestItems = uniformItems _unit;
+		_backpackItems = backpackItems _unit;
+
+		_weapons = weapons _unit;
+
+		_primaryweaponItems = primaryWeaponItems _unit;
+		_primaryWeaponMagazine = primaryWeaponMagazine _unit;
+
+		_handgunItems = handgunItems _unit;
+		_handgunMagazine = handgunMagazine _unit;
+
+		_secondaryWeaponItems = secondaryWeaponItems _unit;
+		_secondaryWeaponMagazine = secondaryWeaponMagazine _unit;
+
+		_assignedItems = assignedItems _unit;
+
+		_result = [
+				_uniform,
+				_vest,
+				_backpack,
+				_headgear,
+				_goggles,
+				_uniformItems,
+				_vestItems,
+				_backpackItems,
+				_weapons,
+				_primaryWeaponItems,
+				_primaryWeaponMagazine,
+				_handgunItems,
+				_handgunMagazine,
+				_secondaryWeaponItems,
+				_secondaryWeaponMagazine,
+				_assignedItems
+		];
+	};
+	
+	case "renameSlot": {
+		_currentFolder = [_logic,"CurrentFolder"] call CBA_fnc_hashGet;
+		_index = lbCurSel LOADOUTMANAGER_LEFTLIST;
+		_oldName = LOADOUTMANAGER_LEFTLIST lbText _index;
+		_newName = ctrlText LOADOUTMANAGER_INPUTBOX;
+
+		_data = [_currentFolder,_oldName] call CBA_fnc_hashGet;
+		[_currentFolder,_oldName] call CBA_fnc_hashRem;
+		[_currentFolder,_newName, _data] call CBA_fnc_hashSet;
+
+		[_logic,"displayFolder", _currentFolder] call MAINCLASS;
+		lbSetCurSel [LOADOUTMANAGER_LEFTLIST, _index];
+	};
+	
+	case "displayClassContents": {
+		_loadout = _arguments;
+
+		lbClear LOADOUTMANAGER_RIGHTLIST;
+
+		TITLERIGHT ctrlSetText "Class Gear";
 
 		//-- Define Gear
-		_uniform = _loadout select 1;
-		_vest = _loadout select 2;
-		_backpack = _loadout select 3;
-		_backpackitems = _loadout select 4;
-		_headgear = _loadout select 5;
-		_goggles = _loadout select 6;
-		_uniformitems = _loadout select 7;
-		_vestitems = _loadout select 8;
-		_weapons = _loadout select 9;
-		_primaryweaponitems = _loadout select 10;
-		_secondaryweaponitems = _loadout select 11;
-		_assigneditems = _loadout select 12;
-		_primaryWeaponMagazines = _loadout select 13;
-
-		//-- Add Gear
-		_unit addUniform _uniform;
-		_unit addVest _vest;
-		_unit addBackpack _backpack;
-		{_unit addItemToBackpack _x} forEach _backpackitems;
-		_unit addHeadgear _headgear;
-		_unit addGoggles _goggles;
-		{_unit addItemToUniform _x} forEach _uniformitems;
-		{_unit addItemToVest _x} forEach _vestitems;
-		{_unit addWeapon _x} forEach _weapons;
-		{_unit addPrimaryWeaponItem _x} forEach _primaryweaponitems;
-		{_unit addSecondaryWeaponItem _x} forEach _secondaryweaponitems;
-		{_unit linkItem _x} forEach _assigneditems; 
-		{_unit addMagazine _x} forEach _primaryWeaponMagazines;
-	};
-	
-	case "saveClass": {
-		//-- Dialog data
-		_slot = lbCurSel LOADOUTMANAGER_CLASSLIST;
-		_name = ctrlText LOADOUTMANAGER_EDIT;
-
-		//-- Save gear
-		_uniform = uniform player;
-		_vest = vest player;
-		_backpack = backpack player;
-		_backpackitems = backpackItems player;
-		_headgear = headgear player;
-		_goggles = goggles player;
-		_uniformitems = uniformItems player;
-		_vestitems = vestItems player;
-		_weapons = weapons player;
-		_primaryweaponitems = primaryWeaponItems player;
-		_secondaryweaponitems = secondaryWeaponItems player;
-		_assigneditems = assignedItems player;
-		_primaryWeaponMagazines = primaryWeaponMagazine player;
-
-		//-- Save loadout
-		profileNameSpace setVariable [format ["LoadoutManagerLoadout_%1", _slot],[_name, _uniform,_vest, _backpack, _backpackitems, _headgear, _goggles,_uniformitems, _vestitems, _weapons, _primaryweaponitems, _secondaryweaponitems, _assigneditems, _primaryWeaponMagazines]];
-
-		saveProfileNamespace;
-
-		//-- Build new list
-		["buildClassList"] call SpyderAddons_fnc_loadoutManager;
-
-		lbSetCurSel [LOADOUTMANAGER_CLASSLIST, _slot];
-	};
-
-	case "deleteClass": {
-		//-- Get class
-		_slot = lbCurSel LOADOUTMANAGER_CLASSLIST;
-
-		//-- Save loadout
-		profileNameSpace setVariable [format ["LoadoutManagerLoadout_%1", _slot], nil];
-
-		saveProfileNamespace;
-
-		//-- Build new list
-		["buildClassList"] call SpyderAddons_fnc_loadoutManager;
-
-		lbSetCurSel [LOADOUTMANAGER_CLASSLIST, _slot];
-	};
-	
-	case "renameClass": {
-		//-- Dialogue data
-		_slot = lbCurSel LOADOUTMANAGER_CLASSLIST;
-
-		//-- Get loadout
-		_loadout = profileNameSpace getVariable format ["LoadoutManagerLoadout_%1",_slot];	
-		_loadout params ["_name","_uniform","_vest","_backpack","_backpackitems","_headgear","_goggles","_uniformitems","_vestitems","_weapons","_primaryweaponitems","_secondaryweaponitems","_assigneditems", "_primaryWeaponMagazines"];
-		_name = ctrlText LOADOUTMANAGER_EDIT;
-
-		//-- Save loadout with new name
-		profileNameSpace setVariable[format["LoadoutManagerLoadout_%1", _slot],[_name, _uniform,_vest, _backpack, _backpackitems, _headgear, _goggles,_uniformitems, _vestitems, _weapons, _primaryweaponitems, _secondaryweaponitems, _assigneditems, _primaryWeaponMagazines]];
-
-		saveProfileNamespace;
-
-		//-- Build new list
-		["buildClassList"] call SpyderAddons_fnc_loadoutManager;
-
-		lbSetCurSel [LOADOUTMANAGER_CLASSLIST, _slot];
-	};
-	
-	case "displayGear": {
-		ctrlShow [LOADOUTMANAGER_GEARTITLE, true];
-		lbClear LOADOUTMANAGER_GEARLIST;
-
-		_arguments params [["_loadout", nil]];
-
-		if (isNil "_loadout") exitWith {
-			lbClear LOADOUTMANAGER_GEARLIST;
-			ctrlShow [LOADOUTMANAGER_GEARTITLE, false];
-		};
-
-		//-- Define Gear
-		_uniform = _loadout select 1;
-		_vest = _loadout select 2;
-		_backpack = _loadout select 3;
-		_backpackitems = _loadout select 4;
-		_headgear = _loadout select 5;
-		_goggles = _loadout select 6;
-		_uniformitems = _loadout select 7;
-		_vestitems = _loadout select 8;
-		_weapons = _loadout select 9;
-		_primaryweaponitems = _loadout select 10;
-		_secondaryweaponitems = _loadout select 11;
-		_assigneditems = _loadout select 12;
-		_primaryWeaponMagazines = _loadout select 13;
+		_loadout params [
+				"_uniform",
+				"_vest",
+				"_backpack",
+				"_headgear",
+				"_goggles",
+				"_uniformItems",
+				"_vestItems",
+				"_backpackItems",
+				"_weapons",
+				"_primaryWeaponItems",
+				"_primaryWeaponMagazine",
+				"_handgunItems",
+				"_handgunMagazine",
+				"_secondaryWeaponItems",
+				"_secondaryWeaponMagazine",
+				"_assignedItems"
+		];
 
 		private ["_index"];
 		_index = 0;
@@ -288,25 +428,29 @@ switch (_operation) do {
 			_configPath = configfile >> "CfgWeapons" >> _x;
 			if (isClass _configPath) then {
 				_displayName = getText (_configPath >> "displayName");
+				_tooltip = getText (_configPath >> "tooltip");
 				_picture = getText (_configPath >> "picture");
 
-				lbAdd [LOADOUTMANAGER_GEARLIST, _displayName];
-				lbSetPicture [LOADOUTMANAGER_GEARLIST, _index, _picture];
+				LOADOUTMANAGER_RIGHTLIST lbAdd _displayName;
+				LOADOUTMANAGER_RIGHTLIST lbSetTooltip [_index,_tooltip];
+				LOADOUTMANAGER_RIGHTLIST lbSetPicture [_index, _picture];
 				_index = _index + 1;
 			};
 		} forEach _weapons;
 
 		//-- Weapon attachments
-		_attachments = _primaryweaponitems + _secondaryweaponitems;
+		_attachments = _primaryWeaponItems + _handgunItems + _secondaryWeaponItems;
 		{
 			_item = _x;
 			_configPath = configfile >> "CfgWeapons" >> _item;
 			if (isClass _configPath) then {
 				_displayName = getText (_configPath >> "displayName");
+				_tooltip = getText (_configPath >> "tooltip");
 				_picture = getText (_configPath >> "picture");
 
-				lbAdd [LOADOUTMANAGER_GEARLIST, _displayName];
-				lbSetPicture [LOADOUTMANAGER_GEARLIST, _index, _picture];
+				LOADOUTMANAGER_RIGHTLIST lbAdd _displayName;
+				LOADOUTMANAGER_RIGHTLIST lbSetTooltip [_index,_tooltip];
+				LOADOUTMANAGER_RIGHTLIST lbSetPicture [_index, _picture];
 				_index = _index + 1;
 			};
 		} forEach _attachments;
@@ -315,10 +459,12 @@ switch (_operation) do {
 		_uniformConfigPath = configfile >> "CfgWeapons" >> _uniform;
 		if (isClass _uniformConfigPath) then {
 			_displayName = getText (_uniformConfigPath >> "displayName");
+			_tooltip = getText (_configPath >> "tooltip");
 			_picture = getText (_uniformConfigPath >> "picture");
 
-			lbAdd [LOADOUTMANAGER_GEARLIST, _displayName];
-			lbSetPicture [LOADOUTMANAGER_GEARLIST, _index, _picture];
+			LOADOUTMANAGER_RIGHTLIST lbAdd _displayName;
+			LOADOUTMANAGER_RIGHTLIST lbSetTooltip [_index,_tooltip];
+			LOADOUTMANAGER_RIGHTLIST lbSetPicture [_index, _picture];
 			_index = _index + 1;
 		};
 
@@ -326,10 +472,12 @@ switch (_operation) do {
 		_vestConfigPath = configfile >> "CfgWeapons" >> _vest;
 		if (isClass _vestConfigPath) then {
 			_displayName = getText (_vestConfigPath >> "displayName");
+			_tooltip = getText (_configPath >> "tooltip");
 			_picture = getText (_vestConfigPath >> "picture");
 
-			lbAdd [LOADOUTMANAGER_GEARLIST, _displayName];
-			lbSetPicture [LOADOUTMANAGER_GEARLIST, _index, _picture];
+			LOADOUTMANAGER_RIGHTLIST lbAdd _displayName;
+			LOADOUTMANAGER_RIGHTLIST lbSetTooltip [_index,_tooltip];
+			LOADOUTMANAGER_RIGHTLIST lbSetPicture [_index, _picture];
 			_index = _index + 1;
 		};
 
@@ -337,10 +485,12 @@ switch (_operation) do {
 		_headgearConfigPath = configfile >> "CfgWeapons" >> _headgear;
 		if (isClass _headgearConfigPath) then {
 			_displayName = getText (_headgearConfigPath >> "displayName");
+			_tooltip = getText (_configPath >> "tooltip");
 			_picture = getText (_headgearConfigPath >> "picture");
 
-			lbAdd [LOADOUTMANAGER_GEARLIST, _displayName];
-			lbSetPicture [LOADOUTMANAGER_GEARLIST, _index, _picture];
+			LOADOUTMANAGER_RIGHTLIST lbAdd _displayName;
+			LOADOUTMANAGER_RIGHTLIST lbSetTooltip [_index,_tooltip];
+			LOADOUTMANAGER_RIGHTLIST lbSetPicture [_index, _picture];
 			_index = _index + 1;
 		};
 
@@ -349,10 +499,12 @@ switch (_operation) do {
 			_gogglesConfigPath = configfile >> "CfgGlasses" >> _goggles;
 			if (isClass _gogglesConfigPath) then {
 				_displayName = getText (_gogglesConfigPath >> "displayName");
+				_tooltip = getText (_configPath >> "tooltip");
 				_picture = getText (_gogglesConfigPath >> "picture");
 
-				lbAdd [LOADOUTMANAGER_GEARLIST, _displayName];
-				lbSetPicture [LOADOUTMANAGER_GEARLIST, _index, _picture];
+				LOADOUTMANAGER_RIGHTLIST lbAdd _displayName;
+				LOADOUTMANAGER_RIGHTLIST lbSetTooltip [_index,_tooltip];
+				LOADOUTMANAGER_RIGHTLIST lbSetPicture [_index, _picture];
 				_index = _index + 1;
 			};
 		};
@@ -361,15 +513,18 @@ switch (_operation) do {
 		_backpackConfigPath = configfile >> "CfgVehicles" >> _backpack;
 		if (isClass _backpackConfigPath) then {
 			_displayName = getText (_backpackConfigPath >> "displayName");
+			_tooltip = getText (_configPath >> "tooltip");
 			_picture = getText (_backpackConfigPath >> "picture");
 
-			lbAdd [LOADOUTMANAGER_GEARLIST, _displayName];
-			lbSetPicture [LOADOUTMANAGER_GEARLIST, _index, _picture];
+			LOADOUTMANAGER_RIGHTLIST lbAdd _displayName;
+			LOADOUTMANAGER_RIGHTLIST lbSetTooltip [_index,_tooltip];
+			LOADOUTMANAGER_RIGHTLIST lbSetPicture [_index, _picture];
 			_index = _index + 1;
 		};
 
 		//-- Backpack items
-		_itemArray = _uniformitems + _vestitems + _backpackitems + _primaryWeaponMagazines + _assigneditems;
+		_itemArray = _uniformItems + _vestItems + _backpackItems + _primaryWeaponMagazine + _handgunMagazine + _secondaryWeaponMagazine + _primaryWeaponItems
+		 	+ _handgunItems + _secondaryWeaponItems + _assigneditems;
 		{
 			private ["_item","_count","_configPath"];
 			_item = _x;
@@ -383,90 +538,50 @@ switch (_operation) do {
 				if !(isClass _configPath) then {_configPath = configfile >> "CfgVehicles" >> _item};
 
 				_displayName = getText (_configPath >> "displayName");
+				_tooltip = getText (_configPath >> "tooltip");
 				_picture = getText (_configPath >> "picture");
 				_itemInfo = format ["%1: %2", _displayName, _count];
 
-				lbAdd [LOADOUTMANAGER_GEARLIST, _itemInfo];
-				lbSetPicture [LOADOUTMANAGER_GEARLIST, _index, _picture];
+				LOADOUTMANAGER_RIGHTLIST lbAdd _displayName;
+				LOADOUTMANAGER_RIGHTLIST lbSetTooltip [_index,_tooltip];
+				LOADOUTMANAGER_RIGHTLIST lbSetPicture [_index, _picture];
 				_index = _index + 1;
 
 			};
 		} forEach _itemArray;
 	};
 
-	case "loadOnRespawn": {
-		//-- Dialogue data
-		_slot = lbCurSel LOADOUTMANAGER_CLASSLIST;
+	case "setLoadOnRespawn": {
+		_currentFolder = [_logic,"CurrentFolder"] call CBA_fnc_hashGet;
+		_index = lbCurSel LOADOUTMANAGER_LEFTLIST;
+		_slotName = LOADOUTMANAGER_LEFTLIST lbText _index;
 
-		//-- Get selected loadout
-		_loadout = profileNameSpace getVariable format ["LoadoutManagerLoadout_%1",_slot];
-		_loadout params ["_name","_uniform","_vest","_backpack","_backpackitems","_headgear","_goggles","_uniformitems","_vestitems","_weapons","_primaryweaponitems","_secondaryweaponitems","_assigneditems", "_primaryWeaponMagazines"];
+		_slotData = [_currentFolder,_slotName] call CBA_fnc_hashGet;
 
-		//-- Save loadout to onRespawn variable
-		profileNameSpace setVariable ["LoadoutManager_onRespawn", [_name,_uniform,_vest,_backpack,_backpackitems,_headgear,_goggles,_uniformitems,_vestitems,_weapons,_primaryweaponitems,_secondaryweaponitems,_assigneditems,_primaryWeaponMagazines]];
-		saveProfileNamespace;
-
-		//-- Remove previous eventhandler if one exists
-		if (!isNil {player getVariable "LoadoutManager_onSpawnLoadoutIndex"}) then {
-			_index = player getVariable "LoadoutManager_onSpawnLoadoutIndex";
-			player removeEventHandler ["MPRespawn", _index];
-			player setVariable ["LoadoutManager_onSpawnLoadoutIndex", nil];
+		if ([_slotData] call CBA_fnc_isHash) then {
+			hint "You must select a class to load on respawn";
 		};
 
-		_index = player addMPEventHandler ["MPRespawn", {["onSpawn",_this] call SpyderAddons_fnc_loadoutManager}];
-		player setVariable ["LoadoutManager_onSpawnLoadoutIndex", _index];
-	};
-	
-	case "onSpawn": {
-		_loadout = profileNameSpace getVariable "LoadoutManager_onRespawn";
+		//-- Remove previous eventhandler if one exists
+		if (!isNil {[MOD(loadoutManagerHandler),"LoadOnRespawn_EHIndex"] call CBA_fnc_hashGet}) then {
+			_index = [MOD(loadoutManagerHandler),"LoadOnRespawn_EHIndex"] call CBA_fnc_hashGet;
 
-		//-- Define Gear
-		_uniform = _loadout select 1;
-		_vest = _loadout select 2;
-		_backpack = _loadout select 3;
-		_backpackitems = _loadout select 4;
-		_headgear = _loadout select 5;
-		_goggles = _loadout select 6;
-		_uniformitems = _loadout select 7;
-		_vestitems = _loadout select 8;
-		_weapons = _loadout select 9;
-		_primaryweaponitems = _loadout select 10;
-		_secondaryweaponitems = _loadout select 11;
-		_assigneditems = _loadout select 12;
-		_primaryWeaponMagazines = _loadout select 13;
+			player removeEventHandler ["MPRespawn", _index];
 
-		//-- Strip the unit down
+			[MOD(loadoutManagerHandler),"LoadOnRespawn_EHIndex", nil] call CBA_fnc_hashSet;
+			[MOD(loadoutManagerHandler),"LoadOnRespawn_Loadout", nil] call CBA_fnc_hashSet;
+		};
 
-		RemoveAllWeapons player;
+		_index = player addMPEventHandler ["MPRespawn", {
+			_loadout = [SpyderAddons_loadoutManagerHandler,"LoadOnRespawn_Loadout"] call CBA_fnc_hashGet;
+			_unit = _this select 0;
 
-		{_unit removeMagazine _x} foreach (magazines player);
+			[nil,"removeAllGear", _unit] call SpyderAddons_fnc_loadoutManager;
+			[nil,"loadClass", [_unit,_loadout]] call SpyderAddons_fnc_loadoutManager;
+		}];
 
-		removeUniform player;
-
-		removeVest player;
-
-		removeBackpack player;
-
-		removeGoggles player;
-
-		removeHeadGear player;
-
-		removeAllAssignedItems player;
-
-		//-- Add Gear
-		player addUniform _uniform;
-		player addVest _vest;
-		player addBackpack _backpack;
-		{player addItemToBackpack _x} forEach _backpackitems;
-		player addHeadgear _headgear;
-		player addGoggles _goggles;
-		{player addItemToUniform _x} forEach _uniformitems;
-		{player addItemToVest _x} forEach _vestitems;
-		{player addWeapon _x} forEach _weapons;
-		{player addPrimaryWeaponItem _x} forEach _primaryweaponitems;
-		{player addSecondaryWeaponItem _x} forEach _secondaryweaponitems;
-		{player linkItem _x} forEach _assigneditems;
-		{player addMagazine _x} forEach _primaryWeaponMagazines;
+		[MOD(loadoutManagerHandler),"LoadOnRespawn_EHIndex", _index] call CBA_fnc_hashSet;
+		[MOD(loadoutManagerHandler),"LoadOnRespawn_Loadout", _slotData] call CBA_fnc_hashSet;
 	};
 	
 	case "openArsenal": {
@@ -478,91 +593,89 @@ switch (_operation) do {
 
 		//-- Open Arsenal
 		["Open",true] spawn BIS_fnc_arsenal;
+
 		waitUntil {!isNull findDisplay -1};
+
+		//-- Set close button action to open the loadout manager
 		_closeButton = (findDisplay -1) displayCtrl 44448;
-		_closeButton buttonSetAction "['open'] call SpyderAddons_fnc_loadoutManager";
+		_closeButton buttonSetAction "[nil,'open'] call SpyderAddons_fnc_loadoutManager";
 	};
-	
-	case "sendLoadout": {
-		_loadout = LoadoutManager_TransferLoadout;
 
-		_playerSlot = lbCurSel LOADOUTMANAGER_UNITLIST;
-		_playerName = lbData [LOADOUTMANAGER_UNITLIST, _playerSlot];
-		_squad = [];
-		{
-			if (!isPlayer _x) then {_squad pushBack _x};
-		} forEach units group player;
+	case "transferSlot": {
+		_currentFolder = [_logic,"currentFolder"] call CBA_fnc_hashGet;
 
-		{
-			_unit = _x;
+		_index = lbCurSel LOADOUTMANAGER_LEFTLIST;
+		_slotName = LOADOUTMANAGER_LEFTLIST lbText _index;
+		_data = [_currentFolder,_slotName] call CBA_fnc_hashGet;
 
-			if (name _unit == _playerName) exitWith {
-				if (isPlayer _unit) then {
-					["receiveLoadout",[name player,_loadout], "SpyderAddons_fnc_loadoutManager", owner _unit] call BIS_fnc_MP;
-				} else {
-					["loadClass", [_unit,_loadout]] call SpyderAddons_fnc_loadoutManager;
-				};
-			};
-		} forEach allPlayers + _squad;
-	};
-	
-	case "receiveLoadout": {
-		_arguments params ["_sender","_loadout"];
+		[MOD(loadoutManagerHandler),"TransferData", [_slotName,_data]] call CBA_fnc_hashSet;
 
-		//if !(isNull findDisplay 718) exitWith {}; //-- Possibly breaking function
-		hint "You received a loadout, tell Spyder the god about this momentous achievement";
-
-		//-- Exit if player is not in loadout organizer interface
-		if (isNull findDisplay 721) exitWith {
-			_message = format ["You have received a loadout from %1, you must have the Loadout Organizer open when receiving a loadout in order to save it", _sender];
-			hint _message;
+		//-- Set instructions
+		if ([_data] call CBA_fnc_isHash) then {
+			_dataType = "folder";
+		} else {
+			_dataType = "loadout";
 		};
+		LOADOUTMANAGER_RIGHTINSTRUCTIONS ctrlSetText (format ["Select a unit to transfer the %1 to", _dataType]);
 
-		LoadoutManager_TransferLoadout = _loadout;
-
-		//-- Create dialog
-		CreateDialog LOADOUTMANAGER_RECEIVELOADOUT;
-		_message = format ["You have received a loadout from %1, would you like to accept the transfer and load the class?", _sender];
-
-		(findDisplay 718 displayCtrl 7185) ctrlSetText _message;
-	};
-	
-	case "openTransferMenu": {
-		disableSerialization;
-
-		_slotNum = format ['%1', [lbCurSel 7217] select 0];
-		_loadout = profileNamespace getVariable format ['LoadoutManagerLoadout_%1',_slotNum];
-		LoadoutManager_TransferLoadout = _loadout;
-
+		//-- Get all units of side player and AI group members
+		_units = [];
 		{
-			ctrlShow [_x, false];
-		} forEach LOADOUTMANAGER_MAINCONTROLS;
-
-		CreateDialog LOADOUTMANAGER_TRANSFERLOADOUT;
-
-		_localPlayerName = name player;
-		_playerSide = playerSide;
-		_squad = [];
-		{
-			if (!isPlayer _x) then {_squad pushBack _x};
-		} forEach units group player;
-
-		_index = 0;
-		{
-			_unit = _x;
-			_name = name _unit;
-
-			if (side _unit == _playerSide) then {
-				if (_name != _localPlayerName) then {
-					lbAdd [LOADOUTMANAGER_UNITLIST, _name];
-					lbSetData [LOADOUTMANAGER_UNITLIST, _index, _name];
-					_index = _index + 1;
+			if (_x in (units group player) || {{isPlayer _x} && {side _x == side player}}) then {
+				if (!(_x in _units) && {_x != player}) then {
+					_units pushBack _x;
 				};
 			};
-		} forEach allPlayers + _squad;
-	};
-	
+		} forEach allUnits;
 
+		//-- Populate right list
+		{
+			LOADOUTMANAGER_RIGHTLIST lbAdd (name _x);
+			LOADOUTMANAGER_RIGHTLIST lbSetData [_forEachIndex, _x];
+		} forEach _units;
+
+		//-- Enable confirm transfer button
+		LOADOUTMANAGER_BLANKBUTTON ctrlShow true;
+		LOADOUTMANAGER_BLANKBUTTON ctrlEnable false;
+		LOADOUTMANAGER_BLANKBUTTON ctrlSetText "Confirm Transfer";
+		LOADOUTMANAGER_BLANKBUTTON buttonSetAction "[MOD(loadoutManagerHandler),'confirmTransfer'] call QUOTE(MAINCLASS)";
+
+		LOADOUTMANAGER_RIGHTLIST ctrlAddEventHandler ["LBSelChanged","
+			LOADOUTMANAGER_BLANKBUTTON ctrlEnable true;
+			LOADOUTMANAGER_RIGHTINSTRUCTIONS ctrlSetText 'Select a unit to transfer the data to';
+		"];
+	};
+
+	case "confirmTransfer": {
+		_index = lbCurSel LOADOUTMANAGER_RIGHTLIST;
+		_unit = LOADOUTMANAGER_RIGHTLIST lbData _index;
+
+		_data = [MOD(loadoutManagerHandler),"TransferData", _data] call CBA_fnc_hashGet;
+		[MOD(loadoutManagerHandler),"TransferData", nil] call CBA_fnc_hashSet;
+
+		if (isPlayer _unit) then {
+			[nil,"storeTransferredData", _data] remoteExecCall [QUOTE(MAINCLASS), _unit];
+		} else {
+			if !([_data] call CBA_fnc_isHash) then {
+				[nil,"equipLoadout", [_unit,_data]] call MAINCLASS;
+			} else {
+				LOADOUTMANAGER_RIGHTINSTRUCTIONS ctrlSetText "You cannot transfer a folder to an AI unit";
+			};
+		};
+	};
+
+	case "storeTransferredData": {
+		_arguments params ["_slotName","_data"];
+
+		_loadoutDirectory = profileNamespace getVariable "SpyderAddons_Loadouts";
+		_storedData = [_loadoutDirectory,"Transferred_Loadouts", ([] call CBA_fnc_hashCreate)] call CBA_fnc_hashGet;
+
+		if (_slotName in (_storedData select 1)) then {
+			[_storedData,(format ["%1 (%2)", _slotName, lbSize LOADOUTMANAGER_RIGHTLIST]), _data] call CBA_fnc_hashSet;
+		} else {
+			[_storedData,_slotName, _data] call CBA_fnc_hashSet;
+		};
+	};
 };
 
 //-- Return result if any exists

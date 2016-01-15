@@ -114,6 +114,14 @@ class LoadoutManager_RscText
 	y = 0;
 	h = 0.037;
 	w = 0.3;
+	class Attributes { 
+		font = "PuristaMedium"; 
+		color = "#C0C0C0"; 
+		align = "center"; 
+		valign = "middle"; 
+		shadow = true; 
+		shadowColor = "#000000";
+	};
 	style = 0;
 	shadow = 1;
 	colorShadow[] = {0,0,0,0.5};
@@ -283,6 +291,24 @@ class LoadoutManager_RscListBox
 	autoScrollDelay = 5;
 	autoScrollRewind = 0;
 };
+
+class LoadoutManager_RscFrame
+{
+	colorBackground[] = {0,0,0,0};
+	colorText[] = {1,1,1,1};
+	font = "PuristaMedium";
+	h = 0.3;
+	idc = -1;
+	shadow = 2;
+	sizeEx = 0.02;
+	style = 0x40;
+	text = "";
+	type = 0;
+	w = 0.3;
+	x = 0;
+	y = 0;
+};
+
 class LoadoutManager_RscButton
 {
 	access = 0;
@@ -333,7 +359,7 @@ class LoadoutManager_RscButton
 	animTextureDefault = "";
 };
 
-class LoadoutManager_ListNBox {
+class LoadoutManager_RscListNBox {
 	style = "ST_LEFT + LB_TEXTURES";
 	type = 102;
 	rowHeight = .05;
