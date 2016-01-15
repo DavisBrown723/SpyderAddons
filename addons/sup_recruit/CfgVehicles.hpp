@@ -55,6 +55,11 @@ class CfgVehicles
 				description = "The maximum amount of units a player may have in his squad before being unable to recruit.";
 				defaultValue = "10";
 			};
+			class SpawnCode {
+				displayName = "Code";
+				description = "Code ran a unit is recruited. The unit can be referenced by the variable _this";
+				defaultValue = "";
+			};
 			
 		};
 

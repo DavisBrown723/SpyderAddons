@@ -9,7 +9,7 @@ class Recruitment_Menu
 	idd = 570;
 	movingEnable = 1;
 	onLoad = "";
-	onUnload = "player setVariable ['Recruitment_CurrentObject', nil]";
+	onUnload = "['onUnload'] call SpyderAddons_fnc_recruitment";
 	class controls 
 	{
 		class Recruitment_Background: Recruitment_RscText
@@ -90,7 +90,7 @@ class Recruitment_Menu
 		class Recruitment_Recruit: Recruitment_RscButton
 		{
 			idc = 578;
-			action = "['recruitUnit',['client']] call SpyderAddons_fnc_recruitment";
+			action = "['getSelectedUnit'] call SpyderAddons_fnc_recruitment";
 			text = "Recruit";
 			x = 11.3 * GUI_GRID_W + GUI_GRID_X;
 			y = 24.2 * GUI_GRID_H + GUI_GRID_Y;

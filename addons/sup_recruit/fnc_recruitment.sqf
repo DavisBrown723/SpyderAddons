@@ -1,3 +1,6 @@
+#include <\x\spyderaddons\addons\sup_recruit\script_component.hpp>
+SCRIPT(recruitment);
+
 /* ----------------------------------------------------------------------------
 Function: SpyderAddons_fnc_recruitment
 
@@ -30,8 +33,10 @@ params [
 ];
 private ["_result"];
 
+//-- Define Class
+#define MAINCLASS SpyderAddons_fnc_recruitment
+
 //-- Define control ID's
-#define RECRUITMENT_DIALOG "Recruitment_Menu"
 #define RECRUITMENT_UNITLIST 574
 #define RECRUITMENT_GEARLIST 576
 
@@ -44,21 +49,22 @@ switch (_operation) do {
 		_whitelist = [_logic getVariable "RecruitableUnits"] call SpyderAddons_fnc_getModuleArray;
 		_blacklist = [_logic getVariable "BlacklistedUnits"] call SpyderAddons_fnc_getModuleArray;
 		_maxUnits = call compile (_logic getVariable "MaximumUnits");
+		_spawnCode = compile (_logic getVariable "SpawnCode");
 
 		{
 			if (typeName _x == "OBJECT") then {
-				_x setVariable ["Recruitment_Factions", _factions];
-				_x setVariable ["Recruitment_Whitelist", _whitelist];
-				_x setVariable ["Recruitment_Blacklist", _blacklist];
-				_x setVariable ["Recruitment_MaximumUnits", _maxUnits];
+				_x setVariable ["Recruitment_Settings", [_factions,_whitelist,_blacklist,_maxUnits,_spawnCode]];
 				_x addAction ["Recruit", {["open",_this] call SpyderAddons_fnc_recruitment}];
 			};
 		} forEach _syncedUnits;
 	};
 	
 	case "open": {
-		CreateDialog RECRUITMENT_DIALOG;
+		CreateDialog "Recruitment_Menu";
 		["onLoad", _arguments] call SpyderAddons_fnc_recruitment;
+
+		MOD(recruitmentHandler) = [] call CBA_fnc_hashCreate;
+		[MOD(recruitmentHandler),"Data", _arguments] call CBA_fnc_hashSet;
 	};
 
 	case "onLoad": {
@@ -68,9 +74,12 @@ switch (_operation) do {
 		player setVariable ["Recruitment_CurrentObject", _object];
 
 		//-- Get settings
-		_factions = _object getVariable ["Recruitment_Factions",[]];
-		_whitelist = _object getVariable ["Recruitment_Whitelist",[]];
-		_blacklist = _object getVariable ["Recruitment_Blacklist",[]];
+		_settings = _object getVariable "Recruitment_Settings";
+		_settings params [
+			"_factions",
+			"_whitelist",
+			"_blacklist"
+		];
 
 		//-- Get faction units
 		_units = "(
@@ -100,6 +109,10 @@ switch (_operation) do {
 		(findDisplay 570 displayCtrl RECRUITMENT_UNITLIST)  ctrlAddEventHandler ["LBSelChanged","
 			['updateGear'] call SpyderAddons_fnc_recruitment;
 		"];
+	};
+
+	case "onUnload": {
+		MOD(recruitmentHandler) = nil;
 	};
 
 	case "updateGear": {
@@ -160,35 +173,34 @@ switch (_operation) do {
 		} forEach _itemArray;
 	};
 
-	case "recruitUnit": {
-		private ["_locality"];
-		_locality = _arguments select 0;
+	case "getSelectedUnit": {
+		_data = [MOD(recruitmentHandler),"Data"] call CBA_fnc_hashGet;
+		_currentObject = _data select 0;
 
 		//-- Exit if too many units in player group
-		_maxUnits = (player getVariable "Recruitment_CurrentObject") getVariable ["Recruitment_MaximumUnits", 10];
+		_settings = _currentObject getVariable "Recruitment_Settings";
+		_maxUnits = _settings select 3;
+
 		if (count units group player >= _maxUnits) exitWith {
 			hint format ["You have too many units in your group. You may not recruit more until you have less than %1 units in your group.", _maxUnits];
 		};
 
-		switch (_locality) do {
-			//-- Get data from client and execute file on server
-			case "client": {
-				//-- Get selected unit
-				_index = lbCurSel RECRUITMENT_UNITLIST;
-				_classname = lbData [RECRUITMENT_UNITLIST, _index];
-				["recruitUnit", ["server", [_classname, player]]] remoteExecCall ["SpyderAddons_fnc_recruitment",2];
-			};
+		_index = lbCurSel RECRUITMENT_UNITLIST;
+		_classname = lbData [RECRUITMENT_UNITLIST, _index];
 
-			//-- Recieve client-sent data and create unit on server
-			case "server": {
-				_data = _arguments select 1;
-				_data params ["_classname","_player"];
-				_pos = getPos _player;
-				_unit = (group _player) createUnit [_classname, _pos, [], 15, "FORM"];
-				_unit setPos _pos;	//-- Set's unit to proper height if needed
-				addSwitchableUnit _unit;
-			};
-		};
+		["spawnUnit", [_data, _classname]] remoteExecCall [QUOTE(MAINCLASS), 2];
+	};
+
+	case "spawnUnit": {
+		_arguments params ["_data","_classname"];
+		_data params ["_object","_player"];
+		_settings = _object getVariable "Recruitment_Settings";
+		_spawnCode = _settings select 4;
+
+		_unit = (group _player) createUnit [_classname, (getPos _player), [], 15, "FORM"];
+		addSwitchableUnit _unit;
+
+		_unit call _spawnCode;
 	};
 
 };
