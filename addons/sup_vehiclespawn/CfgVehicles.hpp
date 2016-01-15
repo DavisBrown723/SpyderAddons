@@ -73,6 +73,11 @@ class CfgVehicles
 				description = "Vehicles of these types will be excluded. Some types are [Car, Truck, Armored, Tank, Helicopter, Plane]";
 				defaultValue = "";
 			};
+			class SpawnCode {
+				displayName = "Code";
+				description = "Code ran when a vehicle is spawned. The vehicle can be referenced by the variable _this";
+				defaultValue = "";
+			};
 		};
 
 		class ModuleDescription

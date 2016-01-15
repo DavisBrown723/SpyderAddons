@@ -9,7 +9,7 @@ class SpyderAddons_VehicleSpawner
 	idd = 570;
 	movingEnable = 1;
 	onLoad = "";
-	onUnload = "SpyderAddons_VehicleSpawner_Logic = nil";
+	onUnload = "['onUnload'] call SpyderAddons_fnc_vehicleSpawner";
 	class controls 
 	{
 
@@ -98,7 +98,7 @@ class SpyderAddons_VehicleSpawner
 		class VehicleSpawner_Spawn: VehicleSpawner_RscButton
 		{
 			idc = 578;
-			action = "['spawnVehicle'] call SpyderAddons_fnc_vehicleSpawner";
+			action = "['getSelectedVehicle'] call SpyderAddons_fnc_vehicleSpawner";
 
 			text = "Spawn";
 			x = 11.3 * GUI_GRID_W + GUI_GRID_X;
