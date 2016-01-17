@@ -54,6 +54,11 @@ class CfgFunctions {
 				file = "\x\spyderaddons\addons\x_lib\functions\misc\isFaction.sqf";
 				recompile = RECOMPILE;
 			};
+			class displayNotification {
+				description = "Displays a notification that slides into view";
+				file = "\x\spyderaddons\addons\x_lib\functions\misc\displayNotification.sqf";
+				recompile = RECOMPILE;
+			};
 			
 			//////-- Objectives --//////
 			class createObjective {

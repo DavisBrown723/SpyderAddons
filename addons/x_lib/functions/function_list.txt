@@ -16,6 +16,7 @@ logistics
 
 misc
 
+	displayNotification
 	getFactionMostPlayers
 	getModuleArray
 	getNearAgents
