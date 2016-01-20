@@ -29,12 +29,12 @@ Peer Reviewed:
 nil
 ---------------------------------------------------------------------------- */
 
+private ["_result"];
 params [
 	["_logic", objNull],
 	["_operation", ""],
 	["_arguments", []]
 ];
-private ["_result"];
 
 //-- Define Class
 #define MAINCLASS SpyderAddons_fnc_loadoutManager
@@ -55,7 +55,10 @@ private ["_result"];
 #define LOADOUTMANAGER_OPENFOLDER (LOADOUTMANAGER_DISPLAY displayCtrl 7227)
 #define LOADOUTMANAGER_CLOSEFOLDER (LOADOUTMANAGER_DISPLAY displayCtrl 7228)
 
+#define LOADOUTMANAGER_MOVE (LOADOUTMANAGER_DISPLAY displayCtrl 7229)
 #define LOADOUTMANAGER_TRANSFER (LOADOUTMANAGER_DISPLAY displayCtrl 7219)
+#define LOADOUTMANAGER_RENAME (LOADOUTMANAGER_DISPLAY displayCtrl 7218)
+#define LOADOUTMANAGER_DELETE (LOADOUTMANAGER_DISPLAY displayCtrl 7221)
 
 #define LOADOUTMANAGER_LOADCLASS (LOADOUTMANAGER_DISPLAY displayCtrl 7216)
 #define LOADOUTMANAGER_SAVECLASS (LOADOUTMANAGER_DISPLAY displayCtrl 7217)
@@ -109,40 +112,45 @@ switch (_operation) do {
 			_transfer = _settings select 1;
 		};
 
-		//-- Check if arsenal is enabled
+		//-- Check if arsenal and transfer is enabled
 		LOADOUTMANAGER_ARSENAL ctrlEnable _arsenal;
 		LOADOUTMANAGER_TRANSFER ctrlEnable _transfer;
-		LOADOUTMANAGER_BLANKBUTTON ctrlShow false;
 
+		//-- Disable unneeded buttons
+		LOADOUTMANAGER_BLANKBUTTON ctrlShow false;
 		LOADOUTMANAGER_CLOSEFOLDER ctrlEnable false;
 
-		//-- Display main folder
+		//-- Create main folder if it doesn't exist
 		_loadoutDirectory = profileNamespace getVariable "SpyderAddons_Loadouts";
 		if (isNil "_loadoutDirectory") then {
 			profileNamespace setVariable ["SpyderAddons_Loadouts", ([] call CBA_fnc_hashCreate)];
 			[_logic,"createFolder", "Transferred_Loadouts"] call MAINCLASS;
 		};
 
+		//-- Load and reformat old classes
+		[_logic,"loadOldFormatClasses"] call MAINCLASS;
+
+		//-- Display main folder
 		[_logic,"displayFolder", _loadoutDirectory] call SpyderAddons_fnc_loadoutManager;
 
 		LOADOUTMANAGER_LEFTLIST ctrlAddEventHandler ["LBSelChanged","[SpyderAddons_loadoutManager,'onLeftListSwitch'] call SpyderAddons_fnc_loadoutManager"];
+
+		if (lbSize LOADOUTMANAGER_LEFTLIST > 0) then {
+			LOADOUTMANAGER_LEFTLIST lbSetCurSel 0;
+		};
 	};
 
 	case "onUnload": {
 		[_logic,"TransferData", nil] call CBA_fnc_hashSet;
+		[_logic,"MoveData", nil] call CBA_fnc_hashSet;
+		[_logic,"AllFolders", nil] call CBA_fnc_hashSet;
 		[_logic,"CurrentFolder", nil] call CBA_fnc_hashSet;
-		[_logic,"ParentFolder", nil] call CBA_fnc_hashSet;
+
+		saveProfileNamespace;	//-- 99% sure this isn't necessary, but w/e
 	};
 
 	case "onLeftListSwitch": {
-		_mainDirectory = profileNamespace getVariable "SpyderAddons_Loadouts";
 		_currentFolder = [_logic,"CurrentFolder"] call CBA_fnc_hashGet;
-
-		if !(_currentFolder isEqualTo _mainDirectory) then {
-			LOADOUTMANAGER_CLOSEFOLDER ctrlEnable true;
-		} else {
-			LOADOUTMANAGER_CLOSEFOLDER ctrlEnable false;
-		};
 
 		lbClear LOADOUTMANAGER_RIGHTLIST;
 		LOADOUTMANAGER_RIGHTLIST ctrlRemoveAllEventHandlers "LBSelChanged";
@@ -158,6 +166,8 @@ switch (_operation) do {
 
 		//-- Nullify data
 		[_logic,"TransferData", nil] call CBA_fnc_hashSet;
+		[_logic,"MoveData", nil] call CBA_fnc_hashSet;
+		[_logic,"AllFolders", nil] call CBA_fnc_hashSet;
 
 		if ([_slotData] call CBA_fnc_isHash) then {
 			//-- Selected folder
@@ -167,7 +177,6 @@ switch (_operation) do {
 
 			//-- Disable loadout controls
 			LOADOUTMANAGER_LOADCLASS ctrlEnable false;
-			LOADOUTMANAGER_SAVECLASS ctrlEnable false;
 			LOADOUTMANAGER_LOADONRESPAWN ctrlEnable false;
 
 			//-- enable folder controls
@@ -182,7 +191,6 @@ switch (_operation) do {
 
 			//-- enable loadout controls
 			LOADOUTMANAGER_LOADCLASS ctrlEnable true;
-			LOADOUTMANAGER_SAVECLASS ctrlEnable true;
 			LOADOUTMANAGER_LOADONRESPAWN ctrlEnable true;
 
 			//-- disable folder controls
@@ -203,7 +211,58 @@ switch (_operation) do {
 	};
 
 	case "loadOldFormatClasses": {
+		_oldClasses = [];
 
+		//-- Get old classes
+		for "_i" from 0 to 15 step 1 do {
+			_loadout = profileNamespace getVariable format ["LoadoutManagerLoadout_%1", _i];
+
+			if (!isNil {_loadout select 0}) then {
+
+				//-- Get old format info
+				_loadout params [
+					"_name",
+					"_uniform",
+					"_vest",
+					"_backpack",
+					"_backpackItems",
+					"_headgear",
+					"_goggles",
+					"_uniformItems",
+					"_vestItems",
+					"_weapons",
+					"_primaryWeaponItems",
+					"_secondaryWeaponItems",
+					"_assignedItems",
+					"_primaryWeaponMagazines"
+				];
+
+				//-- Reformat info to new standard
+				_loadout = [
+					_uniform,
+					_vest,
+					_backpack,
+					_headgear,
+					_goggles,
+					_uniformItems,
+					_vestItems,
+					_backpackItems,
+					_weapons,
+					_primaryWeaponItems,
+					[""],
+					["","",""],
+					[""],
+					_secondaryWeaponItems,
+					[""],
+					_assignedItems
+				];
+
+				[_logic,"saveClass", _name] call MAINCLASS;
+
+				//-- Delete old format class
+				profileNamespace setVariable [(format ["LoadoutManagerLoadout_%1", _i]), nil];
+			};
+		};
 	};
 
 	case "createFolder": {
@@ -218,7 +277,7 @@ switch (_operation) do {
 		_currentFolder = [_logic,"CurrentFolder"] call CBA_fnc_hashGet;
 		
 		if (_folderName in (_currentFolder select 1)) then {
-			LOADOOUTMANAGER_LEFTINSTRUCTIONS ctrlSetText "Folder already exists";
+			LOADOOUTMANAGER_LEFTINSTRUCTIONS ctrlSetText "A slot with that name already exists in the current folder";
 		} else {
 			LOADOUTMANAGER_LEFTLIST lbAdd _folderName;
 			[_currentFolder,_folderName, ([] call CBA_fnc_hashCreate)] call CBA_fnc_hashSet;
@@ -246,10 +305,17 @@ switch (_operation) do {
 		_folder = _arguments;
 		[_logic,"CurrentFolder", _folder] call CBA_fnc_hashSet;
 
+		_mainDirectory = profileNamespace getVariable "SpyderAddons_Loadouts";
+		if (_folder isEqualTo _mainDirectory) then {
+			LOADOUTMANAGER_CLOSEFOLDER ctrlEnable false;
+		} else {
+			LOADOUTMANAGER_CLOSEFOLDER ctrlEnable true;
+		};
+
 		//-- Flush list
 		lbClear LOADOUTMANAGER_LEFTLIST;
 		lbClear LOADOUTMANAGER_RIGHTLIST;
-
+							copyToClipboard str _folder;
 		_data = _folder select 2;
 		{
 			_name = _x;
@@ -260,13 +326,40 @@ switch (_operation) do {
 				LOADOUTMANAGER_LEFTLIST lbSetPicture [_forEachIndex, "x\spyderaddons\addons\sup_loadout\data\images\folder.paa"];
 			} else {
 				LOADOUTMANAGER_LEFTLIST lbAdd _name;
+				LOADOUTMANAGER_LEFTLIST lbSetPicture [_forEachIndex, "x\spyderaddons\addons\sup_loadout\data\images\weapon.paa"];
 			};
 		} forEach (_folder select 1);
 
 		if (lbSize LOADOUTMANAGER_LEFTLIST > 0) then {
-			LOADOUTMANAGER_LEFTLIST lbSetCurSel 0;
+			_selectedIndex = lbCurSel LOADOUTMANAGER_LEFTLIST;
+
+			if (_selectedIndex != -1) then {
+				LOADOUTMANAGER_LEFTLIST lbSetCurSel _selectedIndex;
+			} else {
+				LOADOUTMANAGER_LEFTLIST lbSetCurSel 0;
+			};
+
+			LOADOUTMANAGER_MOVE ctrlEnable true;
+
+			//-- enable generic controls
+			LOADOUTMANAGER_RENAME ctrlEnable true;
+			LOADOUTMANAGER_DELETE ctrlEnable true;
+
+			if (([_logic,"Settings"] call CBA_fnc_hashGet) select 1) then {
+				LOADOUTMANAGER_TRANSFER ctrlEnable true;
+			};
 		} else {
-			//-- enable loadout controls
+			LOADOUTMANAGER_MOVE ctrlEnable false;
+			LOADOUTMANAGER_TRANSFER ctrlEnable false;
+
+			//-- disable folder controls
+			LOADOUTMANAGER_OPENFOLDER ctrlEnable false;
+
+			//-- disable generic controls
+			LOADOUTMANAGER_RENAME ctrlEnable false;
+			LOADOUTMANAGER_DELETE ctrlEnable false;
+
+			//-- disable loadout controls
 			LOADOUTMANAGER_LOADCLASS ctrlEnable false;
 			LOADOUTMANAGER_SAVECLASS ctrlEnable true;
 			LOADOUTMANAGER_LOADONRESPAWN ctrlEnable false;
@@ -285,6 +378,7 @@ switch (_operation) do {
 				LOADOUTMANAGER_RIGHTLIST lbSetPicture [_forEachIndex, "x\spyderaddons\addons\sup_loadout\data\images\folder.paa"];
 			} else {
 				LOADOUTMANAGER_RIGHTLIST lbAdd _name;
+				LOADOUTMANAGER_RIGHTLIST lbSetPicture [_forEachIndex, "x\spyderaddons\addons\sup_loadout\data\images\weapon.paa"];
 			};
 		} forEach (_folder select 2);
 	};
@@ -341,31 +435,31 @@ switch (_operation) do {
 	};
 
 	case "getAllFoldersInDirectory": {
-		_directory = _arguments;
+		private ["_names","_folders"];
+		_arguments params ["_directory",["_exclude",[]]];
+		_keys = _directory select 1;
 
 		_names = [];
 		_folders = [];
-
-		_keys = _directory select 1;
+			
 		{
 			if ([_x] call CBA_fnc_isHash) then {
-				_names pushBack (_keys select _forEachIndex);
-				_folders pushBack _x;
+				if !(_x isEqualTo _exclude) then {
+					_names pushBack (_keys select _forEachIndex);
+					_folders pushBack _x;
 
-				{
-					if (_forEachIndex == 0) then {
-						_names pushBack _x;
-					} else {
-						_folders pushBack _x;
-					};
-				} forEach ([_logic,"getAllFoldersInDirectory", _x] call MAINCLASS);
+					_subData = [_logic,"getAllFoldersInDirectory", [_x,_exclude]] call MAINCLASS;
+					_names append (_subData select 0);
+					_folders append (_subData select 1);
+				};
 			};
-		} forEach (_directory select 2);
+		} forEach (_directory select 2);	
 
 		_result = [_names,_folders];
 	};
 
 	case "moveSlot": {
+		private ["_allFolders"];
 		_mainDirectory = profileNamespace getVariable "SpyderAddons_Loadouts";
 		_currentFolder = [_logic,"CurrentFolder"] call CBA_fnc_hashGet;
 
@@ -373,35 +467,85 @@ switch (_operation) do {
 		_slotName = LOADOUTMANAGER_LEFTLIST lbText _index;
 		_slotData = [_currentFolder,_slotName] call CBA_fnc_hashGet;
 
-		[_logic,"MoveData", _slotData] call CBA_fnc_hashSet;
+		[_logic,"MoveData", [_slotName, _slotData]] call CBA_fnc_hashSet;
 
 		if ([_slotData] call CBA_fnc_isHash) then {
 			LOADOUTMANAGER_RIGHTTITLE ctrlSetText "Move Folder";
+			LOADOUTMANAGER_RIGHTINSTRUCTIONS ctrlSetText "Select a folder to move the folder to";
+
+			_allFolders = [nil,"getAllFoldersInDirectory", [_mainDirectory, _slotData]] call MAINCLASS;
 		} else {
 			LOADOUTMANAGER_RIGHTTITLE ctrlSetText "Move Loadout";
+			LOADOUTMANAGER_RIGHTINSTRUCTIONS ctrlSetText "Select a folder to move the loadout to";
+
+			_allFolders = [nil,"getAllFoldersInDirectory", [_mainDirectory]] call MAINCLASS;
 		};
 
-		LOADOUTMANAGER_RIGHTINSTRUCTIONS ctrlSetText "Select a folder to move the data to";
+		//-- Display all folders in the right list
+		lbClear LOADOUTMANAGER_RIGHTLIST;
+		_allFolders params ["_names","_folders"];
 
-		_allFolders = [nil,"getAllFoldersInDirectory", _mainDirectory] call MAINCLASS;
+		//-- Add main directory
+		_folders = [_mainDirectory] + _folders;
+		_index = LOADOUTMANAGER_RIGHTLIST lbAdd "Main Directory";
+		LOADOUTMANAGER_RIGHTLIST lbSetPicture [_index, "x\spyderaddons\addons\sup_loadout\data\images\folder.paa"];
+
 		{
-			LOADOUTMANAGER_RIGHTLIST lbAdd _x;
-		} forEach (_allFolders select 0);
-		[_logic,"AllFolders", (_allFolders select 1)] call CBA_fnc_hashSet;
+			_index = LOADOUTMANAGER_RIGHTLIST lbAdd _x;
+			LOADOUTMANAGER_RIGHTLIST lbSetPicture [_index, "x\spyderaddons\addons\sup_loadout\data\images\folder.paa"];
+		} forEach _names;
+
+		[_logic,"AllFolders", _folders] call CBA_fnc_hashSet;
 
 		LOADOUTMANAGER_BLANKBUTTON ctrlShow true;
 		LOADOUTMANAGER_BLANKBUTTON ctrlSetText "Confirm Move";
 		LOADOUTMANAGER_BLANKBUTTON buttonSetAction "[SpyderAddons_loadoutManager,'confirmMove'] call SpyderAddons_fnc_loadoutManager";
+
+		LOADOUTMANAGER_RIGHTLIST lbSetCurSel 0;
+	};
+
+	case "confirmMove": {
+		_data = [_logic,"MoveData"] call CBA_fnc_hashGet;
+		_data params ["_name","_data"];
+		_index = lbCurSel LOADOUTMANAGER_RIGHTLIST;
+
+		//-- Get selected folder
+		_allFolders = [_logic,"AllFolders"] call CBA_fnc_hashGet;
+		_selectedFolder = _allFolders select _index;
+
+		if (_name in (_selectedFolder select 1)) then {
+			LOADOOUTMANAGER_LEFTINSTRUCTIONS ctrlSetText "Data of that name already exists in the selected folder";
+		} else {
+			//-- Delete original data
+			_currentFolder = [_logic,"CurrentFolder"] call CBA_fnc_hashGet;
+			[_currentFolder,_name, nil] call CBA_fnc_hashSet;
+
+			//-- Create replicated data in selected folder
+			[_selectedFolder,_name,_data] call CBA_fnc_hashSet;
+
+			[_logic,"displayFolder", _currentFolder] call MAINCLASS;
+		};
 	};
 
 	case "saveClass": {
-		_name = ctrlText LOADOUTMANAGER_INPUTBOX;
+		private ["_name"];
+
 		_currentFolder = [_logic,"CurrentFolder"] call CBA_fnc_hashGet;
 
-		_loadout = [nil,"getLoadout", player] call MAINCLASS;
-		[_currentFolder,_name,_loadout] call CBA_fnc_hashSet;
+		if (typeName _arguments == "ARRAY") then {
+			_name = ctrlText LOADOUTMANAGER_INPUTBOX;
+		} else {
+			_name = _arguments;
+		};
 
-		[_logic,"displayFolder", _currentFolder] call MAINCLASS;
+		if (_name in (_currentFolder select 1)) then {
+			LOADOOUTMANAGER_LEFTINSTRUCTIONS ctrlSetText "A slot with that name already exists in the current folder";
+		} else {
+			_loadout = [nil,"getLoadout", player] call MAINCLASS;
+			[_currentFolder,_name,_loadout] call CBA_fnc_hashSet;
+
+			[_logic,"displayFolder", _currentFolder] call MAINCLASS;
+		};
 	};
 
 	case "loadClass": {
@@ -564,21 +708,19 @@ switch (_operation) do {
 				"_assignedItems"
 		];
 
-		private ["_index"];
-		_index = 0;
-
 		//-- Weapons
 		{
 			_configPath = configfile >> "CfgWeapons" >> _x;
 			if (isClass _configPath) then {
 				_displayName = getText (_configPath >> "displayName");
-				_tooltip = getText (_configPath >> "tooltip");
 				_picture = getText (_configPath >> "picture");
+				_tooltip = getText (_configPath >> "descriptionShort");
+				_tooltip = [_tooltip, "<br />", ". "] call CBA_fnc_replace;
+				_tooltip = [_tooltip, "<br/>", ". "] call CBA_fnc_replace;
 
-				LOADOUTMANAGER_RIGHTLIST lbAdd _displayName;
-				LOADOUTMANAGER_RIGHTLIST lbSetTooltip [_index,_tooltip];
+				_index = LOADOUTMANAGER_RIGHTLIST lbAdd _displayName;
 				LOADOUTMANAGER_RIGHTLIST lbSetPicture [_index, _picture];
-				_index = _index + 1;
+				LOADOUTMANAGER_RIGHTLIST lbSetTooltip [_index,_tooltip];
 			};
 		} forEach _weapons;
 
@@ -589,13 +731,14 @@ switch (_operation) do {
 			_configPath = configfile >> "CfgWeapons" >> _item;
 			if (isClass _configPath) then {
 				_displayName = getText (_configPath >> "displayName");
-				_tooltip = getText (_configPath >> "tooltip");
 				_picture = getText (_configPath >> "picture");
+				_tooltip = getText (_configPath >> "descriptionShort");
+				_tooltip = [_tooltip, "<br />", ". "] call CBA_fnc_replace;
+				_tooltip = [_tooltip, "<br/>", ". "] call CBA_fnc_replace;
 
-				LOADOUTMANAGER_RIGHTLIST lbAdd _displayName;
-				LOADOUTMANAGER_RIGHTLIST lbSetTooltip [_index,_tooltip];
+				_index = LOADOUTMANAGER_RIGHTLIST lbAdd _displayName;
 				LOADOUTMANAGER_RIGHTLIST lbSetPicture [_index, _picture];
-				_index = _index + 1;
+				LOADOUTMANAGER_RIGHTLIST lbSetTooltip [_index,_tooltip];
 			};
 		} forEach _attachments;
 
@@ -603,39 +746,42 @@ switch (_operation) do {
 		_uniformConfigPath = configfile >> "CfgWeapons" >> _uniform;
 		if (isClass _uniformConfigPath) then {
 			_displayName = getText (_uniformConfigPath >> "displayName");
-			_tooltip = getText (_configPath >> "tooltip");
 			_picture = getText (_uniformConfigPath >> "picture");
+			_tooltip = getText (_uniformConfigPath >> "descriptionShort");
+			_tooltip = [_tooltip, "<br />", ". "] call CBA_fnc_replace;
+			_tooltip = [_tooltip, "<br/>", ". "] call CBA_fnc_replace;
 
-			LOADOUTMANAGER_RIGHTLIST lbAdd _displayName;
-			LOADOUTMANAGER_RIGHTLIST lbSetTooltip [_index,_tooltip];
+			_index = LOADOUTMANAGER_RIGHTLIST lbAdd _displayName;
 			LOADOUTMANAGER_RIGHTLIST lbSetPicture [_index, _picture];
-			_index = _index + 1;
+			LOADOUTMANAGER_RIGHTLIST lbSetTooltip [_index,_tooltip];
 		};
 
 		//-- Vest
 		_vestConfigPath = configfile >> "CfgWeapons" >> _vest;
 		if (isClass _vestConfigPath) then {
 			_displayName = getText (_vestConfigPath >> "displayName");
-			_tooltip = getText (_configPath >> "tooltip");
 			_picture = getText (_vestConfigPath >> "picture");
+			_tooltip = getText (_vestConfigPath >> "descriptionShort");
+			_tooltip = [_tooltip, "<br />", ". "] call CBA_fnc_replace;
+			_tooltip = [_tooltip, "<br/>", ". "] call CBA_fnc_replace;
 
-			LOADOUTMANAGER_RIGHTLIST lbAdd _displayName;
-			LOADOUTMANAGER_RIGHTLIST lbSetTooltip [_index,_tooltip];
+			_index = LOADOUTMANAGER_RIGHTLIST lbAdd _displayName;
 			LOADOUTMANAGER_RIGHTLIST lbSetPicture [_index, _picture];
-			_index = _index + 1;
+			LOADOUTMANAGER_RIGHTLIST lbSetTooltip [_index,_tooltip];
 		};
 
 		//-- Headgear
 		_headgearConfigPath = configfile >> "CfgWeapons" >> _headgear;
 		if (isClass _headgearConfigPath) then {
 			_displayName = getText (_headgearConfigPath >> "displayName");
-			_tooltip = getText (_configPath >> "tooltip");
 			_picture = getText (_headgearConfigPath >> "picture");
+			_tooltip = getText (_headgearConfigPath >> "descriptionShort");
+			_tooltip = [_tooltip, "<br />", ". "] call CBA_fnc_replace;
+			_tooltip = [_tooltip, "<br/>", ". "] call CBA_fnc_replace;
 
-			LOADOUTMANAGER_RIGHTLIST lbAdd _displayName;
-			LOADOUTMANAGER_RIGHTLIST lbSetTooltip [_index,_tooltip];
+			_index = LOADOUTMANAGER_RIGHTLIST lbAdd _displayName;
 			LOADOUTMANAGER_RIGHTLIST lbSetPicture [_index, _picture];
-			_index = _index + 1;
+			LOADOUTMANAGER_RIGHTLIST lbSetTooltip [_index,_tooltip];
 		};
 
 		//-- Goggles
@@ -643,13 +789,14 @@ switch (_operation) do {
 			_gogglesConfigPath = configfile >> "CfgGlasses" >> _goggles;
 			if (isClass _gogglesConfigPath) then {
 				_displayName = getText (_gogglesConfigPath >> "displayName");
-				_tooltip = getText (_configPath >> "tooltip");
 				_picture = getText (_gogglesConfigPath >> "picture");
+				_tooltip = getText (_gogglesConfigPath >> "descriptionShort");
+				_tooltip = [_tooltip, "<br />", ". "] call CBA_fnc_replace;
+				_tooltip = [_tooltip, "<br/>", ". "] call CBA_fnc_replace;
 
-				LOADOUTMANAGER_RIGHTLIST lbAdd _displayName;
-				LOADOUTMANAGER_RIGHTLIST lbSetTooltip [_index,_tooltip];
+				_index = LOADOUTMANAGER_RIGHTLIST lbAdd _displayName;
 				LOADOUTMANAGER_RIGHTLIST lbSetPicture [_index, _picture];
-				_index = _index + 1;
+				LOADOUTMANAGER_RIGHTLIST lbSetTooltip [_index,_tooltip];
 			};
 		};
 
@@ -657,16 +804,17 @@ switch (_operation) do {
 		_backpackConfigPath = configfile >> "CfgVehicles" >> _backpack;
 		if (isClass _backpackConfigPath) then {
 			_displayName = getText (_backpackConfigPath >> "displayName");
-			_tooltip = getText (_configPath >> "tooltip");
 			_picture = getText (_backpackConfigPath >> "picture");
+			_tooltip = getText (_backpackConfigPath >> "descriptionShort");
+			_tooltip = [_tooltip, "<br />", ". "] call CBA_fnc_replace;
+			_tooltip = [_tooltip, "<br/>", ". "] call CBA_fnc_replace;
 
-			LOADOUTMANAGER_RIGHTLIST lbAdd _displayName;
-			LOADOUTMANAGER_RIGHTLIST lbSetTooltip [_index,_tooltip];
+			_index = LOADOUTMANAGER_RIGHTLIST lbAdd _displayName;
 			LOADOUTMANAGER_RIGHTLIST lbSetPicture [_index, _picture];
-			_index = _index + 1;
+			LOADOUTMANAGER_RIGHTLIST lbSetTooltip [_index,_tooltip];
 		};
 
-		//-- Backpack items
+		//-- Items
 		_itemArray = _uniformItems + _vestItems + _backpackItems + _primaryWeaponMagazine + _handgunMagazine + _secondaryWeaponMagazine + _primaryWeaponItems
 		 	+ _handgunItems + _secondaryWeaponItems + _assigneditems;
 		{
@@ -682,15 +830,15 @@ switch (_operation) do {
 				if !(isClass _configPath) then {_configPath = configfile >> "CfgVehicles" >> _item};
 
 				_displayName = getText (_configPath >> "displayName");
-				_tooltip = getText (_configPath >> "tooltip");
 				_picture = getText (_configPath >> "picture");
 				_itemInfo = format ["%1: %2", _displayName, _count];
+				_tooltip = getText (_configPath >> "descriptionShort");
+				_tooltip = [_tooltip, "<br />", ". "] call CBA_fnc_replace;
+				_tooltip = [_tooltip, "<br/>", ". "] call CBA_fnc_replace;
 
-				LOADOUTMANAGER_RIGHTLIST lbAdd _displayName;
-				LOADOUTMANAGER_RIGHTLIST lbSetTooltip [_index,_tooltip];
+				_index = LOADOUTMANAGER_RIGHTLIST lbAdd _displayName;
 				LOADOUTMANAGER_RIGHTLIST lbSetPicture [_index, _picture];
-				_index = _index + 1;
-
+				LOADOUTMANAGER_RIGHTLIST lbSetTooltip [_index,_tooltip];
 			};
 		} forEach _itemArray;
 	};
@@ -767,7 +915,9 @@ switch (_operation) do {
 		{
 			if (_x in (units group player) || {{isPlayer _x} && {side _x == side player}}) then {
 				if (!(_x in _units) && {_x != player}) then {
-					_index = LOADOUTMANAGER_RIGHTLIST lbAdd (name _x);
+					_name = name _x;
+					_index = LOADOUTMANAGER_RIGHTLIST lbAdd format ["%1 (%2)", _name, roleDescription _name];
+					LOADOUTMANAGER_RIGHTLIST lbSetData _name;
 				};
 			};
 		} forEach allUnits;
@@ -788,7 +938,6 @@ switch (_operation) do {
 
 		LOADOUTMANAGER_RIGHTLIST ctrlAddEventHandler ["LBSelChanged","
 			(findDisplay 721 displayCtrl 7224) ctrlEnable true;
-			(findDisplay 721 displayCtrl 7213) ctrlSetText 'Select a unit to transfer the data to';
 		"];
 	};
 
@@ -804,7 +953,7 @@ switch (_operation) do {
 
 	case "confirmTransfer": {
 		_index = lbCurSel LOADOUTMANAGER_RIGHTLIST;
-		_unit = LOADOUTMANAGER_RIGHTLIST lbText _index;
+		_unit = LOADOUTMANAGER_RIGHTLIST lbData _index;
 		_unit = [nil,"getUnitByName", _unit] call MAINCLASS;
 
 		LOADOUTMANAGER_RIGHTLIST ctrlRemoveAllEventHandlers "LBSelChanged";
@@ -825,12 +974,17 @@ switch (_operation) do {
 	};
 
 	case "storeTransferredData": {
+		private ["_loadoutDirectory","_storedData"];
 		_arguments params ["_sender","_data"];
 		_data params ["_slotName","_data"];
 
 		_loadoutDirectory = profileNamespace getVariable "SpyderAddons_Loadouts";
 		_storedData = [_loadoutDirectory,"Transferred_Loadouts"] call CBA_fnc_hashGet;
-		if (isNil "_storedData") then {[_loadoutDirectory,"Transferred_Loadouts", ([] call CBA_fnc_hashCreate)] call CBA_fnc_hashSet};
+		if (isNil "_storedData") then {
+			[_loadoutDirectory,"Transferred_Loadouts", ([] call CBA_fnc_hashCreate)] call CBA_fnc_hashSet;
+			_loadoutDirectory = profileNamespace getVariable "SpyderAddons_Loadouts";
+			_storedData = [_loadoutDirectory,"Transferred_Loadouts"] call CBA_fnc_hashGet;
+		};
 
 		if (_slotName in (_storedData select 1)) then {
 			[_storedData,(format ["%1 (%2)", _slotName, time]), _data] call CBA_fnc_hashSet;

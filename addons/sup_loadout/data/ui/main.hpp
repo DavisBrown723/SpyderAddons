@@ -28,6 +28,7 @@ class Loadout_Manager
 			idc = -1;
 
 			text = "Loadout Manager";
+			moving = 1;
 			x = 0.5 * GUI_GRID_W + GUI_GRID_X;
 			y = -4 * GUI_GRID_H + GUI_GRID_Y;
 			w = 39 * GUI_GRID_W;
@@ -65,7 +66,7 @@ class Loadout_Manager
 			idc = 7212;
 			x = 1 * GUI_GRID_W + GUI_GRID_X;
 			y = -1.15 * GUI_GRID_H + GUI_GRID_Y;
-			w = 16 * GUI_GRID_W;
+			w = 17 * GUI_GRID_W;
 			h = 0.5 * GUI_GRID_H;
 			sizeEx = .6 * GUI_GRID_H;
 		};
@@ -74,7 +75,7 @@ class Loadout_Manager
 			idc = 7213;
 			x = 23 * GUI_GRID_W + GUI_GRID_X;
 			y = -1.15 * GUI_GRID_H + GUI_GRID_Y;
-			w = 16 * GUI_GRID_W;
+			w = 16.5 * GUI_GRID_W;
 			h = 0.5 * GUI_GRID_H;
 			sizeEx = .6 * GUI_GRID_H;
 		};
@@ -155,6 +156,19 @@ class Loadout_Manager
 			sizeEx = .75 * GUI_GRID_H;
 		};
 
+		class LoadoutManager_Move: LoadoutManager_RscButton
+		{
+			idc = 7229;
+			action = "[SpyderAddons_loadoutManager,'moveSlot'] call SpyderAddons_fnc_loadoutManager";
+
+			text = "Move";
+			x = 17.5 * GUI_GRID_W + GUI_GRID_X;
+			y = 8 * GUI_GRID_H + GUI_GRID_Y;
+			w = 5 * GUI_GRID_W;
+			h = 1.25 * GUI_GRID_H;
+			colorBackground[] = {-1,-1,-1,0.8};
+			sizeEx = .75 * GUI_GRID_H;
+		};
 		class LoadoutManager_Transfer: LoadoutManager_RscButton
 		{
 			idc = 7219;
@@ -162,7 +176,7 @@ class Loadout_Manager
 			text = "Transfer";
 			action = "[SpyderAddons_loadoutManager,'transferSlot'] call SpyderAddons_fnc_loadoutManager";
 			x = 17.5 * GUI_GRID_W + GUI_GRID_X;
-			y = 8 * GUI_GRID_H + GUI_GRID_Y;
+			y = 10 * GUI_GRID_H + GUI_GRID_Y;
 			w = 5 * GUI_GRID_W;
 			h = 1.25 * GUI_GRID_H;
 			colorBackground[] = {-1,-1,-1,.8};
@@ -175,7 +189,7 @@ class Loadout_Manager
 
 			text = "Rename";
 			x = 17.5 * GUI_GRID_W + GUI_GRID_X;
-			y = 10 * GUI_GRID_H + GUI_GRID_Y;
+			y = 12 * GUI_GRID_H + GUI_GRID_Y;
 			w = 5 * GUI_GRID_W;
 			h = 1.25 * GUI_GRID_H;
 			colorBackground[] = {-1,-1,-1,.8};
@@ -188,23 +202,10 @@ class Loadout_Manager
 
 			text = "Delete";
 			x = 17.5 * GUI_GRID_W + GUI_GRID_X;
-			y = 12 * GUI_GRID_H + GUI_GRID_Y;
-			w = 5 * GUI_GRID_W;
-			h = 1.25 * GUI_GRID_H;
-			colorBackground[] = {-1,-1,-1,.8};
-			sizeEx = .75 * GUI_GRID_H;
-		};
-		class LoadoutManager_Move: LoadoutManager_RscButton
-		{
-			idc = 7229;
-			action = "[SpyderAddons_loadoutManager,'moveSlot'] call SpyderAddons_fnc_loadoutManager";
-
-			text = "Move";
-			x = 17.5 * GUI_GRID_W + GUI_GRID_X;
 			y = 14 * GUI_GRID_H + GUI_GRID_Y;
 			w = 5 * GUI_GRID_W;
 			h = 1.25 * GUI_GRID_H;
-			colorBackground[] = {-1,-1,-1,0.8};
+			colorBackground[] = {-1,-1,-1,.8};
 			sizeEx = .75 * GUI_GRID_H;
 		};
 
