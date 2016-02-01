@@ -106,6 +106,7 @@ switch (_operation) do {
 
 		//-- Get whitelisted vehicles
 		{
+			//-- UPDATE 1.55: pushBackUnique
 			if !(_x in _vehicles) then {
 				_configPath = configFile >> "CfgVehicles" >>_x;
 
