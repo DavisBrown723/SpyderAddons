@@ -240,6 +240,7 @@ class LoadoutManager_RscCombo
 	font = "PuristaMedium";
 	sizeEx = "(((((safezoneW / safezoneH) min 1.2) / 1.2) / 25) * 1)";
 };
+
 class LoadoutManager_RscListBox
 {
 	access = 0;
@@ -249,13 +250,18 @@ class LoadoutManager_RscListBox
 	rowHeight = 0;
 	colorText[] = {1,1,1,1};
 	colorDisabled[] = {1,1,1,0.25};
-	coloLoadoutManager_Rscrollbar[] ={1,0,0,0};
+	colorRsc_Rscrollbar[] = {1,0,0,0};
 	colorSelect[] = {0,0,0,1};
 	colorSelect2[] = {0,0,0,1};
-	colorSelectBackground[] ={0.95,0.95,0.95,1};
+	colorSelectBackground[] = {0.95,0.95,0.95,1};
 	colorSelectBackground2[] = {1,1,1,0.5};
 	colorBackground[] = {0,0,0,0.3};
-	soundSelect[] = {"\A3\ui_f\data\sound\LoadoutManager_RscListbox\soundSelect",0.09,1};
+	soundSelect[] =
+	{
+		"\A3\ui_f\data\sound\CivInteract_RscListbox\soundSelect",
+		0.09,
+		1
+	};
 	arrowEmpty = "#(argb,8,8,3)color(1,1,1,1)";
 	arrowFull = "#(argb,8,8,3)color(1,1,1,1)";
 	class ScrollBar
@@ -272,6 +278,7 @@ class LoadoutManager_RscListBox
 	class ListScrollBar {
 		color[] = {1,1,1,1};
 		autoScrollEnabled = 1;
+		
 		colorActive[] = {1, 1, 1, 1};
 		colorDisabled[] = {1, 1, 1, 0.3};
 		thumb = "\A3\ui_f\data\gui\cfg\scrollbar\thumb_ca.paa";
@@ -279,7 +286,7 @@ class LoadoutManager_RscListBox
 		arrowEmpty = "\A3\ui_f\data\gui\cfg\scrollbar\arrowEmpty_ca.paa";
 		border = "\A3\ui_f\data\gui\cfg\scrollbar\border_ca.paa";
 	};
-	style = 0x10;
+	style = 16;
 	font = "PuristaMedium";
 	sizeEx = "(((((safezoneW / safezoneH) min 1.2) / 1.2) / 25) * 1)";
 	shadow = 0;
@@ -317,10 +324,11 @@ class LoadoutManager_RscButton
 	colorText[] = {1,1,1,1};
 	fade = 0;
 	colorDisabled[] = {1,1,1,0.25};
-	colorSelect[] = {0,0,0,1};
-	colorSelect2[] = {0,0,0,1};
+	colorSelect[] = {0,0,0,0.5};
+	colorSelect2[] = {0,0,0,0.5};
 	colorBackground[] = {0,0,0,0.5};
 	colorBackgroundDisabled[] = {0,0,0,0.5};
+	colorBackgroundActive[] = {1,1,1,.7};
 	soundEnter[] = {"\A3\ui_f\data\sound\LoadoutManager_RscButton\soundEnter",0.09,1};
 	soundPush[] = {"\A3\ui_f\data\sound\LoadoutManager_RscButton\soundPush",0.09,1};
 	soundClick[] = {"\A3\ui_f\data\sound\LoadoutManager_RscButton\soundClick",0.09,1};
@@ -345,8 +353,7 @@ class LoadoutManager_RscButton
 	offsetPressedX = 0.000;
 	offsetPressedY = 0.002;
 	borderSize = 0;
-	colorBackgroundActive[] = {1,1,1,.7};
-	colorFocused[] = {1,1,1,.5};
+	colorFocused[] = {0,0,0,.5};
 	colorShadow[] = {0,0,0,0};
 	colorBorder[] = {0,0,0,1};
 	style = 2;

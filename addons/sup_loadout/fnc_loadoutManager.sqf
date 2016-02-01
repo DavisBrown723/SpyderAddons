@@ -43,7 +43,7 @@ params [
 #define LOADOUTMANAGER_DISPLAY (findDisplay 721)
 
 #define LOADOUTMANAGER_LEFTTITLE (LOADOUTMANAGER_DISPLAY displayCtrl 7210)
-#define LOADOOUTMANAGER_LEFTINSTRUCTIONS (LOADOUTMANAGER_DISPLAY displayCtrl 7212)
+#define LOADOUTMANAGER_LEFTINSTRUCTIONS (LOADOUTMANAGER_DISPLAY displayCtrl 7212)
 #define LOADOUTMANAGER_LEFTLIST (LOADOUTMANAGER_DISPLAY displayCtrl 7214)
 
 #define LOADOUTMANAGER_RIGHTTITLE (LOADOUTMANAGER_DISPLAY displayCtrl 7211)
@@ -160,7 +160,7 @@ switch (_operation) do {
 		_slotData = [_currentFolder,_slotName] call CBA_fnc_hashGet;
 
 		LOADOUTMANAGER_INPUTBOX ctrlSetText _slotName;
-		LOADOOUTMANAGER_LEFTINSTRUCTIONS ctrlSetText "";
+		LOADOUTMANAGER_LEFTINSTRUCTIONS ctrlSetText "";
 		LOADOUTMANAGER_RIGHTINSTRUCTIONS ctrlSetText "";
 		LOADOUTMANAGER_BLANKBUTTON ctrlShow false;
 
@@ -277,7 +277,7 @@ switch (_operation) do {
 		_currentFolder = [_logic,"CurrentFolder"] call CBA_fnc_hashGet;
 		
 		if (_folderName in (_currentFolder select 1)) then {
-			LOADOOUTMANAGER_LEFTINSTRUCTIONS ctrlSetText "A slot with that name already exists in the current folder";
+			LOADOUTMANAGER_LEFTINSTRUCTIONS ctrlSetText "A slot with that name already exists in the current folder";
 		} else {
 			LOADOUTMANAGER_LEFTLIST lbAdd _folderName;
 			[_currentFolder,_folderName, ([] call CBA_fnc_hashCreate)] call CBA_fnc_hashSet;
@@ -294,11 +294,10 @@ switch (_operation) do {
 		LOADOUTMANAGER_LEFTLIST lbDelete _index;
 		[_currentFolder, _slotName] call CBA_fnc_hashRem;
 
-		[_logic,"displayFolder", _currentFolder] call MAINCLASS;
-
-		lbClear LOADOUTMANAGER_RIGHTLIST;
 		LOADOUTMANAGER_RIGHTTITLE ctrlSetText "";
 		LOADOUTMANAGER_RIGHTINSTRUCTIONS ctrlSetText "";
+
+		[_logic,"displayFolder", _currentFolder] call MAINCLASS;
 	};
 
 	case "displayFolder": {
@@ -315,7 +314,7 @@ switch (_operation) do {
 		//-- Flush list
 		lbClear LOADOUTMANAGER_LEFTLIST;
 		lbClear LOADOUTMANAGER_RIGHTLIST;
-							copyToClipboard str _folder;
+
 		_data = _folder select 2;
 		{
 			_name = _x;
@@ -394,7 +393,7 @@ switch (_operation) do {
 			_result = [nil,"findFolderInDirectory", [_loadoutDirectory,_childFolder]] call MAINCLASS;
 
 			if (_result isEqualTo false) then {
-				LOADOOUTMANAGER_LEFTINSTRUCTIONS ctrlSetText "Error: previous folder could not be found";
+				LOADOUTMANAGER_LEFTINSTRUCTIONS ctrlSetText "Error: previous folder could not be found";
 			};
 		};
 	};
@@ -428,8 +427,6 @@ switch (_operation) do {
 	case "closeFolder": {
 		_currentFolder = [_logic,"CurrentFolder"] call CBA_fnc_hashGet;
 		_parentFolder = [nil,"getParentFolder", _currentFolder] call MAINCLASS;
-
-		copyToClipboard str ([_currentFolder,"DIVIDE",_parentFolder]);
 
 		[_logic,"displayFolder", _parentFolder] call MAINCLASS;
 	};
@@ -514,7 +511,7 @@ switch (_operation) do {
 		_selectedFolder = _allFolders select _index;
 
 		if (_name in (_selectedFolder select 1)) then {
-			LOADOOUTMANAGER_LEFTINSTRUCTIONS ctrlSetText "Data of that name already exists in the selected folder";
+			LOADOUTMANAGER_RIGHTINSTRUCTIONS ctrlSetText "A slot of that name already exists in the selected folder";
 		} else {
 			//-- Delete original data
 			_currentFolder = [_logic,"CurrentFolder"] call CBA_fnc_hashGet;
@@ -525,6 +522,10 @@ switch (_operation) do {
 
 			[_logic,"displayFolder", _currentFolder] call MAINCLASS;
 		};
+
+		LOADOUTMANAGER_RIGHTLIST ctrlAddEventHandler ["LbSelChanged", "
+			LOADOOUTMANAGER_RIGHTINSTRUCTIONS ctrlSetText 'Select a folder to move the data to';
+		"];
 	};
 
 	case "saveClass": {
@@ -539,7 +540,7 @@ switch (_operation) do {
 		};
 
 		if (_name in (_currentFolder select 1)) then {
-			LOADOOUTMANAGER_LEFTINSTRUCTIONS ctrlSetText "A slot with that name already exists in the current folder";
+			LOADOUTMANAGER_LEFTINSTRUCTIONS ctrlSetText "A slot with that name already exists in the current folder";
 		} else {
 			_loadout = [nil,"getLoadout", player] call MAINCLASS;
 			[_currentFolder,_name,_loadout] call CBA_fnc_hashSet;
@@ -850,10 +851,6 @@ switch (_operation) do {
 
 		_slotData = [_currentFolder,_slotName] call CBA_fnc_hashGet;
 
-		if ([_slotData] call CBA_fnc_isHash) then {
-			hint "You must select a class to load on respawn";
-		};
-
 		//-- Remove previous eventhandler if one exists
 		if (!isNil {[MOD(loadoutManager),"LoadOnRespawn_EHIndex"] call CBA_fnc_hashGet}) then {
 			_index = [MOD(loadoutManager),"LoadOnRespawn_EHIndex"] call CBA_fnc_hashGet;
@@ -873,6 +870,8 @@ switch (_operation) do {
 
 		[MOD(loadoutManager),"LoadOnRespawn_EHIndex", _index] call CBA_fnc_hashSet;
 		[MOD(loadoutManager),"LoadOnRespawn_Loadout", _slotData] call CBA_fnc_hashSet;
+
+		LOADOUTMANAGER_LEFTINSTRUCTIONS ctrlSetText "Class will load on respawn";
 	};
 	
 	case "openArsenal": {
@@ -914,13 +913,15 @@ switch (_operation) do {
 		_units = [];
 		{
 			if (_x in (units group player) || {{isPlayer _x} && {side _x == side player}}) then {
-				if (!(_x in _units) && {_x != player}) then {
+				if (!(_x in _units) && {_x != player} && {alive _x}) then {
 					_name = name _x;
-					_index = LOADOUTMANAGER_RIGHTLIST lbAdd format ["%1 (%2)", _name, roleDescription _name];
-					LOADOUTMANAGER_RIGHTLIST lbSetData _name;
+					_role = getText (configfile >> "CfgVehicles" >> (typeOf _x) >> "displayName");
+
+					_index = LOADOUTMANAGER_RIGHTLIST lbAdd (format ["%1 (%2)", _name, _role]);
+					LOADOUTMANAGER_RIGHTLIST lbSetData [_index,_name];
 				};
 			};
-		} forEach allUnits;
+		} forEach ((units group player) + allPlayers);
 
 		//-- Enable confirm transfer button right list texts
 		if ([_data] call CBA_fnc_isHash) then {
@@ -932,13 +933,14 @@ switch (_operation) do {
 		};
 
 		LOADOUTMANAGER_BLANKBUTTON ctrlShow true;
-		LOADOUTMANAGER_BLANKBUTTON ctrlEnable false;
 		LOADOUTMANAGER_BLANKBUTTON ctrlSetText "Confirm Transfer";
 		LOADOUTMANAGER_BLANKBUTTON buttonSetAction "[SpyderAddons_loadoutManager,'confirmTransfer'] call SpyderAddons_fnc_loadoutManager";
 
-		LOADOUTMANAGER_RIGHTLIST ctrlAddEventHandler ["LBSelChanged","
-			(findDisplay 721 displayCtrl 7224) ctrlEnable true;
-		"];
+		if (lbSize LOADOUTMANAGER_RIGHTLIST > 0) then {
+			LOADOUTMANAGER_RIGHTLIST lbSetCurSel 0;
+		} else {
+			LOADOUTMANAGER_RIGHTINSTRUCTIONS ctrlSetText "There are no units to transfer to";
+		};
 	};
 
 	case "getUnitByName": {
@@ -975,17 +977,26 @@ switch (_operation) do {
 
 	case "storeTransferredData": {
 		private ["_loadoutDirectory","_storedData"];
-		_arguments params ["_sender","_data"];
-		_data params ["_slotName","_data"];
+		_arguments params ["_sender","_transferData"];
+		_transferData params ["_slotName","_data"];
 
-		_loadoutDirectory = profileNamespace getVariable "SpyderAddons_Loadouts";
-		_storedData = [_loadoutDirectory,"Transferred_Loadouts"] call CBA_fnc_hashGet;
-		if (isNil "_storedData") then {
-			[_loadoutDirectory,"Transferred_Loadouts", ([] call CBA_fnc_hashCreate)] call CBA_fnc_hashSet;
-			_loadoutDirectory = profileNamespace getVariable "SpyderAddons_Loadouts";
-			_storedData = [_loadoutDirectory,"Transferred_Loadouts"] call CBA_fnc_hashGet;
+		//-- Notify player
+		if ([_data] call CBA_fnc_isHash) then {
+			[format ["%1 has sent you a folder titled %2", _sender, _slotName]] spawn SpyderAddons_fnc_displayNotification;
+		} else {
+			[format ["%1 has sent you a loadout titled %2", _sender, _slotName]] spawn SpyderAddons_fnc_displayNotification;
 		};
 
+		//-- Create Transferred_Data Folder if it doesn't exist
+		_loadoutDirectory = profileNamespace getVariable "SpyderAddons_Loadouts";
+		_storedData = [_loadoutDirectory,"Transferred_Data"] call CBA_fnc_hashGet;
+		if (isNil "_storedData") then {
+			[_loadoutDirectory,"Transferred_Data", ([] call CBA_fnc_hashCreate)] call CBA_fnc_hashSet;
+			_loadoutDirectory = profileNamespace getVariable "SpyderAddons_Loadouts";
+			_storedData = [_loadoutDirectory,"Transferred_Data"] call CBA_fnc_hashGet;
+		};
+
+		//-- Store data
 		if (_slotName in (_storedData select 1)) then {
 			[_storedData,(format ["%1 (%2)", _slotName, time]), _data] call CBA_fnc_hashSet;
 		} else {
@@ -994,12 +1005,6 @@ switch (_operation) do {
 
 		if ([MOD(loadoutManager),"CurrentFolder"] call CBA_fnc_hashGet isEqualTo _loadoutDirectory) then {
 			[MOD(loadoutManager),"displayFolder", _loadoutDirectory] call MAINCLASS;
-		};
-
-		if ([_data] call CBA_fnc_isHash) then {
-			[format ["%1 has sent you a folder titled %2", _sender, _slotName]] call SpyderAddons_fnc_displayNotification;
-		} else {
-			[format ["%1 has sent you a loadout titled %2", _sender, _slotName]] call SpyderAddons_fnc_displayNotification;
 		};
 	};
 };

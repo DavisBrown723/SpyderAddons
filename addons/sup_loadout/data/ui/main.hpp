@@ -30,7 +30,7 @@ class Loadout_Manager
 			text = "Loadout Manager";
 			moving = 1;
 			x = 0.5 * GUI_GRID_W + GUI_GRID_X;
-			y = -4 * GUI_GRID_H + GUI_GRID_Y;
+			y = -3.97 * GUI_GRID_H + GUI_GRID_Y;
 			w = 39 * GUI_GRID_W;
 			h = 1 * GUI_GRID_H;
 			colorBackground[] = {0.788,0.443,0.157,0.65};
@@ -109,10 +109,10 @@ class Loadout_Manager
 		{
 			idc = 7214;
 
-			x = 1 * GUI_GRID_W + GUI_GRID_X;
-			y = -.5 * GUI_GRID_H + GUI_GRID_Y;
-			w = 16 * GUI_GRID_W;
-			h = 25 * GUI_GRID_H;
+			x = 1.041 * GUI_GRID_W + GUI_GRID_X;
+			y = -0.4 * GUI_GRID_H + GUI_GRID_Y;
+			w = 15.86 * GUI_GRID_W;
+			h = 24.7 * GUI_GRID_H;
 			colorBackground[] = {0.302,0.302,0.302,0.5};
 		};
 
@@ -254,10 +254,10 @@ class Loadout_Manager
 			idc = 7222;
 			rowHeight = 0.07;
 
-			x = 23 * GUI_GRID_W + GUI_GRID_X;
-			y = -.5 * GUI_GRID_H + GUI_GRID_Y;
-			w = 16 * GUI_GRID_W;
-			h = 25 * GUI_GRID_H;
+			x = 23.1 * GUI_GRID_W + GUI_GRID_X;
+			y = -0.4 * GUI_GRID_H + GUI_GRID_Y;
+			w = 15.86 * GUI_GRID_W;
+			h = 24.75 * GUI_GRID_H;
 			colorBackground[] = {0.302,0.302,0.302,0.5};
 		};
 
