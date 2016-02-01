@@ -16,9 +16,9 @@ class CfgFunctions {
 				file = "\x\spyderaddons\addons\civ_interact\fnc_civInteractInit.sqf";
 				recompile = RECOMPILE;
 			};
-			class responseHandler {
-				description = "Main handler for civilian responses";
-				file = "\x\spyderaddons\addons\civ_interact\fnc_responseHandler.sqf";
+			class questionHandler {
+				description = "Main handler for questions";
+				file = "\x\spyderaddons\addons\civ_interact\fnc_questionHandler.sqf";
 				recompile = RECOMPILE;
 			};
 		};

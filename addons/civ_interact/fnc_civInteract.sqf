@@ -38,6 +38,7 @@ private ["_result"];
 
 //-- Define function shortcuts
 #define MAINCLASS SpyderAddons_fnc_civInteract
+#define QUESTIONHANDLER SpyderAddons_fnc_questionHandler
 
 //-- Define control ID's
 #define CIVINTERACT_DISPLAY 		(findDisplay 923)
@@ -45,6 +46,7 @@ private ["_result"];
 #define CIVINTERACT_DETAIN 		(CIVINTERACT_DISPLAY displayCtrl 92311)
 #define CIVINTERACT_QUESTIONLIST 		(CIVINTERACT_DISPLAY displayCtrl 9234)
 #define CIVINTERACT_RESPONSELIST 		(CIVINTERACT_DISPLAY displayCtrl 9239)
+
 #define CIVINTERACT_INVENTORYCONTROLS 	[9240,9241,9243,9244]
 #define CIVINTERACT_SEARCHBUTTON 	(CIVINTERACT_DISPLAY displayCtrl 9242)
 #define CIVINTERACT_GEARLIST 		(CIVINTERACT_DISPLAY displayCtrl 9244)
@@ -188,8 +190,8 @@ switch (_operation) do {
 		CIVINTERACT_QUESTIONLIST ctrlAddEventHandler ["LBSelChanged","
 			params ['_control','_index'];
 			_question = _control lbData _index;
+			[SpyderAddons_civInteractHandler,_question] call SpyderAddons_fnc_questionHandler;
 		"];
-//[SpyderAddons_civInteractHandler,_question] call SpyderAddons_fnc_responseHandler;
 	};
 
 	//-- Unload
@@ -318,6 +320,136 @@ switch (_operation) do {
 		{if (_civ getvariable [_x,false]) exitwith {_role = _x}} foreach ["townelder","major","priest","muezzin","politician"];
 
 		_result = ([_role] call CBA_fnc_capitalize);
+	};
+
+	case "isIrritated": {
+		_arguments params ["_hostile","_asked","_civ"];
+
+		//-- Raise hostility if civilian is irritated
+		if !(_hostile) then {
+			if (floor random 100 < (3 * _asked)) then {
+				[_logic,"UpdateHostility", [_civ, 10]] call MAINCLASS;
+				if (floor random 70 < (_asked * 5)) then {
+					_response1 = format [" *%1 grows visibly annoyed*", name _civ];
+					_response2 = format [" *%1 appears uninterested in the conversation*", name _civ];
+					_response3 = " Please leave me alone now.";
+					_response4 = " I do not want to talk to you anymore.";
+					_response5 = " Can I go now?";
+					_response = [_response1, _response2, _response3, _response4, _response5] call BIS_fnc_selectRandom;
+					CIVINTERACT_RESPONSELIST ctrlSetText ((ctrlText CIVINTERACT_RESPONSELIST) + _response);
+				};
+			};
+		} else {
+			if (floor random 100 < (8 * _asked)) then {
+				[_logic,"UpdateHostility", [_civ, 10]] call MAINCLASS;
+				if (floor random 70 < (_asked * 5)) then {
+					_response1 = format [" *%1 looks anxious*", name _civ];
+					_response2 = format [" *%1 looks distracted*", name _civ];
+					_response3 = " Are you done yet?";
+					_response4 = " You ask too many questions.";
+					_response5 = " You need to leave now.";
+					_response = [_response1, _response2, _response3,_response4, _response5] call BIS_fnc_selectRandom;
+					CIVINTERACT_RESPONSELIST ctrlSetText ((ctrlText CIVINTERACT_RESPONSELIST) + _response);
+				};
+			};
+		};
+	};
+
+	case "UpdateHostility": {
+		//-- Change local civilian hostility
+		private ["_townHostilityValue"];
+		_arguments params ["_civ","_value"];
+		if (count _arguments > 2) then {_townHostilityValue = _arguments select 2};
+
+		if (isNil "_townHostilityValue") then {
+			if (isNil {[SpyderAddons_civInteract_Logic, "CurrentCivData"] call ALiVE_fnc_hashGet}) exitWith {};
+
+			_civData = [SpyderAddons_civInteract_Logic, "CurrentCivData"] call ALiVE_fnc_hashGet;
+			_civInfo = ([_civData, "CivInfo", _civInfo] call ALiVE_fnc_hashGet) select 0;
+			_civInfo params ["_homePos","_individualHostility","_townHostility"];
+
+			_individualHostility = _individualHostility + _value;
+			_townHostilityValue = floor random 4;
+			_townHostility = _townHostility + _townHostilityValue;
+			[_civData, "CivInfo", [[_homePos, _individualHostility, _townHostility]]] call ALiVE_fnc_hashSet;
+			[SpyderAddons_civInteract_Logic, "CurrentCivData", _civData] call ALiVE_fnc_hashSet;
+		};
+
+		//-- Change civilian posture globally
+		if (isNil "_townHostilityValue") exitWith {["UpdateHostility", [_civ,_value,_townHostilityValue]] remoteExecCall ["SpyderAddons_fnc_civInteract",2]};
+
+		_civID = _civ getVariable ["agentID", ""];
+		if (_civID != "") then {
+			_civProfile = [ALIVE_agentHandler, "getAgent", _civID] call ALIVE_fnc_agentHandler;
+			_clusterID = _civProfile select 2 select 9;
+
+			//-- Set town hostility
+			_cluster = [ALIVE_clusterHandler, "getCluster", _clusterID] call ALIVE_fnc_clusterHandler;
+			_clusterHostility = [_cluster, "posture"] call ALIVE_fnc_hashGet;
+			[_cluster, "posture", (_clusterHostility + _townHostilityValue)] call ALIVE_fnc_hashSet;
+
+			//-- Set individual hostility
+			_hostility = (_civProfile select 2) select 12;
+			_hostility = _hostility + _value;
+			[_civProfile, "posture", _hostility] call ALiVE_fnc_hashSet;
+		};
+	};
+
+	case "getActivePlan": {
+		_activeCommand = _arguments;
+
+		switch (toLower _activeCommand) do {
+			case "alive_fnc_cc_suicide": {
+				_activePlan1 = "carrying out a suicide bombing";
+				_activePlan2 = "strapping himself with explosives";
+				_activePlan3 = "planning a bombing";
+				_activePlan4 = "getting ready to bomb your forces";
+				_activePlan5 = "about to bomb your forces";
+				_result = [_activePlan1,_activePlan2,_activePlan3,_activePlan4,_activePlan5] call BIS_fnc_selectRandom;
+			};
+			case "alive_fnc_cc_suicidetarget": {
+				_activePlan1 = "planning on carrying out a suicide bombing";
+				_activePlan2 = "strapping himself with explosives";
+				_activePlan3 = "planning a bombing";
+				_activePlan4 = "getting ready to bomb your forces";
+				_activePlan5 = "about to bomb your forces";
+				_result = [_activePlan1,_activePlan2,_activePlan3,_activePlan4,_activePlan5] call BIS_fnc_selectRandom;
+			};
+			case "alive_fnc_cc_rogue": {
+				_activePlan1 = "storing a weapon in his house";
+				_activePlan2 = "stockpiling weapons";
+				_activePlan3 = "planning on shooting a patrol";
+				_activePlan4 = "looking for patrols to shoot at";
+				_activePlan5 = "paid to shoot at your forces";
+				_result = [_activePlan1,_activePlan2,_activePlan3,_activePlan4,_activePlan5] call BIS_fnc_selectRandom;
+			};
+			case "alive_fnc_cc_roguetarget": {
+				_activePlan1 = "storing a weapon in his house";
+				_activePlan2 = "stockpiling weapons";
+				_activePlan3 = "planning on shooting a patrol";
+				_activePlan4 = "looking for somebody to shoot at";
+				_activePlan5 = "paid to shoot at your forces";
+				_result = [_activePlan1,_activePlan2,_activePlan3,_activePlan4,_activePlan5] call BIS_fnc_selectRandom;
+			};
+			case "alive_fnc_cc_sabotage": {
+				_activePlan1 = "planning on sabotaging a building";
+				_activePlan2 = "blowing up a building";
+				_activePlan3 = "planting explosives nearby";
+				_activePlan4 = "getting ready to plant explosives";
+				_activePlan5 = "paid to shoot at your forces";
+				_result = [_activePlan1,_activePlan2,_activePlan3,_activePlan4,_activePlan5] call BIS_fnc_selectRandom;
+			};
+			case "alive_fnc_cc_getweapons": {
+				_activePlan1 = "retrieving weapons from a nearby weapons depot";
+				_activePlan2 = "planning on joining the insurgents";
+				_activePlan3 = "getting ready to go to a nearby insurgent recruitment center";
+				_activePlan4 = "getting ready to retrieve weapons from a cache";
+				_activePlan5 = "paid to attack your forces";
+				_activePlan6 = "forced to join the insurgents";
+				_activePlan7 = "preparing to attack your forces";
+				_result = [_activePlan1,_activePlan2,_activePlan3,_activePlan4,_activePlan5] call BIS_fnc_selectRandom;
+			};
+		};
 	};
 
 	case "toggleSearchMenu": {
