@@ -54,11 +54,6 @@ class CfgFunctions {
 				file = "\x\spyderaddons\addons\x_lib\functions\misc\isFaction.sqf";
 				recompile = RECOMPILE;
 			};
-			class displayNotification {
-				description = "Displays a notification that slides into view";
-				file = "\x\spyderaddons\addons\x_lib\functions\misc\displayNotification.sqf";
-				recompile = RECOMPILE;
-			};
 			
 			//////-- Objectives --//////
 			class createObjective {
@@ -97,6 +92,11 @@ class CfgFunctions {
 			};
 
 			//////-- UI --//////
+			class displayNotification {
+				description = "Displays a notification that slides into view";
+				file = "\x\spyderaddons\addons\x_lib\functions\ui\displayNotification.sqf";
+				recompile = RECOMPILE;
+			};
 			class openRequiresAlive {
 				description = "Opens the menu notifying the user that a module being used requires ALiVE to run";
 				file = "\x\spyderaddons\addons\x_lib\functions\ui\openRequiresAlive.sqf";

@@ -16,7 +16,6 @@ logistics
 
 misc
 
-	displayNotification
 	getFactionMostPlayers
 	getModuleArray
 	getNearAgents
@@ -39,4 +38,5 @@ profiles
 
 ui
 
+	displayNotification
 	openRequiresAlive
