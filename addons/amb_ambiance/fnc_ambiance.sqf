@@ -69,6 +69,8 @@ switch (_operation) do {
 		_enemyChance = call compile (_logic getVariable "EnemyChance");
 		_enemyClasses = [_logic getVariable "EnemyClasses"] call SpyderAddons_fnc_getModuleArray;
 
+		if (!isNil QMOD(ambianceHandler)) exitWith {};
+
 
 		//-- Make markers invisible
 		{_x setMarkerAlpha 0} forEach (_whitelistMarkers + _blacklistMarkers);
@@ -224,9 +226,22 @@ switch (_operation) do {
 	};
 
 	case "Deactivate": {
+		private ["_group"];
 		_logic setVariable ["Activated", false];
 
-		{deleteVehicle _x} forEach (_logic getVariable "Objects");
+		{
+			if (_x isKindOf "Man") then {
+				_group = group _x;		
+			};
+
+			deleteVehicle _x;
+
+			if (!isNil "_group" && {count (units _group) == 0}) then {
+				deleteGroup _group;
+			};
+
+			_group = nil;
+		} forEach (_logic getVariable "Objects");
 		_logic setVariable ["Objects", []];
 
 		if (_logic getVariable "Debug") then {
@@ -303,20 +318,17 @@ switch (_operation) do {
 		_enemyChance = _logic getVariable "EnemyChance";
 		_enemyClasses = _logic getVariable "EnemyClasses";
 		_objects = _logic getVariable "Objects";
+		_group = createGroup civilian;
 
 		//-- Check if vehicle is occupied by civs or enemies
 		if ((floor random 100 <= _enemyChance) and (_enemies)) then {
 			_unitClasses = _enemyClasses;
 			_enemyVehicle = true;
 			_driver = _unitClasses call BIS_fnc_selectRandom;
-			_sideNum = getNumber (configFile >> "CfgVehicles" >> _driver >> "side");
-			_side = [_logic,"getSide", _sideNum] call SpyderAddons_fnc_ambiance;
-			_group = createGroup _side;
 		} else {
 			_unitClasses = _civClasses;
 			_enemyVehicle = false;
 			_driver = _unitClasses call BIS_fnc_selectRandom;
-			_group = createGroup civilian;
 		};
 
 		//-- Create vehicle
@@ -358,8 +370,12 @@ switch (_operation) do {
 		if (_enemyVehicle) then {
 			[_group] spawn {
 				params ["_group"];
-				waitUntil {sleep 2;{_x distance2D (leader _group) < 50} count allPlayers > 0};
-				[nil,"selectResponse", _group] call SpyderAddons_fnc_ambiance;
+				waitUntil {sleep 2;{_x distance2D (leader _group) < 50} count allPlayers > 0 || isNull (leader _group)};
+				if !(isNull (leader _group)) then {
+					[SpyderAddons_ambianceHandler,"selectAction", _group] call SpyderAddons_fnc_ambiance;
+				} else {
+					deleteGroup _group;
+				};
 			};
 		};
 
@@ -394,7 +410,7 @@ switch (_operation) do {
 		};
 	};
 
-	case "selectResponse": {
+	case "selectAction": {
 		_group = _arguments;
 		if (_group getVariable "Decided") exitWith {};
 
@@ -404,9 +420,15 @@ switch (_operation) do {
 		_vehicle = vehicle _leader;
 		_group setVariable ["Decided", true];
 
+		//-- Make group hostile
+		_sideNum = getNumber (configFile >> "CfgVehicles" >> (typeOf _leader) >> "side");
+		_side = [_logic,"getSide", _sideNum] call SpyderAddons_fnc_ambiance;
+		_group = createGroup _side;
+		{[_x] joinSilent _group} forEach units group _leader;
+
 		switch true do {
 			case (_action > 4): {
-				_retreatPos = [_vehicle, 300, ((getDir _vehicle) - 180)] call BIS_fnc_relPos;	//-- *UPDATE 1.55* _retreatPos = _vehicle getRelPos [300, ((getDir _vehicle) - 180)];
+				_retreatPos = [_vehicle, 400, ((getDir _vehicle) - 180)] call BIS_fnc_relPos;	//-- *UPDATE 1.55* _retreatPos = _vehicle getRelPos [300, ((getDir _vehicle) - 180)];
 				(driver _vehicle) doMove _retreatPos;
 				_group setCombatMode "BLUE";
 				(driver _vehicle) forceSpeed 70;
@@ -420,13 +442,14 @@ switch (_operation) do {
 				} forEach allPlayers; 
 
 				_target = _targets call BIS_fnc_selectRandom;
+				(driver _vehicle) forceSpeed 60;
 
 				[_vehicle,_target] spawn {
 					_this params ["_vehicle","_target"];
 					waitUntil {sleep 1;(_vehicle distance _target < 15)};
 					"Bo_Mk82" createVehicle (getPos _vehicle);
 				};
-				(driver _vehicle) forceSpeed 60;
+
 				while {(_vehicle distance _target >= 4) && (alive _target)} do {
 					sleep 1; 
 					(driver _vehicle) domove getposATL _target;
