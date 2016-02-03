@@ -1,3 +1,6 @@
+#include <\x\spyderaddons\addons\sup_loadout\script_component.hpp>
+SCRIPT(detection);
+////////////////////-- This file is ugly, needs fixed/removed (remove MAINLOGIC pls..)
 /* ----------------------------------------------------------------------------
 Function: SpyderAddons_fnc_detection
 
@@ -76,7 +79,8 @@ switch (_operation) do {
 		_incognitoDetectionInfantry = call compile (_logic getVariable "IncognitoDetectionInfantry");		//-- Scalar
 		_incognitoDetectionVehicle = call compile (_logic getVariable "IncognitoDetectionVehicle");		//-- Scalar
 
-		
+		if (!isNil "SpyderAddons_milDetection_logic") exitWith {};
+
 		//-- Create client-side object to save settings
 		MAIN_LOGIC = [] call CBA_fnc_hashCreate;
 		[MAIN_LOGIC,"Debug",_debug] call CBA_fnc_hashSet;
