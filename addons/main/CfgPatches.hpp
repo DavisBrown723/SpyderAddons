@@ -1,5 +1,5 @@
 class CfgPatches {
-	class PREFIX {
+	class ADDON {
 		units[] = {};
 		weapons[] = {};
 		requiredVersion = 1.50;
