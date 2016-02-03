@@ -72,18 +72,20 @@ switch (_operation) do {
 	case "init": {
 		_syncedUnits = _arguments;
 
-		//-- Get module parameters
-		_transfer = call compile (_logic getVariable "Transfer");
-		_arsenal = call compile (_logic getVariable "Arsenal");
+		if (isNil QMOD(loadoutManager)) then {
+			//-- Get module parameters
+			_transfer = call compile (_logic getVariable "Transfer");
+			_arsenal = call compile (_logic getVariable "Arsenal");
 
-		{
-			if (typeName _x == "OBJECT") then {
-				_x setVariable ["LoadoutManager_Settings", [_arsenal,_transfer]];
-				_x addAction ["Access Loadout Manager", {[nil,"open", _this] call SpyderAddons_fnc_loadoutManager}];
-			};
-		} forEach _syncedUnits;
+			{
+				if (typeName _x == "OBJECT") then {
+					_x setVariable ["LoadoutManager_Settings", [_arsenal,_transfer]];
+					_x addAction ["Access Loadout Manager", {[nil,"open", _this] call SpyderAddons_fnc_loadoutManager}];
+				};
+			} forEach _syncedUnits;
 
-		MOD(loadoutManager) = [] call CBA_fnc_hashCreate;
+			MOD(loadoutManager) = [] call CBA_fnc_hashCreate;
+		};
 	};
 	
 	case "open": {
@@ -539,8 +541,8 @@ switch (_operation) do {
 			_name = _arguments;
 		};
 
-		if (_name in (_currentFolder select 1)) then {
-			LOADOUTMANAGER_LEFTINSTRUCTIONS ctrlSetText "A slot with that name already exists in the current folder";
+		if (_name in (_currentFolder select 1) && {[([_currentFolder,_name] call CBA_fnc_hashGet)] call CBA_fnc_isHash}) then {
+			LOADOUTMANAGER_LEFTINSTRUCTIONS ctrlSetText "A folder with that name already exists in the current folder";
 		} else {
 			_loadout = [nil,"getLoadout", player] call MAINCLASS;
 			[_currentFolder,_name,_loadout] call CBA_fnc_hashSet;
@@ -586,15 +588,18 @@ switch (_operation) do {
 		];
 
 		//-- Add Gear
-		_unit addUniform _uniform;
+		_unit forceAddUniform _uniform;
 		_unit addVest _vest;
 		_unit addBackpack _backpack;
 		_unit addHeadgear _headgear;
 		_unit addGoggles _goggles;
 
-		{_unit addItemToBackpack _x} forEach _backpackitems;
+		//-- Remove preset items from containers
+		{_unit removeItem _x} forEach ((uniformItems _unit) + (vestItems _unit) + (backpackItems _unit));
+
 		{_unit addItemToUniform _x} forEach _uniformitems;
 		{_unit addItemToVest _x} forEach _vestitems;
+		{_unit addItemToBackpack _x} forEach _backpackitems;
 
 		{_unit addMagazine _x} forEach _primaryWeaponMagazine;
 		{_unit addMagazine _x} forEach _handgunMagazine;
@@ -632,11 +637,10 @@ switch (_operation) do {
 		_goggles = goggles _unit;
 
 		_uniformItems = uniformItems _unit;
-		_vestItems = uniformItems _unit;
+		_vestItems = vestItems _unit;
 		_backpackItems = backpackItems _unit;
 
 		_weapons = weapons _unit;
-
 		_primaryweaponItems = primaryWeaponItems _unit;
 		_primaryWeaponMagazine = primaryWeaponMagazine _unit;
 
@@ -714,14 +718,17 @@ switch (_operation) do {
 			_configPath = configfile >> "CfgWeapons" >> _x;
 			if (isClass _configPath) then {
 				_displayName = getText (_configPath >> "displayName");
-				_picture = getText (_configPath >> "picture");
-				_tooltip = getText (_configPath >> "descriptionShort");
-				_tooltip = [_tooltip, "<br />", ". "] call CBA_fnc_replace;
-				_tooltip = [_tooltip, "<br/>", ". "] call CBA_fnc_replace;
 
-				_index = LOADOUTMANAGER_RIGHTLIST lbAdd _displayName;
-				LOADOUTMANAGER_RIGHTLIST lbSetPicture [_index, _picture];
-				LOADOUTMANAGER_RIGHTLIST lbSetTooltip [_index,_tooltip];
+				if (_displayName != "") then {
+					_picture = getText (_configPath >> "picture");
+					_tooltip = getText (_configPath >> "descriptionShort");
+					_tooltip = [_tooltip, "<br />", ". "] call CBA_fnc_replace;
+					_tooltip = [_tooltip, "<br/>", ". "] call CBA_fnc_replace;
+
+					_index = LOADOUTMANAGER_RIGHTLIST lbAdd _displayName;
+					LOADOUTMANAGER_RIGHTLIST lbSetPicture [_index, _picture];
+					LOADOUTMANAGER_RIGHTLIST lbSetTooltip [_index,_tooltip];
+				};
 			};
 		} forEach _weapons;
 
@@ -732,14 +739,17 @@ switch (_operation) do {
 			_configPath = configfile >> "CfgWeapons" >> _item;
 			if (isClass _configPath) then {
 				_displayName = getText (_configPath >> "displayName");
-				_picture = getText (_configPath >> "picture");
-				_tooltip = getText (_configPath >> "descriptionShort");
-				_tooltip = [_tooltip, "<br />", ". "] call CBA_fnc_replace;
-				_tooltip = [_tooltip, "<br/>", ". "] call CBA_fnc_replace;
 
-				_index = LOADOUTMANAGER_RIGHTLIST lbAdd _displayName;
-				LOADOUTMANAGER_RIGHTLIST lbSetPicture [_index, _picture];
-				LOADOUTMANAGER_RIGHTLIST lbSetTooltip [_index,_tooltip];
+				if (_displayName != "") then {
+					_picture = getText (_configPath >> "picture");
+					_tooltip = getText (_configPath >> "descriptionShort");
+					_tooltip = [_tooltip, "<br />", ". "] call CBA_fnc_replace;
+					_tooltip = [_tooltip, "<br/>", ". "] call CBA_fnc_replace;
+
+					_index = LOADOUTMANAGER_RIGHTLIST lbAdd _displayName;
+					LOADOUTMANAGER_RIGHTLIST lbSetPicture [_index, _picture];
+					LOADOUTMANAGER_RIGHTLIST lbSetTooltip [_index,_tooltip];
+				};
 			};
 		} forEach _attachments;
 
@@ -747,51 +757,10 @@ switch (_operation) do {
 		_uniformConfigPath = configfile >> "CfgWeapons" >> _uniform;
 		if (isClass _uniformConfigPath) then {
 			_displayName = getText (_uniformConfigPath >> "displayName");
-			_picture = getText (_uniformConfigPath >> "picture");
-			_tooltip = getText (_uniformConfigPath >> "descriptionShort");
-			_tooltip = [_tooltip, "<br />", ". "] call CBA_fnc_replace;
-			_tooltip = [_tooltip, "<br/>", ". "] call CBA_fnc_replace;
 
-			_index = LOADOUTMANAGER_RIGHTLIST lbAdd _displayName;
-			LOADOUTMANAGER_RIGHTLIST lbSetPicture [_index, _picture];
-			LOADOUTMANAGER_RIGHTLIST lbSetTooltip [_index,_tooltip];
-		};
-
-		//-- Vest
-		_vestConfigPath = configfile >> "CfgWeapons" >> _vest;
-		if (isClass _vestConfigPath) then {
-			_displayName = getText (_vestConfigPath >> "displayName");
-			_picture = getText (_vestConfigPath >> "picture");
-			_tooltip = getText (_vestConfigPath >> "descriptionShort");
-			_tooltip = [_tooltip, "<br />", ". "] call CBA_fnc_replace;
-			_tooltip = [_tooltip, "<br/>", ". "] call CBA_fnc_replace;
-
-			_index = LOADOUTMANAGER_RIGHTLIST lbAdd _displayName;
-			LOADOUTMANAGER_RIGHTLIST lbSetPicture [_index, _picture];
-			LOADOUTMANAGER_RIGHTLIST lbSetTooltip [_index,_tooltip];
-		};
-
-		//-- Headgear
-		_headgearConfigPath = configfile >> "CfgWeapons" >> _headgear;
-		if (isClass _headgearConfigPath) then {
-			_displayName = getText (_headgearConfigPath >> "displayName");
-			_picture = getText (_headgearConfigPath >> "picture");
-			_tooltip = getText (_headgearConfigPath >> "descriptionShort");
-			_tooltip = [_tooltip, "<br />", ". "] call CBA_fnc_replace;
-			_tooltip = [_tooltip, "<br/>", ". "] call CBA_fnc_replace;
-
-			_index = LOADOUTMANAGER_RIGHTLIST lbAdd _displayName;
-			LOADOUTMANAGER_RIGHTLIST lbSetPicture [_index, _picture];
-			LOADOUTMANAGER_RIGHTLIST lbSetTooltip [_index,_tooltip];
-		};
-
-		//-- Goggles
-		if (_goggles != "") then {
-			_gogglesConfigPath = configfile >> "CfgGlasses" >> _goggles;
-			if (isClass _gogglesConfigPath) then {
-				_displayName = getText (_gogglesConfigPath >> "displayName");
-				_picture = getText (_gogglesConfigPath >> "picture");
-				_tooltip = getText (_gogglesConfigPath >> "descriptionShort");
+			if (_displayName != "") then {
+				_picture = getText (_uniformConfigPath >> "picture");
+				_tooltip = getText (_uniformConfigPath >> "descriptionShort");
 				_tooltip = [_tooltip, "<br />", ". "] call CBA_fnc_replace;
 				_tooltip = [_tooltip, "<br/>", ". "] call CBA_fnc_replace;
 
@@ -801,18 +770,74 @@ switch (_operation) do {
 			};
 		};
 
+		//-- Vest
+		_vestConfigPath = configfile >> "CfgWeapons" >> _vest;
+		if (isClass _vestConfigPath) then {
+			_displayName = getText (_vestConfigPath >> "displayName");
+
+			if (_displayName != "") then {
+				_picture = getText (_vestConfigPath >> "picture");
+				_tooltip = getText (_vestConfigPath >> "descriptionShort");
+				_tooltip = [_tooltip, "<br />", ". "] call CBA_fnc_replace;
+				_tooltip = [_tooltip, "<br/>", ". "] call CBA_fnc_replace;
+
+				_index = LOADOUTMANAGER_RIGHTLIST lbAdd _displayName;
+				LOADOUTMANAGER_RIGHTLIST lbSetPicture [_index, _picture];
+				LOADOUTMANAGER_RIGHTLIST lbSetTooltip [_index,_tooltip];
+			};
+		};
+
+		//-- Headgear
+		_headgearConfigPath = configfile >> "CfgWeapons" >> _headgear;
+		if (isClass _headgearConfigPath) then {
+			_displayName = getText (_headgearConfigPath >> "displayName");
+
+			if (_displayName != "") then {
+				_picture = getText (_headgearConfigPath >> "picture");
+				_tooltip = getText (_headgearConfigPath >> "descriptionShort");
+				_tooltip = [_tooltip, "<br />", ". "] call CBA_fnc_replace;
+				_tooltip = [_tooltip, "<br/>", ". "] call CBA_fnc_replace;
+
+				_index = LOADOUTMANAGER_RIGHTLIST lbAdd _displayName;
+				LOADOUTMANAGER_RIGHTLIST lbSetPicture [_index, _picture];
+				LOADOUTMANAGER_RIGHTLIST lbSetTooltip [_index,_tooltip];
+			};
+		};
+
+		//-- Goggles
+		if (_goggles != "") then {
+			_gogglesConfigPath = configfile >> "CfgGlasses" >> _goggles;
+			if (isClass _gogglesConfigPath) then {
+				_displayName = getText (_gogglesConfigPath >> "displayName");
+
+				if (_displayName != "") then {
+					_picture = getText (_gogglesConfigPath >> "picture");
+					_tooltip = getText (_gogglesConfigPath >> "descriptionShort");
+					_tooltip = [_tooltip, "<br />", ". "] call CBA_fnc_replace;
+					_tooltip = [_tooltip, "<br/>", ". "] call CBA_fnc_replace;
+
+					_index = LOADOUTMANAGER_RIGHTLIST lbAdd _displayName;
+					LOADOUTMANAGER_RIGHTLIST lbSetPicture [_index, _picture];
+					LOADOUTMANAGER_RIGHTLIST lbSetTooltip [_index,_tooltip];
+				};
+			};
+		};
+
 		//-- Backpack
 		_backpackConfigPath = configfile >> "CfgVehicles" >> _backpack;
 		if (isClass _backpackConfigPath) then {
 			_displayName = getText (_backpackConfigPath >> "displayName");
-			_picture = getText (_backpackConfigPath >> "picture");
-			_tooltip = getText (_backpackConfigPath >> "descriptionShort");
-			_tooltip = [_tooltip, "<br />", ". "] call CBA_fnc_replace;
-			_tooltip = [_tooltip, "<br/>", ". "] call CBA_fnc_replace;
 
-			_index = LOADOUTMANAGER_RIGHTLIST lbAdd _displayName;
-			LOADOUTMANAGER_RIGHTLIST lbSetPicture [_index, _picture];
-			LOADOUTMANAGER_RIGHTLIST lbSetTooltip [_index,_tooltip];
+			if (_displayName != "") then {
+				_picture = getText (_backpackConfigPath >> "picture");
+				_tooltip = getText (_backpackConfigPath >> "descriptionShort");
+				_tooltip = [_tooltip, "<br />", ". "] call CBA_fnc_replace;
+				_tooltip = [_tooltip, "<br/>", ". "] call CBA_fnc_replace;
+
+				_index = LOADOUTMANAGER_RIGHTLIST lbAdd _displayName;
+				LOADOUTMANAGER_RIGHTLIST lbSetPicture [_index, _picture];
+				LOADOUTMANAGER_RIGHTLIST lbSetTooltip [_index,_tooltip];
+			};
 		};
 
 		//-- Items
@@ -831,15 +856,18 @@ switch (_operation) do {
 				if !(isClass _configPath) then {_configPath = configfile >> "CfgVehicles" >> _item};
 
 				_displayName = getText (_configPath >> "displayName");
-				_picture = getText (_configPath >> "picture");
-				_itemInfo = format ["%1: %2", _displayName, _count];
-				_tooltip = getText (_configPath >> "descriptionShort");
-				_tooltip = [_tooltip, "<br />", ". "] call CBA_fnc_replace;
-				_tooltip = [_tooltip, "<br/>", ". "] call CBA_fnc_replace;
 
-				_index = LOADOUTMANAGER_RIGHTLIST lbAdd _displayName;
-				LOADOUTMANAGER_RIGHTLIST lbSetPicture [_index, _picture];
-				LOADOUTMANAGER_RIGHTLIST lbSetTooltip [_index,_tooltip];
+				if (_displayName != "") then {
+					_picture = getText (_configPath >> "picture");
+					_itemInfo = format ["%1: %2", _displayName, _count];
+					_tooltip = getText (_configPath >> "descriptionShort");
+					_tooltip = [_tooltip, "<br />", ". "] call CBA_fnc_replace;
+					_tooltip = [_tooltip, "<br/>", ". "] call CBA_fnc_replace;
+
+					_index = LOADOUTMANAGER_RIGHTLIST lbAdd _displayName;
+					LOADOUTMANAGER_RIGHTLIST lbSetPicture [_index, _picture];
+					LOADOUTMANAGER_RIGHTLIST lbSetTooltip [_index,_tooltip];
+				};
 			};
 		} forEach _itemArray;
 	};
