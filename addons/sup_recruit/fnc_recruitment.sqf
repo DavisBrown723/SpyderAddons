@@ -52,9 +52,11 @@ switch (_operation) do {
 		_spawnCode = compile (_logic getVariable "SpawnCode");
 
 		{
-			if (typeName _x == "OBJECT") then {
-				_x setVariable ["Recruitment_Settings", [_factions,_whitelist,_blacklist,_maxUnits,_spawnCode]];
-				_x addAction ["Recruit", {["open",_this] call SpyderAddons_fnc_recruitment}];
+			if !(_x getVariable ["Recruitment_Settings", false]) then {
+				if (typeName _x == "OBJECT") then {
+					_x setVariable ["Recruitment_Settings", [_factions,_whitelist,_blacklist,_maxUnits,_spawnCode]];
+					_x addAction ["Recruit", {["open",_this] call SpyderAddons_fnc_recruitment}];
+				};
 			};
 		} forEach _syncedUnits;
 	};
