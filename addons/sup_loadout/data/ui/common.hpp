@@ -329,10 +329,10 @@ class LoadoutManager_RscButton
 	colorBackground[] = {0,0,0,0.5};
 	colorBackgroundDisabled[] = {0,0,0,0.5};
 	colorBackgroundActive[] = {1,1,1,.7};
-	soundEnter[] = {"\A3\ui_f\data\sound\LoadoutManager_RscButton\soundEnter",0.09,1};
-	soundPush[] = {"\A3\ui_f\data\sound\LoadoutManager_RscButton\soundPush",0.09,1};
-	soundClick[] = {"\A3\ui_f\data\sound\LoadoutManager_RscButton\soundClick",0.09,1};
-	soundEscape[] = {"\A3\ui_f\data\sound\LoadoutManager_RscButton\soundEscape",0.09,1};
+	soundEnter[] = {"\A3\ui_f\data\sound\RscButton\soundEnter",0.09,1};
+	soundPush[] = {"\A3\ui_f\data\sound\RscButton\soundPush",0.09,1};
+	soundClick[] = {"\A3\ui_f\data\sound\RscButton\soundClick",0.09,1};
+	soundEscape[] = {"\A3\ui_f\data\sound\RscButton\soundEscape",0.09,1};
 	class Attributes { 
 		font = "PuristaMedium"; 
 		color = "#C0C0C0"; 
