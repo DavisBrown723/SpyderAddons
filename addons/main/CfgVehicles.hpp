@@ -1,5 +1,5 @@
 class CfgFactionClasses {
-	class PREFIX {
+	class SpyderAddons {
 		displayName = "Spyder Addons";
 		priority = 1;
 		side = 7;
@@ -21,6 +21,6 @@ class CfgVehicles {
 	class ModuleSpyderAddonsBase: Module_F {
 		scope = 1;
 		displayName = "SpyderAddonsModuleBase";
-		category = QUOTE(PREFIX);
+		category = "SpyderAddons";
 	};
 };

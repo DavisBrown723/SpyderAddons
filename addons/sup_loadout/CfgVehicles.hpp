@@ -1,7 +1,7 @@
 class CfgVehicles
 {
 	class ModuleSpyderAddonsBase;
-	class SpyderAddons_sup_loadout: ModuleSpyderAddonsBase
+	class ADDON : ModuleSpyderAddonsBase
 	{
 		scope = 2;
 		author = "SpyderBlack723";
@@ -11,7 +11,7 @@ class CfgVehicles
 		picture = "x\spyderaddons\addons\sup_loadout\icon_sup_loadout.paa";
 		functionPriority = 10;
 		isGlobal = 2;
-		isDisposable = 1;
+		//isDisposable = 1;
 
 		class Arguments {
 			
