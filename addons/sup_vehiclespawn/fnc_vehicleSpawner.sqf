@@ -63,9 +63,11 @@ switch (_operation) do {
 		if (_spawnHeight != "") then {_spawnPosition = [_spawnPosition select 0, _spawnPosition select 1, call (compile _spawnHeight)]};
 
 		{
-			if (typeName _x == "OBJECT") then {
-				_x setVariable ["VehicleSpawner_Settings", [_spawnPosition, _spawnDir, _factions, _whitelist, _blacklist, _typeBlacklist, _typeWhitelist, _spawnCode]];
-				_x addAction ["Vehicle Spawner", {["open",_this] call SpyderAddons_fnc_vehicleSpawner}];
+			if !(_x getVariable ["VehicleSpawner_Settings", false]) then {
+				if (typeName _x == "OBJECT") then {
+					_x setVariable ["VehicleSpawner_Settings", [_spawnPosition, _spawnDir, _factions, _whitelist, _blacklist, _typeBlacklist, _typeWhitelist, _spawnCode]];
+					_x addAction ["Vehicle Spawner", {["open",_this] call SpyderAddons_fnc_vehicleSpawner}];
+				};
 			};
 		} forEach _syncedUnits;
 	};
@@ -154,7 +156,9 @@ switch (_operation) do {
 
 				lbAdd [VEHICLESPAWNER_VEHICLELIST, _name];
 				lbSetData [VEHICLESPAWNER_VEHICLELIST, _forEachIndex, configName _x];
-				lbSetPicture [VEHICLESPAWNER_VEHICLELIST, _forEachIndex, _icon];
+				if (_icon != "iconcar") then {
+					lbSetPicture [VEHICLESPAWNER_VEHICLELIST, _forEachIndex, _icon];
+				};
 		} forEach _validVehicles;
 
 		//-- Track vehicle list selection
