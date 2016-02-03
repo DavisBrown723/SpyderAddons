@@ -1,9 +1,9 @@
 class CfgVehicles
 {
 	class ModuleSpyderAddonsBase;
-	class SpyderAddons_mil_insurgency: ModuleSpyderAddonsBase
+	class ADDON : ModuleSpyderAddonsBase
 	{
-		scope = 2;
+		scope = 1;
 		author = "SpyderBlack723";
 		displayName = "Insurgency";
 		function = "SpyderAddons_fnc_insurgencyInit";
@@ -11,7 +11,7 @@ class CfgVehicles
 		picture = "x\spyderaddons\addons\mil_insurgency\icon_mil_insurgency.paa";
 		functionPriority = 10;
 		isGlobal = 2;
-		isDisposable = 1;
+		//isDisposable = 1;
 
 		class Arguments {
 			

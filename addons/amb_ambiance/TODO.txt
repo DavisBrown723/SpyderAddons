@@ -1,3 +1,4 @@
 Features
 -----------
 - Add call to prayer featuring churchbells,muslim prayer etc.
+	- Separate module
