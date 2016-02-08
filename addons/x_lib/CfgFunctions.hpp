@@ -92,6 +92,11 @@ class CfgFunctions {
 			};
 
 			//////-- UI --//////
+			class ctrlMoveRelative {
+				description = "Moves a control relative to it's current position";
+				file = "\x\spyderaddons\addons\x_lib\functions\ui\ctrlMoveRelative.sqf";
+				recompile = RECOMPILE;
+			};
 			class displayNotification {
 				description = "Displays a notification that slides into view";
 				file = "\x\spyderaddons\addons\x_lib\functions\ui\displayNotification.sqf";
@@ -100,6 +105,11 @@ class CfgFunctions {
 			class openRequiresAlive {
 				description = "Opens the menu notifying the user that a module being used requires ALiVE to run";
 				file = "\x\spyderaddons\addons\x_lib\functions\ui\openRequiresAlive.sqf";
+				recompile = RECOMPILE;
+			};
+			class progressAnimateAndExecute {
+				description = "Fills or drains a progress bar over the specified period of time, executing passed code once filled";
+				file = "\x\spyderaddons\addons\x_lib\functions\ui\progressAnimateAndExecute.sqf";
 				recompile = RECOMPILE;
 			};
 		};
