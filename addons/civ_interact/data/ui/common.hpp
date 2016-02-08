@@ -342,12 +342,12 @@ class CivInteract_RscButton
 	text = "";
 	colorText[] = {1,1,1,1};
 	colorDisabled[] = {1,1,1,0.25};
-	colorSelect[] = {0,0,0,1};
-	colorSelect2[] = {0,0,0,1};
+	colorSelect[] = {0,0,0,0.5};
+	colorSelect2[] = {0,0,0,0.5};
 	colorBackground[] = {0,0,0,0.5};
 	colorBackgroundDisabled[] = {0,0,0,0.5};
 	colorBackgroundActive[] = {1,1,1,.7};
-	colorFocused[] = {1,1,1,1};
+	colorFocused[] = {0,0,0,.5};
 	colorShadow[] = {0,0,0,0};
 	colorBorder[] = {0,0,0,1};
 	soundEnter[] = {"\A3\ui_f\data\sound\RscButton\soundEnter",0.09,1};
@@ -405,6 +405,49 @@ class CivInteract_RscStructuredText
 	text = "";
 	size = "(((((safezoneW / safezoneH) min 1.2) / 1.2) / 25) * 1)";
 	shadow = 1;
+};
+
+class CivInteract_RscFrame
+{
+	colorBackground[] = {0,0,0,0};
+	colorText[] = {1,1,1,1};
+	font = "PuristaMedium";
+	h = 0.3;
+	idc = -1;
+	shadow = 2;
+	sizeEx = 0.02;
+	style = 0x40;
+	text = "";
+	type = 0;
+	w = 0.3;
+	x = 0;
+	y = 0;
+};
+
+class CivInteract_RscProgress
+{
+	access = 0;
+	idc = -1;
+	type = 0;
+	style = "0x30 + 0x800";
+	colorFrame[] = {0.788,0.443,0.157,1};
+	colorBar[] = {0.788,0.443,0.157,1};
+	texture = "ProgressBar_Bg.paa";
+	deletable = 0;
+	fade = 0;
+	fixedWidth = 0;
+	font = "PuristaMedium";
+	lineSpacing = 0;
+	text = "";
+	sizeEx = 0;
+	tooltipColorBox[] = {1,1,1,1};
+	tooltipColorShade[] = {0,0,0,0.65};
+	tooltipColorText[] = {1,1,1,1};
+	shadow = 0;
+	x = 0;
+	y = 0;
+	w = 0.2;
+	h = 0.15;
 };
 
 class CivInteract_RscControlsGroup

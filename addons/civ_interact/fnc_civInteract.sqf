@@ -35,10 +35,12 @@ params [
 	["_arguments", []]
 ];
 private ["_result"];
+disableSerialization;
 
 //-- Define function shortcuts
-#define MAINCLASS SpyderAddons_fnc_civInteract
-#define QUESTIONHANDLER SpyderAddons_fnc_questionHandler
+#define MAINCLASS 			SpyderAddons_fnc_civInteract
+#define INVENTORYHANDLER 		SpyderAddons_fnc_inventoryHandler
+#define GETRESPONSE 			SpyderAddons_fnc_getResponse
 
 //-- Define control ID's
 #define CIVINTERACT_DISPLAY 		(findDisplay 923)
@@ -109,15 +111,21 @@ switch (_operation) do {
 			CIVINTERACT_DETAIN ctrlSetText "Release";
 		};
 
-		[nil,"toggleSearchMenu"] call MAINCLASS;
-		CIVINTERACT_CONFISCATEBUTTON ctrlShow false;
-		CIVINTERACT_OPENGEARCONTAINER ctrlShow false;
+		[SpyderAddons_civInteractHandler,"mainMenuOpened"] call INVENTORYHANDLER;
 
 		//-- Display loading
 		CIVINTERACT_QUESTIONLIST lbAdd "Loading . . .";
 
 		//-- Retrieve data
 		[nil,"getData", [player,_civ]] remoteExecCall [QUOTE(MAINCLASS),2];
+
+		//-- Create progress bar --> doesn't like working when created via main.hpp (fix) --> This needs to be created inside _fnc_civInteract
+		_bar = CIVINTERACT_DISPLAY ctrlCreate ["RscProgress", -1];
+		_bar ctrlSetPosition [-0.0275, 0.86, 0.85, 0.04]; 
+		_bar ctrlSetTextColor [0.788,0.443,0.157,1];
+		_bar progressSetPosition 0;
+		_bar ctrlCommit 0;
+		[MOD(civInteractHandler),"ProgressBar", _bar] call ALiVE_fnc_hashSet;
 	};
 
 	//-- Load data
@@ -207,7 +215,12 @@ switch (_operation) do {
 		//-- Remove data from handler
 		[_logic, "CivData", nil] call ALiVE_fnc_hashSet;
 		[_logic, "Civ", nil] call ALiVE_fnc_hashSet;
-		//[_logic, "Items", nil] call ALiVE_fnc_hashSet; 	//-- REMOVE AFTER FIX
+
+		//-- Handle inventory upon closing
+		[_logic,"mainMenuClosed"] call INVENTORYHANDLER;
+
+		ctrlDelete ([MOD(civInteractHandler),"ProgressBar"] call ALiVE_fnc_hashGet);
+		[MOD(civInteractHandler),"ProgressBar", nil] call ALiVE_fnc_hashSet;
 	};
 
 	case "getObjectiveInstallations": {
