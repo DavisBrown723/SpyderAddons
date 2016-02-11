@@ -125,7 +125,6 @@ switch (_operation) do {
 		//-- Get valid locations
 		_result = [];
 		_mapLocations = configfile >> "CfgWorlds" >> worldName >> "Names";
-		_mapLocations = _mapLocations;
 
 		for "_i" from 0 to (count _mapLocations - 1) do {
 			_location = _mapLocations select _i;
@@ -169,8 +168,7 @@ switch (_operation) do {
 
 		if (isNil QMOD(ambianceHandler)) then {
 			MOD(ambianceHandler) = [nil,"create"] call MAINCLASS;
-			_logics = _locs;
-			[MOD(ambianceHandler),"Logics", _logics] call CBA_fnc_hashSet;
+			[MOD(ambianceHandler),"Logics", _locs] call CBA_fnc_hashSet;
 		} else {
 			_logics = [MOD(ambianceHandler),"Logics"] call CBA_fnc_hashGet;
 			{_logics pushBack _x} forEach _locs;
