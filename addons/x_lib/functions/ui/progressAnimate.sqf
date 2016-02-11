@@ -15,8 +15,6 @@ None
 
 Examples:
 (begin example)
-["Displayed Text", "left", 1, 5] call SpyderAddons_fnc_displayNotification
-["Displayed Text"] call SpyderAddons_fnc_displayNotification
 (end)
 
 See Also:

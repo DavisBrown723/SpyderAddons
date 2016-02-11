@@ -24,6 +24,7 @@ misc
 objectives
 
 	createObjective
+	getObjectiveInstallations
 	getSideDominantObjectives
 
 opcom
@@ -38,7 +39,8 @@ profiles
 
 ui
 
-	ctrlMoveRelative
+	ctrlGetRelPos
+	ctrlRelMove
 	displayNotification
 	openRequiresAlive
-	progressAnimateAndExecute
+	progressAnimate

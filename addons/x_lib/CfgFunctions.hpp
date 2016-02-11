@@ -61,6 +61,11 @@ class CfgFunctions {
 				file = "\x\spyderaddons\addons\x_lib\functions\objectives\createObjective.sqf";
 				recompile = RECOMPILE;
 			};
+			class getObjectiveInstallations {
+				description = "Returns an array of installations within the objective";
+				file = "\x\spyderaddons\addons\x_lib\functions\objectives\getObjectiveInstallations.sqf";
+				recompile = RECOMPILE;
+			};
 			class getSideDominantObjectives {
 				description = "Returns objectives controlled by the given sides";
 				file = "\x\spyderaddons\addons\x_lib\functions\objectives\getSideDominantObjectives.sqf";
@@ -92,9 +97,14 @@ class CfgFunctions {
 			};
 
 			//////-- UI --//////
-			class ctrlMoveRelative {
+			class ctrlGetRelPos {
+				description = "Finds the positions relative to the passed control's position";
+				file = "\x\spyderaddons\addons\x_lib\functions\ui\ctrlGetRelPos.sqf";
+				recompile = RECOMPILE;
+			};
+			class ctrlRelMove {
 				description = "Moves a control relative to it's current position";
-				file = "\x\spyderaddons\addons\x_lib\functions\ui\ctrlMoveRelative.sqf";
+				file = "\x\spyderaddons\addons\x_lib\functions\ui\ctrlRelMove.sqf";
 				recompile = RECOMPILE;
 			};
 			class displayNotification {
@@ -107,9 +117,9 @@ class CfgFunctions {
 				file = "\x\spyderaddons\addons\x_lib\functions\ui\openRequiresAlive.sqf";
 				recompile = RECOMPILE;
 			};
-			class progressAnimateAndExecute {
+			class progressAnimate {
 				description = "Fills or drains a progress bar over the specified period of time, executing passed code once filled";
-				file = "\x\spyderaddons\addons\x_lib\functions\ui\progressAnimateAndExecute.sqf";
+				file = "\x\spyderaddons\addons\x_lib\functions\ui\progressAnimate.sqf";
 				recompile = RECOMPILE;
 			};
 		};

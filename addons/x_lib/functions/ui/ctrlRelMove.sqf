@@ -1,5 +1,5 @@
 /* ----------------------------------------------------------------------------
-Function: SpyderAddons_fnc_ctrlMoveRelative
+Function: SpyderAddons_fnc_ctrlRelMove
 
 Description:
 Moves a control relative to it's current position
