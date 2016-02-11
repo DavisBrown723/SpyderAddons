@@ -1,0 +1,12 @@
+Study asymmetrics and civilian ecosystems and immersion
+
+When questions are asked, remove them from the list (?)
+
+It is a fine day, isn't it?
+I hope that you're family is well and healthy
+Do you know of anyone involved with the insurgents
+How are you?
+You are under arrest, please follow me. (replaced detain button)
+It is not safe here, leave the area (replaces go away button)
+What do you know of NAME - (when told of suspicious people, they are added to a list (for limited time or death). Selecting this option brings up a sublist listing names of those stored suspicious people)
+Do you know of anyone involved in suspicous activity in town
