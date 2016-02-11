@@ -6,7 +6,8 @@ class Civ_Interact
 {
 	idd = 923;
 	movingEnable = 1;
-	onUnload = "[SpyderAddons_civInteractHandler,'closeMenu'] call SpyderAddons_fnc_civInteract";
+	onLoad = "[SpyderAddons_civInteract,'onLoad'] call SpyderAddons_fnc_civInteract";
+	onUnload = "[SpyderAddons_civInteract,'unLoad'] call SpyderAddons_fnc_civInteract";
 
 	class controlsBackground {
 		class CivInteract_inventory_Background: CivInteract_RscText
@@ -178,7 +179,7 @@ class Civ_Interact
 		class CivInteract_Detain: CivInteract_RscButton
 		{
 			idc = 92311;
-			action = "[SpyderAddons_civInteractHandler,'Detain'] call SpyderAddons_fnc_civInteract";
+			action = "[SpyderAddons_civInteract,'Detain'] call SpyderAddons_fnc_civInteract";
 
 			text = "Detain";
 			x = 7.5 * GUI_GRID_W + GUI_GRID_X;
@@ -191,7 +192,7 @@ class Civ_Interact
 		class CivInteract_GetDown: CivInteract_RscButton
 		{
 			idc = 92312;
-			action = "[SpyderAddons_civInteractHandler,'getDown'] call SpyderAddons_fnc_civInteract";
+			action = "[SpyderAddons_civInteract,'getDown'] call SpyderAddons_fnc_civInteract";
 
 			text = "Get Down";
 			x = 13.5 * GUI_GRID_W + GUI_GRID_X;
@@ -204,7 +205,7 @@ class Civ_Interact
 		class CivInteract_GoAway: CivInteract_RscButton
 		{
 			idc = 92313;
-			action = "[SpyderAddons_civInteractHandler,'goAway'] call SpyderAddons_fnc_civInteract";
+			action = "[SpyderAddons_civInteract,'goAway'] call SpyderAddons_fnc_civInteract";
 
 			text = "Go Away";
 			x = 19.5 * GUI_GRID_W + GUI_GRID_X;
@@ -230,7 +231,7 @@ class Civ_Interact
 		class CivInteract_Search: CivInteract_RscButton
 		{
 			idc = 9242;
-			action = "[SpyderAddons_civInteractHandler,'toggleSearchMenu'] call SpyderAddons_fnc_inventoryHandler";
+			action = "[SpyderAddons_civInteract,'toggleSearchMenu'] call SpyderAddons_fnc_inventoryHandler";
 
 			text = "Search";
 			x = 28.5 * GUI_GRID_W + GUI_GRID_X;
