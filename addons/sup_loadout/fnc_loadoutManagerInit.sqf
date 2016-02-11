@@ -1,5 +1,5 @@
 /* ----------------------------------------------------------------------------
-Function: SpyderAddons_fnc_recruitmentInit
+Function: SpyderAddons_fnc_loadoutManagerInit
 
 Description:
 Initializes the loadout manager
