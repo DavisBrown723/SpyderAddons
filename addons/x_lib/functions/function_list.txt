@@ -2,6 +2,7 @@
 
 asymmetric
 
+	getCivilianRole
 	getPositionSideHostility
 
 logging
@@ -36,6 +37,10 @@ profiles
 
 	isProfileAlive
 	profilePatrol
+
+strings
+
+	strFind
 
 ui
 

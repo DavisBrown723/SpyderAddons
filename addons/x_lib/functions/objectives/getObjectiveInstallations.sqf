@@ -12,6 +12,7 @@ Array -
 
 Examples:
 (begin example)
+_installations = _objective call SpyderAddons_fnc_getObjectiveInstallations;
 (end)
 
 See Also:

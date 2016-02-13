@@ -3,6 +3,11 @@ class CfgFunctions {
 		class COMPONENT {
 			
 			//////-- Asymmetric --//////
+			class getCivilianRole {
+				description = "Returns a civilians ALiVE role (priest, townelder, etc)";
+				file = "\x\spyderaddons\addons\x_lib\functions\asymmetric\getCivilianRole.sqf";
+				recompile = RECOMPILE;
+			};
 			class getPositionSideHostility {
 				description = "Returns the hostility towards a side at a given location";
 				file = "\x\spyderaddons\addons\x_lib\functions\asymmetric\getPositionSideHostility.sqf";
@@ -96,6 +101,13 @@ class CfgFunctions {
 				recompile = RECOMPILE;
 			};
 
+			//////-- Strings --//////
+			class strFind {
+				description = "Finds the next instance of a character sequence within a string";
+				file = "\x\spyderaddons\addons\x_lib\functions\strings\strFind.sqf";
+				recompile = RECOMPILE;
+			};
+
 			//////-- UI --//////
 			class ctrlGetRelPos {
 				description = "Finds the positions relative to the passed control's position";
@@ -118,7 +130,7 @@ class CfgFunctions {
 				recompile = RECOMPILE;
 			};
 			class progressAnimate {
-				description = "Fills or drains a progress bar over the specified period of time, executing passed code once filled";
+				description = "Fills or drains a progress bar over the specified period of time";
 				file = "\x\spyderaddons\addons\x_lib\functions\ui\progressAnimate.sqf";
 				recompile = RECOMPILE;
 			};

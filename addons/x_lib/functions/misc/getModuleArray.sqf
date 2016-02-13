@@ -12,7 +12,7 @@ Array - Array
 
 Examples:
 (begin example)
-_whitelistMarkers = [_logic getVariable "WhitelistMarkers"] call SpyderAddons_fnc_getModuleArray;
+_whitelistMarkers = [_logic getVariable "Whitelist"] call SpyderAddons_fnc_getModuleArray;
 (end)
 
 See Also:

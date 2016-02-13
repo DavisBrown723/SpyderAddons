@@ -2,7 +2,7 @@
 Function: SpyderAddons_fnc_progressAnimate
 
 Description:
-Fills or drains a progress bar over the specified period of time, executing passed code once filled
+Fills or drains a progress bar over the specified period of time
 
 Parameters:
 Control - Progress bar
@@ -27,7 +27,6 @@ disableSerialization;
 _this params [
 	"_bar",
 	"_time",
-	["_code", {disableSerialization;}],
 	["_reset", true]
 ];
 
@@ -41,6 +40,4 @@ if !(isNull _bar) then {
 	if (_reset) then {
 		_bar progressSetPosition 0;
 	};
-
-	_bar spawn _code;
 };
