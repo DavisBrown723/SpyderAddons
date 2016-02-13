@@ -57,7 +57,7 @@ params [
 switch (_operation) do {
 
 	case "mainMenuOpened": {
-		waitUntil {ctrlShown INVENTORY_BACKGROUND};
+		//waitUntil {ctrlShown INVENTORY_BACKGROUND};
 		{_x ctrlShow false} forEach ([INVENTORY_BACKGROUND, INVENTORY_HEADER, INVENTORY_BUTTONTWO, INVENTORY_BUTTONTHREE]);
 	};
 

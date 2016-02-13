@@ -42,10 +42,13 @@ params [
 
 //-- Define control ID's
 #define CIVINTERACT_DISPLAY 		(findDisplay 923)
+#define CIVINTERACT_LISTONE 		(CIVINTERACT_DISPLAY displayCtrl 9234)
+#define CIVINTERACT_LISTTWO 		(CIVINTERACT_DISPLAY displayCtrl 9235)
+#define CIVINTERACT_ASKQUESTION		(CIVINTERACT_DISPLAY displayCtrl 9247)
+#define CIVINTERACT_RESPONSEBOX 		(CIVINTERACT_DISPLAY displayCtrl 9239)
+
 #define CIVINTERACT_CIVNAME 		(CIVINTERACT_DISPLAY displayCtrl 9236)
 #define CIVINTERACT_DETAIN 		(CIVINTERACT_DISPLAY displayCtrl 92311)
-#define CIVINTERACT_QUESTIONLIST 		(CIVINTERACT_DISPLAY displayCtrl 9234)
-#define CIVINTERACT_RESPONSELIST 		(CIVINTERACT_DISPLAY displayCtrl 9239)
 
 switch (_operation) do {
 
@@ -55,6 +58,8 @@ switch (_operation) do {
 
 	//-- Create logic on all localities
 	case "init": {
+		private ["_hostility"];
+
 		//-- Make sure ALiVE is running
 		if ((hasInterface) and {!(isClass (configfile >> "CfgVehicles" >> "ALiVE_require"))}) exitWith {
 			waitUntil {sleep 1; time > 5};
@@ -63,17 +68,73 @@ switch (_operation) do {
 
 		if (isNil QMOD(civInteract)) then {
 			//-- Get settings
-			_factionEnemy = _logic getVariable "enemyFaction";
 			_hostilityChance = call compile (_logic getVariable "HostilityChance");
 			_irritatedChance = call compile (_logic getVariable "IrritatedChance");
 			_answerChance = call compile (_logic getVariable "AnswerChance");
 
+			_friendlyForces = _logic getVariable "FriendlyForces";
+			_enemyForces = _logic getVariable "EnemyForces";
+
+			//-- Let's get hacky! (Seriously, turn back now)
+			_friendlyForces = [_friendlyForces, "[", "'["] call CBA_fnc_replace;
+			_friendlyForces = [_friendlyForces, "]", "]'"] call CBA_fnc_replace;
+			_friendlyForces = "[" + _friendlyForces + "]";
+			_friendlyForces = call compile _friendlyForces;
+
+			_enemyForces = [_enemyForces, "[", "'["] call CBA_fnc_replace;
+			_enemyForces = [_enemyForces, "]", "]'"] call CBA_fnc_replace;
+			_enemyForces = "[" + _enemyForces + "]";
+			_enemyForces = call compile _enemyForces;
+
+			_ff = [];
+			{
+				_force = _x;
+				_force = [_force, "[", "['"] call CBA_fnc_replace;
+				_force = [_force, "]", "']"] call CBA_fnc_replace;
+				_force = [_force, ",", "','"] call CBA_fnc_replace;
+				_force = call compile _force;
+
+				_hostility = call compile (_force select 2);
+				if (_hostility > 1) then {
+					_hostility = 1;
+				} else {
+					if (_hostility < -1) then {
+						_hostility = -1;
+					};
+				};
+
+				_force = [_force select 0,_force select 1,_hostility];
+				_ff pushBack _force;
+			} forEach _friendlyForces;
+
+			_ef = [];
+			{
+				_force = _x;
+				_force = [_force, "[", "['"] call CBA_fnc_replace;
+				_force = [_force, "]", "']"] call CBA_fnc_replace;
+				_force = [_force, ",", "','"] call CBA_fnc_replace;
+				_force = call compile _force;
+
+				_hostility = call compile (_force select 2);
+				if (_hostility > 1) then {
+					_hostility = 1;
+				} else {
+					if (_hostility < -1) then {
+						_hostility = -1;
+					};
+				};
+
+				_force = [_force select 0,_force select 1,call compile (_force select 2)];
+				_ef pushBack _force;
+			} forEach _enemyForces;
+
 			//-- Create interact handler object
 			MOD(civInteract) = [nil,"create"] call MAINCLASS;
-			[MOD(civInteract),"InsurgentFaction", _factionEnemy] call ALiVE_fnc_hashSet;
 			[MOD(civInteract),"Hostilitychance", _hostilityChance] call ALiVE_fnc_hashSet;
 			[MOD(civInteract),"IrritatedChance", _irritatedChance] call ALiVE_fnc_hashSet;
 			[MOD(civInteract),"AnswerChance", _answerChance] call ALiVE_fnc_hashSet;
+			[MOD(civInteract),"FriendlyForces", _ff] call ALiVE_fnc_hashSet;
+			[MOD(civInteract),"EnemyForces", _ef] call ALiVE_fnc_hashSet;
 		};
 	};
 
@@ -89,16 +150,22 @@ switch (_operation) do {
 		[_logic, "Civ", _civ] call ALiVE_fnc_hashSet;
 
 		CreateDialog "Civ_Interact";
+
+		[_logic,"onLoad"] call MAINCLASS;
 	};
 
 	case "onLoad": {
 		_civ = [_logic,"Civ"] call ALiVE_fnc_hashGet;
 
 		//-- onLoad call for inventory handler
-		[_logic,"mainMenuOpened"] spawn INVENTORYHANDLER;
+		[_logic,"mainMenuOpened"] call INVENTORYHANDLER;
+
+		//-- Hide controls
+		CIVINTERACT_LISTTWO ctrlShow false;
+		CIVINTERACT_ASKQUESTION ctrlShow false;
 
 		//-- Display loading
-		CIVINTERACT_QUESTIONLIST lbAdd "Loading . . .";
+		CIVINTERACT_LISTONE lbAdd "Loading . . .";
 
 		//-- Retrieve data
 		[nil,"getData", [player,_civ]] remoteExecCall [QUOTE(MAINCLASS),2];
@@ -106,41 +173,6 @@ switch (_operation) do {
 		if (_civ getVariable "detained") then {
 			CIVINTERACT_DETAIN ctrlSetText "Release";
 		};
-
-		//-- Build question list
-		CIVINTERACT_QUESTIONLIST lbAdd "How are you?";
-		CIVINTERACT_QUESTIONLIST lbSetData [0, "HowAreYou"];
-
-		CIVINTERACT_QUESTIONLIST lbAdd "Where do you live?";
-		CIVINTERACT_QUESTIONLIST lbSetData [0, "Home"];
-
-		CIVINTERACT_QUESTIONLIST lbAdd "What town you do live in";
-		CIVINTERACT_QUESTIONLIST lbSetData [1, "Town"];
-
-		CIVINTERACT_QUESTIONLIST lbAdd "Have you seen any IED's lately?";
-		CIVINTERACT_QUESTIONLIST lbSetData [2, "IEDs"];
-
-		CIVINTERACT_QUESTIONLIST lbAdd "Have you seen any insurgent activity lately?";
-		CIVINTERACT_QUESTIONLIST lbSetData [3, "Insurgents"];
-
-		CIVINTERACT_QUESTIONLIST lbAdd "Do you know the location of any insurgent hideouts?";
-		CIVINTERACT_QUESTIONLIST lbSetData [4, "Hideouts"];
-
-		CIVINTERACT_QUESTIONLIST lbAdd "Have you seen any strange behavior lately?";
-		CIVINTERACT_QUESTIONLIST lbSetData [5, "StrangeBehavior"];
-
-		CIVINTERACT_QUESTIONLIST lbAdd "Do you support us?";
-		CIVINTERACT_QUESTIONLIST lbSetData [6, "Opinion"];
-
-		CIVINTERACT_QUESTIONLIST lbAdd "What is the opinion of our forces in this area?";
-		CIVINTERACT_QUESTIONLIST lbSetData [7, "TownOpinion"];
-
-		//-- Add onSel EH to question list
-		CIVINTERACT_QUESTIONLIST ctrlAddEventHandler ["LBSelChanged","
-			params ['_control','_index'];
-			_question = _control lbData _index;
-			[SpyderAddons_civInteract,_question] call SpyderAddons_fnc_questionHandler;
-		"];
 
 		//-- Create progress bar --> doesn't like working when created via main.hpp (fix) --> This needs to be created relative to progressTitle (ctrlGetRelPos)
 		_bar = CIVINTERACT_DISPLAY ctrlCreate ["RscProgress", -1];
@@ -168,86 +200,77 @@ switch (_operation) do {
 		[MOD(civInteract),"ProgressBar", nil] call ALiVE_fnc_hashSet;
 	};
 
-	//-- Load data
-	case "dataReceived": {
-		//-- Exit if the menu has been closed
-		if (isNull findDisplay 923) exitWith {};
-
-		_arguments params ["_objectiveInstallations","_objectiveActions","_civInfo","_hostileCivInfo"];
-
-		_logic = MOD(civInteract);
-
-		//-- Create hash
-		_civData = [] call ALIVE_fnc_hashCreate;
-		_civ = [_logic,"Civ"] call ALiVE_fnc_hashGet;
-		_answersGiven = _civ getVariable ["AnswersGiven", []];
-
-		//-- Hash data to logic
-		[_civData, "Installations", _objectiveInstallations] call ALiVE_fnc_hashSet;		//-- [_factory,_HQ,_depot,_roadblocks]
-		[_civData, "Actions", _objectiveActions] call ALiVE_fnc_hashSet;			//-- [_ambush,_sabotage,_ied,_suicide]
-		[_civData, "CivInfo", _civInfo] call ALiVE_fnc_hashSet;				//-- [_homePos, _individualHostility, _townHostility]
-		[_civData, "HostileCivInfo", _hostileCivInfo] call ALiVE_fnc_hashSet;			//-- [_civ,_homePos,_activeCommands]
-		[_civData, "AnswersGiven", _answersGiven] call ALiVE_fnc_hashSet;			//-- Default []
-		[_civData, "Asked", 0] call ALiVE_fnc_hashSet;					//-- Default - 0
-		[_logic, "CivData", _civData] call ALiVE_fnc_hashSet;
-
-		//-- Display persistent civ name
-		_name = _civInfo select 3;
-		_role = [nil,"getRole", _civ] call MAINCLASS;
-		if (_role == "None") then {
-			CIVINTERACT_CIVNAME ctrlSetText _name;
-		} else {
-			CIVINTERACT_CIVNAME ctrlSetText (format ["%1 (%2)", _name, _role]);
-		};
-
-		[_logic,"enableMain"] call MAINCLASS;
-	};
-
 	case "getData": {
-		private ["_opcom","_nearestObjective","_civInfo","_clusterID","_agentProfile","_hostileCivInfo","_name","_objectiveInstallations","_objectiveActions"];
+		private ["_opcom","_nearestObjective","_civInfo","_clusterID","_agentProfile","_hostileCivInfo","_name","_installations"];
 		_arguments params ["_player","_civ"];
 
 		_civPos = getPos _civ;
-		_insurgentFaction = [MOD(civInteract), "InsurgentFaction"] call ALiVE_fnc_hashGet;
+
+		//-- Get insurgent factions
+		_enemyForces = [MOD(civInteract), "EnemyForces"] call ALiVE_fnc_hashGet;
+		_insurgentFactions = [];
+		{
+			_specifier = _x select 3;
+			if !(isnil "_specifier") then {
+				if (_specifier) then {
+					_insurgentFactions pushback (_x select 0);
+				};
+			};
+		} forEach _enemyForces;
 
 		//-- Get nearest objective properties
-		for "_i" from 0 to (count OPCOM_instances - 1) step 1 do {
-			_opcom = OPCOM_instances select _i;
+		_objectives = [];
+		{
+			private _exit = false; //-- Don't grab the same objective from an opcom twice
+			_opcom = _x;
 
-			if (_insurgentFaction in ([_opcom, "factions"] call ALiVE_fnc_hashGet)) exitWith {
-				_objectives = ([_opcom, "objectives"] call ALiVE_fnc_hashGet);
-				_objectives = [_objectives,[_civPos],{_Input0 distance2D ([_x, "center"] call CBA_fnc_HashGet)},"ASCEND"] call BIS_fnc_sortBy;
-				_nearestObjective = _objectives select 0;
+			{
+				if (!(_exit) && {_x in ([_opcom, "factions"] call ALiVE_fnc_hashGet)}) exitWith {
+					_objectives = ([_opcom, "objectives"] call ALiVE_fnc_hashGet);
+					_objectives = [_objectives,[_civPos],{_Input0 distance2D ([_x, "center"] call CBA_fnc_HashGet)},"ASCEND"] call BIS_fnc_sortBy;
+					_objectives pushback (_objectives select 0);
+					_exit = true;
+				};
+			} foreach _insurgentFactions;
+		} count OPCOM_instances;
+
+		_installations = [[],[],[],[],[],[],[],[]];
+		{
+			_objective = _x;
+			_inst = _objective call SpyderAddons_fnc_getObjectiveInstallations; //-- [_HQ,_depot,_factory,_roadblocks,_ambush,_sabotage,_ied,_suicide]
+
+			for "_i" from 0 to 8 do {
+				(_installations select _i) append (_inst select _i);
 			};
-		};
-
-		if (!isNil "_opcom") then {
-			_objectiveInstallations = ["getObjectiveInstallations", [_opcom,_nearestObjective]] call SpyderAddons_fnc_civInteract;
-			_objectiveActions = ["getObjectiveActions", [_opcom,_nearestObjective]] call SpyderAddons_fnc_civInteract;
-		} else {
-			_objectiveInstallations = [[],[],[],[]];
-			_objectiveActions = [[],[],[],[]];
-		};
+		} foreach _objectives;
 
 		//-- Get civilian info
 		_civID = _civ getVariable ["agentID", ""];
-
 		if (_civID != "") then {
+			//-- Get civ cluster
 			_civProfile = [ALIVE_agentHandler, "getAgent", _civID] call ALIVE_fnc_agentHandler;
 			_clusterID = (_civProfile select 2) select 9;
 			_cluster = [ALIVE_clusterHandler, "getCluster", _clusterID] call ALIVE_fnc_clusterHandler;
-			_homePos = (_civProfile select 2) select 10;
-			_individualHostility = (_civProfile select 2) select 12;
-			_townHostility = [_cluster, "posture"] call ALIVE_fnc_hashGet;	//_townHostility = (_cluster select 2) select 9; (Different)
 
-			if (!isNil {[_civProfile,"SpyderAddons_PersistentName"] call ALiVE_fnc_hashGet}) then {
+			//-- Get info
+			_homePos = (_civProfile select 2) select 10;
+			_hostilityIndividual = (_civProfile select 2) select 12;
+			_hostilityTown = [_cluster, "posture"] call ALIVE_fnc_hashGet;	//_townHostility = (_cluster select 2) select 9; (Different)
+
+			//-- Get persistent civ name, set if it doesn't exist
+			if (!isnil {[_civProfile,"SpyderAddons_PersistentName"] call ALiVE_fnc_hashGet}) then {
 				_name = [_civProfile,"SpyderAddons_PersistentName"] call ALiVE_fnc_hashGet;
 			} else {
 				[_civProfile,"SpyderAddons_PersistentName", name _civ] call ALiVE_fnc_hashSet;
 				_name = name _civ;
 			};
 
-			_civInfo = [_homePos, _individualHostility, _townHostility,_name];
+			//-- Create hash
+			_civInfo = [] call ALiVE_fnc_hashCreate;
+			[_civInfo,"Name", _name] call ALiVE_fnc_hashSet;
+			[_civInfo,"HomePosition", _homePos] call ALiVE_fnc_hashSet;
+			[_civInfo,"HostilityIndividual", _hostilityIndividual] call ALiVE_fnc_hashSet;
+			[_civInfo,"HostilityTown", _hostilityTown] call ALiVE_fnc_hashSet;
 		};
 
 		//-- Get nearby hostile civilian
@@ -256,42 +279,178 @@ switch (_operation) do {
 		_agentsByCluster = [ALIVE_agentHandler, "agentsByCluster"] call ALIVE_fnc_hashGet;
 		_nearCivs = [_agentsByCluster, _clusterID] call ALIVE_fnc_hashGet;
 
-		for "_i" from 0 to ((count (_nearCivs select 1)) - 1) do {
-			_agentID = (_nearCivs select 1) select _i;
+		{
+			_agentID = _x;
 			_agentProfile = [_nearCivs, _agentID] call ALiVE_fnc_hashGet;
 
+			//-- Only check active, human agent profiles
 			if ([_agentProfile,"active"] call ALIVE_fnc_hashGet) then {
 				if ([_agentProfile, "type"] call ALiVE_fnc_hashGet == "agent") then {
 					_activeCommands = [_agentProfile,"activeCommands",[]] call ALIVE_fnc_hashGet;
 
-					if ({toLower (_x select 0) in _insurgentCommands} count _activeCommands > 0) then {
+					//-- Check if any of the agent's current commands are insurgent commands
+					if ({(tolower (_x select 0)) in _insurgentCommands} count _activeCommands > 0) then {
 						_unit = [_agentProfile,"unit"] call ALIVE_fnc_hashGet;
 
+						//-- Don't rat yourself out!
 						if (name _civ != name _unit) then {
 							_homePos = (_agentProfile select 2) select 10;
-							_hostileCivInfo pushBack [_unit,_homePos,_activeCommands];
+
+							_hostileCivInfo = [] call ALiVE_fnc_hashCreate; //-- [_unit,_homePos,_activeCommands]
+							[_hostileCivInfo,"Unit", _unit] call ALiVE_fnc_hashSet;
+							[_hostileCivInfo,"HomePosition", _homePos] call ALiVE_fnc_hashSet;
+							[_hostileCivInfo,"ActiveCommands", _activeCommands] call ALiVE_fnc_hashSet;
 						};
 					};
 				};
 			};
-		};
+		} foreach (_nearCivs select 1);
 
+		//-- If multiple hostile civilians nearby, pick one at random
 		if (count _hostileCivInfo > 0) then {_hostileCivInfo = _hostileCivInfo call BIS_fnc_selectRandom};	//-- Ensure random hostile civ is picked if there are multiple
 
-		_civData = [_objectiveInstallations, _objectiveActions, _civInfo,_hostileCivInfo];
-
 		//-- Send data to client
-		[nil,"dataReceived", _civData] remoteExecCall [QUOTE(MAINCLASS),_player];
+		[nil,"dataReceived", [_installations, _civInfo,_hostileCivInfo]] remoteExecCall [QUOTE(MAINCLASS),_player];
 	};
 
-	case "getRole": {
-		private ["_role"];
-		_civ = _arguments;
-		_role = "none";
+	//-- Data received from server
+	case "dataReceived": {
+		//-- Exit if the menu has been closed
+		if (isNull (findDisplay 923)) exitWith {
+			[MOD(civInteract),"Civ", nil] call ALiVE_fnc_hashSet;
+			[MOD(civInteract),"ProgressBar", nil] call ALiVE_fnc_hashSet;
+		};
+		
+		_arguments params ["_installations","_civInfo","_hostileCivInfo"];
+		_civ = [MOD(civInteract),"Civ"] call ALiVE_fnc_hashGet;
+		_answersGiven = _civ getVariable ["AnswersGiven", []];
 
-		{if (_civ getvariable [_x,false]) exitwith {_role = _x}} foreach ["townelder","major","priest","muezzin","politician"];
+		//-- Create hash
+		_civData = [] call ALIVE_fnc_hashCreate;
+		[_civData, "Installations", _installations] call ALiVE_fnc_hashSet;			//-- [_HQ,_depot,_factory,_roadblocks,_ambush,_sabotage,_ied,_suicide]
+		[_civData, "CivInfo", _civInfo] call ALiVE_fnc_hashSet;				//-- ["HomePosition","HostilityIndividual","HostilityTown"] - Hash
+		[_civData, "HostileCivInfo", _hostileCivInfo] call ALiVE_fnc_hashSet;			//-- ["Unit","HomePosition","ActiveCommands"] - Hash
+		[_civData, "AnswersGiven", _answersGiven] call ALiVE_fnc_hashSet;			//-- Default []
+		[_civData, "Asked", 0] call ALiVE_fnc_hashSet;					//-- Default - 0
+		[MOD(civInteract), "CivData", _civData] call ALiVE_fnc_hashSet;
 
-		_result = ([_role] call CBA_fnc_capitalize);
+		//-- Display persistent civ name
+		_name = [_civInfo,"Name"] call ALiVE_fnc_hashGet;
+		_role = _civ call SpyderAddons_fnc_getCivilianRole;
+
+		if !(isNil "_role") then {
+			CIVINTERACT_CIVNAME ctrlSetText (format ["%1 (%2)", _name, _role]);
+		} else {
+			CIVINTERACT_CIVNAME ctrlSetText _name;
+		};
+
+		//-- Populate question list
+		[MOD(civInteract),"loadQuestions"] call MAINCLASS;
+	};
+
+	case "loadQuestions": {
+		//-- Clear list
+		lbClear CIVINTERACT_LISTONE;
+
+		//-- Build question list
+		_index = CIVINTERACT_LISTONE lbAdd "How are you?";
+		CIVINTERACT_LISTONE lbSetData [_index, "['HowAreYou', 1.5]"];
+
+		_index = CIVINTERACT_LISTONE lbAdd "Where do you live?";
+		CIVINTERACT_LISTONE lbSetData [_index, "['Home', 1.6]"];
+
+		_index = CIVINTERACT_LISTONE lbAdd "Have you seen any IED's lately?";
+		CIVINTERACT_LISTONE lbSetData [_index, "['IEDs', 2]"];
+
+		_index = CIVINTERACT_LISTONE lbAdd "Have you seen any ... forces activity lately?";
+		CIVINTERACT_LISTONE lbSetData [_index, "['Insurgents', -1, 'enemy']"];
+
+		_index = CIVINTERACT_LISTONE lbAdd "Do you know the location of any insurgent hideouts?";
+		CIVINTERACT_LISTONE lbSetData [_index, "['Hideouts', 2.5]"];
+
+		_index = CIVINTERACT_LISTONE lbAdd "Have you seen any strange behavior lately?";
+		CIVINTERACT_LISTONE lbSetData [_index, "['StrangeBehavior', 2.5]"];
+
+		_index = CIVINTERACT_LISTONE lbAdd "What is your opinion of ..?";
+		CIVINTERACT_LISTONE lbSetData [_index, "['ForcesOpinion', -1, 'all']"];
+
+		_index = CIVINTERACT_LISTONE lbAdd "What is the opinion of ... in this area?";
+		CIVINTERACT_LISTONE lbSetData [_index, "['TownOpinion', -1, 'all']"];
+
+		//-- Add onSel EH to question list
+		CIVINTERACT_LISTONE ctrlAddEventHandler ["LBSelChanged",{[SpyderAddons_civInteract,"mainListLBSelChanged", _this] call SpyderAddons_fnc_civInteract}];
+	};
+
+	case "mainListLBSelChanged": {
+		_arguments params ["_control","_index"];
+		_data = call compile (_control lbData _index);
+		_data params ["_question","_askTime"];
+
+		lbClear CIVINTERACT_LISTTWO;
+
+		//-- Question requires force definition
+		if (_askTime == -1) then {
+			private ["_forces"];
+
+			CIVINTERACT_LISTTWO ctrlShow true;
+			CIVINTERACT_ASKQUESTION ctrlShow false;
+
+			_forces = _data select 2;
+
+			switch (_forces) do {
+				case "friendly": {
+					_forces = [_logic,"FriendlyForces",[]] call ALiVE_fnc_hashGet;
+				};
+
+				case "enemy": {
+					_forces = [_logic,"EnemyForces",[]] call ALiVE_fnc_hashGet;
+				};
+
+				case "all": {
+					_forces1 = [_logic,"FriendlyForces",[]] call ALiVE_fnc_hashGet;
+					_forces2 = [_logic,"EnemyForces",[]] call ALiVE_fnc_hashGet;
+					_forces = _forces1 + _forces2;
+				};
+			};
+
+			//-- Populate list 2 with forces
+			{
+				_index = CIVINTERACT_LISTTWO lbAdd (_x select 1);
+				CIVINTERACT_LISTTWO lbSetData [_index, _question];
+			} forEach _forces;
+
+			//-- Add onSel EH to question list
+			CIVINTERACT_LISTTWO ctrlAddEventHandler ["LBSelChanged",{[SpyderAddons_civInteract,"secondaryListLBSelChanged", _this] call SpyderAddons_fnc_civInteract}];
+		} else {
+			CIVINTERACT_LISTTWO ctrlShow false;
+			CIVINTERACT_ASKQUESTION ctrlShow true;
+		};
+	};
+
+	case "secondaryListLBSelChanged": {
+		CIVINTERACT_ASKQUESTION ctrlShow true;
+	};
+
+	case "askQuestion": {
+			//-- Get responses to the question
+			_responses = [SpyderAddons_civInteract,_question] call SpyderAddons_fnc_questionHandler; //["Response Text", [["FollowupResponse1","Data1"],["FollowupResponse2","Data2"]]]
+
+			if (count (_responses select 1) > 0) then {
+				//-- Followup questions
+				CIVINTERACT_LISTTWO ctrlShow true;
+
+				CIVINTERACT_RESPONSEBOX ctrlSetText (_responses select 0);
+
+				//-- Populate list two with followup questions
+				{
+					_index = CIVINTERACT_LISTTWO lbAdd (_x select 0);
+					CIVINTERACT_LISTTWO lbSetData [_index, (_x select 1)];
+				} forEach (_responses select 0);
+			} else {
+				//-- No followup questions
+				CIVINTERACT_RESPONSEBOX ctrlSetText (_responses select 0);
+				CIVINTERACT_LISTTWO ctrlShow false;
+			};
 	};
 
 	case "isIrritated": {

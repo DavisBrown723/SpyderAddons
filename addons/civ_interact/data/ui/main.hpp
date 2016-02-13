@@ -6,7 +6,7 @@ class Civ_Interact
 {
 	idd = 923;
 	movingEnable = 1;
-	onLoad = "[SpyderAddons_civInteract,'onLoad'] call SpyderAddons_fnc_civInteract";
+	//onLoad = "[SpyderAddons_civInteract,'onLoad'] call SpyderAddons_fnc_civInteract"; //-- Get's executed before the menu is opened.. wtf
 	onUnload = "[SpyderAddons_civInteract,'unLoad'] call SpyderAddons_fnc_civInteract";
 
 	class controlsBackground {
@@ -52,7 +52,7 @@ class Civ_Interact
 			idc = 9232;
 
 			moving = 1;
-			text = "Civilian interaction";
+			text = "Civilian Interaction";
 			x = -2 * GUI_GRID_W + GUI_GRID_X;
 			y = -3 * GUI_GRID_H + GUI_GRID_Y;
 			w = 36 * GUI_GRID_W;
@@ -72,22 +72,6 @@ class Civ_Interact
 			h = 1 * GUI_GRID_H;
 			colorActive[] = {-1,-1,-1,-1};
 			sizeEx = 1 * GUI_GRID_H;
-		};
- 		class CivInteract_QuestionListOneFrame: CivInteract_RscFrame
-		{
-			idc = 1800;
-			x = -1.1 * GUI_GRID_W + GUI_GRID_X;
-			y = 1.4 * GUI_GRID_H + GUI_GRID_Y;
-			w = 16.4 * GUI_GRID_W;
-			h = 10.7 * GUI_GRID_H;
-		};
-		class CivInteract_QuestionListTwoFrame: CivInteract_RscFrame
-		{
-			idc = 1801;
-			x = 15.88 * GUI_GRID_W + GUI_GRID_X;
-			y = 1.4 * GUI_GRID_H + GUI_GRID_Y;
-			w = 16.4 * GUI_GRID_W;
-			h = 10.7 * GUI_GRID_H;
 		};
 		class CivInteract_ResponseTitle: CivInteract_RscText
 		{
@@ -121,27 +105,38 @@ class Civ_Interact
 		{
 			idc = 9234;
 
-			text = "Do you know the location of any insurgent hideouts";
+			text = "";
 			x = -1 * GUI_GRID_W + GUI_GRID_X;
 			y = 1.5 * GUI_GRID_H + GUI_GRID_Y;
-			w = 16 * GUI_GRID_W;
-			h = 10.5 * GUI_GRID_H;
+			w = 17 * GUI_GRID_W;
+			h = 9.3 * GUI_GRID_H;
 			colorBackground[] = {0.173,0.173,0.173,0.8};
-			colorActive[] = {0,0,0,0};
 			sizeEx = .67 * GUI_GRID_H;
 		};
 		class CivInteract_QuestionListTwo: CivInteract_RscListBox
 		{
-			idc = 9234;
+			idc = 9235;
 
-			text = "Do you know the location of any insurgent hideouts";
-			x = 16 * GUI_GRID_W + GUI_GRID_X;
+			text = "";
+			x = 16.5 * GUI_GRID_W + GUI_GRID_X;
 			y = 1.5 * GUI_GRID_H + GUI_GRID_Y;
-			w = 16 * GUI_GRID_W;
-			h = 10.5 * GUI_GRID_H;
+			w = 16.5 * GUI_GRID_W;
+			h = 9.3 * GUI_GRID_H;
 			colorBackground[] = {0.173,0.173,0.173,0.8};
-			colorActive[] = {0,0,0,0};
 			sizeEx = .67 * GUI_GRID_H;
+		};
+		class CivInteract_AskQuestion: CivInteract_RscButton
+		{
+			idc = 9247;
+			action = "[SpyderAddons_civInteract,'askQuestion'] call SpyderAddons_fnc_civInteract";
+
+			text = "Ask Question";
+			x = -1 * GUI_GRID_W + GUI_GRID_X;
+			y = 11.2 * GUI_GRID_H + GUI_GRID_Y;
+			w = 34 * GUI_GRID_W;
+			h = 1.2 * GUI_GRID_H;
+			colorBackground[] = {0.788,0.443,0.157,0.8};
+			sizeEx = .85 * GUI_GRID_H;
 		};
 		class CivInteract_ResponseList: CivInteract_RscStructuredText
 		{
