@@ -120,7 +120,7 @@ switch (_operation) do {
 
 		//-- Modify progress bar
 		INVENTORY_PROGRESSBARTITLE ctrlSetText "Closing Inventory";
-		_bar = [MOD(civInteract),"ProgressBar"] call ALiVE_fnc_hashGet;
+		_bar = [_logic,"ProgressBar"] call ALiVE_fnc_hashGet;
 		[_bar,.55] spawn SpyderAddons_fnc_progressAnimate;
 
 		//-- Move inventory controls
@@ -140,6 +140,7 @@ switch (_operation) do {
 
 		//-- Glide search button into position
 		INVENTORY_SEARCHBUTTON ctrlSetText "Search";
+		INVENTORY_SEARCHBUTTON ctrlSetTooltip "Search the civilian's inventory";
 		INVENTORY_SEARCHBUTTON buttonSetAction "[SpyderAddons_civInteract,'toggleSearchMenu'] call SpyderAddons_fnc_inventoryHandler";
 		INVENTORY_SEARCHBUTTON ctrlEnable false;
 		[INVENTORY_SEARCHBUTTON, [-.15,0,-0.225], 0.55] call SpyderAddons_fnc_ctrlRelMove;

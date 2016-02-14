@@ -36,21 +36,29 @@ params [
 ];
 
 //-- Define function shortcuts
-#define MAINCLASS 			SpyderAddons_fnc_personalityHandler
+#define MAINCLASS 		SpyderAddons_fnc_personalityHandler
 
 switch (_operation) do {
 
 	case "create": {
-		_result = [] call ALiVE_fnc_hashCreate;
-		[_result,"Positivity", ()] call ALiVE_fnc_hashSet;
-		[_result,"Negativity, ()] call ALiVE_fnc_hashSet;
-		[_result,"Bravery", ()] call ALiVE_fnc_hashSet;
-		[_result,"Indecisiveness", ()] call ALiVE_fnc_hashSet;
-		[_result,"Aggressiveness", ()] call ALiVE_fnc_hashSet;
+		_positivity = ((ceil random 100) - (ceil random 100)) + 20;
+		_negativity = ceil ();
+		_bravery = ceil ();
+		_indecisiveness = 
+		_aggressiveness = 
 
+		_result = [] call ALiVE_fnc_hashCreate;
+		[_result,"Positivity", _positivity] call ALiVE_fnc_hashSet;
+		[_result,"Negativity, _negativity] call ALiVE_fnc_hashSet;
+		[_result,"Bravery", _bravery] call ALiVE_fnc_hashSet;
+		[_result,"Indecisiveness", _indecisiveness] call ALiVE_fnc_hashSet;
+		[_result,"Aggressiveness", _aggressiveness] call ALiVE_fnc_hashSet;
+
+		_forces = [SpyderAddons_civInteract,"forces"] call SpyderAddons_fnc_civInteract;
 		_forceAlignments = [] call ALiVE_fnc_hashCreate;
-		[_forceAlignments,"SecurityForces", ()] call ALiVE_fnc_hashSet;
-		[_forceAlignments,"Insurgents", ()] call ALiVE_fnc_hashSet;
+		{
+			[_forceAlignments,(_x select 0), _x select 2]] call ALiVE_fnc_hashSet;
+		} foreach _forces;
 
 		[_result,"ForceAlignments", _forceAlignments] call ALiVE_fnc_hashSet;
 	};
@@ -62,7 +70,7 @@ switch (_operation) do {
 		if (_civID == "") exitWith {};
 
 		_civProfile = [ALIVE_agentHandler, "getAgent", _civID] call ALIVE_fnc_agentHandler;
-		_result = [_civProfile,"Personality", []] call ALiVE_fnc_hashGet;
+		_result = [_civProfile,"Personality", ""] call ALiVE_fnc_hashGet;
 
 		if (typename _result == "STRING") then {
 			_result = [_logic,"create", _civ] call MAINCLASS;

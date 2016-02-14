@@ -58,8 +58,6 @@ switch (_operation) do {
 
 	//-- Create logic on all localities
 	case "init": {
-		private ["_hostility"];
-
 		//-- Make sure ALiVE is running
 		if ((hasInterface) and {!(isClass (configfile >> "CfgVehicles" >> "ALiVE_require"))}) exitWith {
 			waitUntil {sleep 1; time > 5};
@@ -88,13 +86,13 @@ switch (_operation) do {
 
 			_ff = [];
 			{
-				_force = _x;
-				_force = [_force, "[", "['"] call CBA_fnc_replace;
-				_force = [_force, "]", "']"] call CBA_fnc_replace;
-				_force = [_force, ",", "','"] call CBA_fnc_replace;
-				_force = call compile _force;
+				_f = _x;
+				_f = [_f, "[", "['"] call CBA_fnc_replace;
+				_f = [_f, "]", "']"] call CBA_fnc_replace;
+				_f = [_f, ",", "','"] call CBA_fnc_replace;
+				_f = call compile _f;
 
-				_hostility = call compile (_force select 2);
+				private _hostility = call compile (_f select 2);
 				if (_hostility > 1) then {
 					_hostility = 1;
 				} else {
@@ -103,19 +101,27 @@ switch (_operation) do {
 					};
 				};
 
-				_force = [_force select 0,_force select 1,_hostility];
+				//-- Create forcehash
+				_force = [] call ALiVE_fnc_hashCreate;
+				[_force,"Faction", _f select 0] call ALiVE_fnc_hashSet;
+				[_force,"DisplayName", _f select 1] call ALiVE_fnc_hashSet;
+				[_force,"Hostility", _f select 2] call ALiVE_fnc_hashSet;
+				[_force,"Asymmetric", false] call ALiVE_fnc_hashSet;
+
 				_ff pushBack _force;
 			} forEach _friendlyForces;
 
 			_ef = [];
 			{
-				_force = _x;
-				_force = [_force, "[", "['"] call CBA_fnc_replace;
-				_force = [_force, "]", "']"] call CBA_fnc_replace;
-				_force = [_force, ",", "','"] call CBA_fnc_replace;
-				_force = call compile _force;
+				//-- Convert string
+				_f = _x;
+				_f = [_f, "[", "['"] call CBA_fnc_replace;
+				_f = [_f, "]", "']"] call CBA_fnc_replace;
+				_f = [_f, ",", "','"] call CBA_fnc_replace;
+				_f = call compile _f;
 
-				_hostility = call compile (_force select 2);
+				//-- Ensure hostility is between -1 and 1
+				private _hostility = call compile (_f select 2);
 				if (_hostility > 1) then {
 					_hostility = 1;
 				} else {
@@ -124,7 +130,17 @@ switch (_operation) do {
 					};
 				};
 
-				_force = [_force select 0,_force select 1,call compile (_force select 2)];
+				//-- Create forcehash
+				_force = [] call ALiVE_fnc_hashCreate;
+				[_force,"Faction", _f select 0] call ALiVE_fnc_hashSet;
+				[_force,"DisplayName", _f select 1] call ALiVE_fnc_hashSet;
+				[_force,"Hostility", _f select 2] call ALiVE_fnc_hashSet;
+				if (isnil {_f select 3}) then {
+					[_force,"Asymmetric", false] call ALiVE_fnc_hashSet;
+				} else {
+					[_force,"Asymmetric", _x select 3] call ALiVE_fnc_hashSet;
+				};
+
 				_ef pushBack _force;
 			} forEach _enemyForces;
 
@@ -136,6 +152,26 @@ switch (_operation) do {
 			[MOD(civInteract),"FriendlyForces", _ff] call ALiVE_fnc_hashSet;
 			[MOD(civInteract),"EnemyForces", _ef] call ALiVE_fnc_hashSet;
 		};
+	};
+
+	case "forces": {
+		if (typeName _arguments == "STRING") then {
+			_result = [_logic,_arguments] call ALiVE_fnc_hashGet;
+		} else {
+			_result = (([_logic,"FriendlyForces"] call ALiVE_fnc_hashGet) + ([_logic,"EnemyForces"] call ALiVE_fnc_hashGet));
+		};
+	};
+
+	case "getForceByDisplayName": {
+		_displayName = _arguments;
+
+		//-- More questions reference enemy forces, check first
+		_enemyForces = [_logic,"EnemyForces"] call ALiVE_fnc_hashGet;
+		{
+			if (_displayName == (_x select 1)) then {
+				_result = _x;
+			};
+		} forEach _enemyForces;
 	};
 
 	case "openMenu": {
@@ -371,10 +407,10 @@ switch (_operation) do {
 		_index = CIVINTERACT_LISTONE lbAdd "Have you seen any strange behavior lately?";
 		CIVINTERACT_LISTONE lbSetData [_index, "['StrangeBehavior', 2.5]"];
 
-		_index = CIVINTERACT_LISTONE lbAdd "What is your opinion of ..?";
+		_index = CIVINTERACT_LISTONE lbAdd "What is your opinion of .. forces?";
 		CIVINTERACT_LISTONE lbSetData [_index, "['ForcesOpinion', -1, 'all']"];
 
-		_index = CIVINTERACT_LISTONE lbAdd "What is the opinion of ... in this area?";
+		_index = CIVINTERACT_LISTONE lbAdd "What is the opinion of ... forces in this area?";
 		CIVINTERACT_LISTONE lbSetData [_index, "['TownOpinion', -1, 'all']"];
 
 		//-- Add onSel EH to question list
@@ -387,6 +423,7 @@ switch (_operation) do {
 		_data params ["_question","_askTime"];
 
 		lbClear CIVINTERACT_LISTTWO;
+		CIVINTERACT_LISTTWO lbSetCurSel -1;
 
 		//-- Question requires force definition
 		if (_askTime == -1) then {
@@ -415,7 +452,7 @@ switch (_operation) do {
 
 			//-- Populate list 2 with forces
 			{
-				_index = CIVINTERACT_LISTTWO lbAdd (_x select 1);
+				_index = CIVINTERACT_LISTTWO lbAdd ((_x select 2) select 1);
 				CIVINTERACT_LISTTWO lbSetData [_index, _question];
 			} forEach _forces;
 
@@ -427,30 +464,75 @@ switch (_operation) do {
 		};
 	};
 
+	//-- Cleanup function, too complex
 	case "secondaryListLBSelChanged": {
 		CIVINTERACT_ASKQUESTION ctrlShow true;
 	};
 
+	case "prepQuestion": {
+		_data = CIVINTERACT_LISTONE lbData (lbCurSel CIVINTERACT_LISTONE);
+		_data = call compile _data;
+		_data params ["_question","_askTime"];
+
+		//-- disable ask control
+		CIVINTERACT_ASKQUESTION ctrlEnable false;
+
+		//-- animate progress bar
+		_bar = [_logic,"ProgressBar"] call ALiVE_fnc_hashGet;
+		[_bar,_askTime] spawn SpyderAddons_fnc_progressAnimate;
+
+		//-- Ask question after delay if menu is still open
+		[_logic,"askQuestion", [_question,_askTime]] spawn MAINCLASS;
+	};
+
 	case "askQuestion": {
-			//-- Get responses to the question
-			_responses = [SpyderAddons_civInteract,_question] call SpyderAddons_fnc_questionHandler; //["Response Text", [["FollowupResponse1","Data1"],["FollowupResponse2","Data2"]]]
+		_arguments params ["_question","_askTime"];
 
-			if (count (_responses select 1) > 0) then {
-				//-- Followup questions
-				CIVINTERACT_LISTTWO ctrlShow true;
+		//-- Wait until progress bar is filled
+		sleep _askTime;
 
-				CIVINTERACT_RESPONSEBOX ctrlSetText (_responses select 0);
+		//-- Enable ask control
+		CIVINTERACT_ASKQUESTION ctrlEnable true;
 
-				//-- Populate list two with followup questions
-				{
-					_index = CIVINTERACT_LISTTWO lbAdd (_x select 0);
-					CIVINTERACT_LISTTWO lbSetData [_index, (_x select 1)];
-				} forEach (_responses select 0);
-			} else {
-				//-- No followup questions
-				CIVINTERACT_RESPONSEBOX ctrlSetText (_responses select 0);
+		//-- Exit if menu has closed
+		if (isnull (findDisplay 923)) exitWith {};
+
+		if (ctrlShown CIVINTERACT_LISTTWO) then {
+			//-- Ask question from list one, with force from list two
+
+			//-- Delete selected option
+			CIVINTERACT_LISTTWO lbDelete (lbCurSel CIVINTERACT_LISTTWO);
+
+			//-- If no more options in list two, delete question from list two
+			if (lbSize CIVINTERACT_LISTTWO == 0) then {
 				CIVINTERACT_LISTTWO ctrlShow false;
+				CIVINTERACT_LISTONE lbDelete (lbCurSel CIVINTERACT_LISTONE);
 			};
+		} else {
+			CIVINTERACT_LISTONE lbDelete (lbCurSel CIVINTERACT_LISTONE);
+		};
+
+		//-- Get responses to the question
+		_responses = [SpyderAddons_civInteract,_question] call SpyderAddons_fnc_getResponses; //-- ["Response Text", [["FollowupResponse1","Data1"],["FollowupResponse2","Data2"]]]
+
+		if (count (_responses select 1) > 0) then {
+			//-- Followup questions
+			CIVINTERACT_LISTTWO ctrlShow true;
+
+			CIVINTERACT_RESPONSEBOX ctrlSetText (_responses select 0);
+
+			//-- Populate list two with followup questions
+			{
+				_index = CIVINTERACT_LISTTWO lbAdd (_x select 0);
+				CIVINTERACT_LISTTWO lbSetData [_index, (_x select 1)];
+			} forEach (_responses select 1);
+		} else {
+			//-- No followup questions
+			CIVINTERACT_RESPONSEBOX ctrlSetText (_responses select 0);
+			CIVINTERACT_LISTTWO ctrlShow false;
+		};
+
+		if (lbCurSel CIVINTERACT_LISTONE != -1) then {CIVINTERACT_LISTONE lbSetCurSel (lbCurSel CIVINTERACT_LISTONE)};
 	};
 
 	case "isIrritated": {

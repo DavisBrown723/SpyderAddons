@@ -128,7 +128,7 @@ class Civ_Interact
 		class CivInteract_AskQuestion: CivInteract_RscButton
 		{
 			idc = 9247;
-			action = "[SpyderAddons_civInteract,'askQuestion'] call SpyderAddons_fnc_civInteract";
+			action = "[SpyderAddons_civInteract,'prepQuestion'] call SpyderAddons_fnc_civInteract";
 
 			text = "Ask Question";
 			x = -1 * GUI_GRID_W + GUI_GRID_X;
@@ -136,6 +136,8 @@ class Civ_Interact
 			w = 34 * GUI_GRID_W;
 			h = 1.2 * GUI_GRID_H;
 			colorBackground[] = {0.788,0.443,0.157,0.8};
+			colorSelect[] = {0.788,0.443,0.157,0.8};
+			colorSelect2[] = {0.788,0.443,0.157,0.8};
 			sizeEx = .85 * GUI_GRID_H;
 		};
 		class CivInteract_ResponseList: CivInteract_RscStructuredText
@@ -229,6 +231,7 @@ class Civ_Interact
 			action = "[SpyderAddons_civInteract,'toggleSearchMenu'] call SpyderAddons_fnc_inventoryHandler";
 
 			text = "Search";
+			tooltip = "Search the civilian's inventory";
 			x = 28.5 * GUI_GRID_W + GUI_GRID_X;
 			y = 23.25 * GUI_GRID_H + GUI_GRID_Y;
 			w = 5.5 * GUI_GRID_W;
