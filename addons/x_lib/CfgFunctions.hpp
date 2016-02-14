@@ -37,6 +37,18 @@ class CfgFunctions {
 				file = "\x\spyderaddons\addons\x_lib\functions\logistics\addForcepool.sqf";
 				recompile = RECOMPILE;
 			};
+
+			//////-- Numbers --//////
+			class getClosestNumber {
+				description = "Returns the closest number number in an array to the passed number";
+				file = "\x\spyderaddons\addons\x_lib\functions\numbers\getClosestNumber.sqf";
+				recompile = RECOMPILE;
+			};
+			class numberInBounds {
+				description = "Checks if a number is between the given bounds, and either returns true/false or the closest bound if it isn't";
+				file = "\x\spyderaddons\addons\x_lib\functions\numbers\numberInBounds.sqf";
+				recompile = RECOMPILE;
+			};
 			
 			//////-- Misc --//////
 			class getFactionMostPlayers {

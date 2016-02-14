@@ -15,6 +15,10 @@ logistics
 
 	addForcepool
 
+numbers
+	getClosestNumber
+	numberInBounds
+
 misc
 
 	getFactionMostPlayers
