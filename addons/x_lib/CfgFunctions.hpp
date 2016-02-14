@@ -45,7 +45,7 @@ class CfgFunctions {
 				recompile = RECOMPILE;
 			};
 			class numberInBounds {
-				description = "Checks if a number is between the given bounds, and either returns true/false or the closest bound if it isn't";
+				description = "Returns whether a number is between the given bounds";
 				file = "\x\spyderaddons\addons\x_lib\functions\numbers\numberInBounds.sqf";
 				recompile = RECOMPILE;
 			};

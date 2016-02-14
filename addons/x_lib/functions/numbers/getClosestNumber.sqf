@@ -17,15 +17,27 @@ _result = [5,[0,4,10]] call SpyderAddons_fnc_closestNumberInArray;		//-- Returns
 _result = [0,[-1,2]] call SpyderAddons_fnc_closestNumberInArray;		//-- Returns: -1
 (end)
 
-See Also:
-- nil
+Notes:
+- If there are multiple numbers with the same distance from the number being checked, the first will be selected
+ex. [5,[4,6]] Will return 4
+- If the array is empty, nil will be returned
 
 Author: SpyderBlack723
 ---------------------------------------------------------------------------- */
 
+private ["_result","_closest"];
 params ["_number","_array"];
-private _closest = 0;
 
-{if (abs (_number - _x) < _closest) then {_closest = _x}} forEach _array;
+if (count _array > 0) then {
+	_closest = abs (_number - (_array select 0)) + 1;
 
-if (_closest == 0) then {_number} else {_closest};
+	{
+		_diff = abs (_number - _x);
+		if (_diff < _closest) then {
+			_closest = _diff;
+			_result = _x;
+		};
+	} forEach _array;
+};
+
+_result
