@@ -301,9 +301,12 @@ switch (_operation) do {
 				_name = name _civ;
 			};
 
+			_personality = [nil,"getPersonality", _civ] call SpyderAddons_fnc_personalityHandler;
+
 			//-- Create hash
 			_civInfo = [] call ALiVE_fnc_hashCreate;
 			[_civInfo,"Name", _name] call ALiVE_fnc_hashSet;
+			[_civInfo,"Personality", _personality] call ALiVE_fnc_hashSet;
 			[_civInfo,"HomePosition", _homePos] call ALiVE_fnc_hashSet;
 			[_civInfo,"HostilityIndividual", _hostilityIndividual] call ALiVE_fnc_hashSet;
 			[_civInfo,"HostilityTown", _hostilityTown] call ALiVE_fnc_hashSet;
@@ -358,6 +361,7 @@ switch (_operation) do {
 		};
 		
 		_arguments params ["_installations","_civInfo","_hostileCivInfo"];
+
 		_civ = [MOD(civInteract),"Civ"] call ALiVE_fnc_hashGet;
 		_answersGiven = _civ getVariable ["AnswersGiven", []];
 

@@ -40,29 +40,6 @@ params [
 
 switch (_operation) do {
 
-	case "create": {
-		_positivity = ((ceil random 100) - (ceil random 100)) + 20;
-		_negativity = ceil ();
-		_bravery = ceil ();
-		_indecisiveness = 
-		_aggressiveness = 
-
-		_result = [] call ALiVE_fnc_hashCreate;
-		[_result,"Positivity", _positivity] call ALiVE_fnc_hashSet;
-		[_result,"Negativity, _negativity] call ALiVE_fnc_hashSet;
-		[_result,"Bravery", _bravery] call ALiVE_fnc_hashSet;
-		[_result,"Indecisiveness", _indecisiveness] call ALiVE_fnc_hashSet;
-		[_result,"Aggressiveness", _aggressiveness] call ALiVE_fnc_hashSet;
-
-		_forces = [SpyderAddons_civInteract,"forces"] call SpyderAddons_fnc_civInteract;
-		_forceAlignments = [] call ALiVE_fnc_hashCreate;
-		{
-			[_forceAlignments,(_x select 0), _x select 2]] call ALiVE_fnc_hashSet;
-		} foreach _forces;
-
-		[_result,"ForceAlignments", _forceAlignments] call ALiVE_fnc_hashSet;
-	};
-
 	case "getPersonality": {
 		_civ = _arguments;
 		_civID = _civ getVariable ["agentID", ""];
@@ -75,6 +52,63 @@ switch (_operation) do {
 		if (typename _result == "STRING") then {
 			_result = [_logic,"create", _civ] call MAINCLASS;
 			[_civProfile,"Personality", _result] call ALiVE_fnc_hashSet;
+		};
+	};
+
+	case "create": {
+		_hostility = [nil,"generateHostilityValue"] call MAINCLASS;
+		_bravery = [nil,"generateBraveryValue"] call MAINCLASS;
+		_indecisiveness = [nil,"generateIndecisivenessValue", _bravery] call MAINCLASS;
+		_aggressiveness = [nil,"generateAggressivenessValue", [_bravery,_indecisiveness]] call MAINCLASS;
+
+		_result = [] call ALiVE_fnc_hashCreate;
+		[_result,"Hostility", _hostility] call ALiVE_fnc_hashSet;
+		[_result,"Bravery", _bravery] call ALiVE_fnc_hashSet;
+		[_result,"Aggressiveness", _aggressiveness] call ALiVE_fnc_hashSet;
+		[_result,"Indecisiveness", _indecisiveness] call ALiVE_fnc_hashSet;
+
+		_forces = [SpyderAddons_civInteract,"forces"] call SpyderAddons_fnc_civInteract;
+		_forceAlignments = [] call ALiVE_fnc_hashCreate;
+		{
+			[_forceAlignments,[(_x select 0), _x select 2]] call ALiVE_fnc_hashSet;
+		} foreach _forces;
+
+		[_result,"ForceAlignments", _forceAlignments] call ALiVE_fnc_hashSet;
+	};
+
+	case "generateHostilityValue": {
+		//-- Average over 10,000 iterations: 65
+		_result = ((ceil random 100) + 30) - (floor random 40);
+		if !([_result,[0,100]] call SpyderAddons_fnc_numberInBounds) then {
+			_result = [_result,[0,100]] call SpyderAddons_fnc_getClosestNumber;
+		};
+	};
+
+	case "generateBraveryValue": {
+		//-- Average over 10,000 iterations: 24
+		_result = (ceil random 100) - (floor random 70);
+		if !([_result,[0,100]] call SpyderAddons_fnc_numberInBounds) then {
+			_result = [_result,[0,100]] call SpyderAddons_fnc_getClosestNumber;
+		};
+	};
+
+	case "generateIndecisivenessValue": {
+		_bravery = _arguments;
+
+		//-- Average over 10,000 iterations: 59
+		_result = ((ceil random 100) + 30) - (ceil random 20 + (ceil random 20));
+		if !([_result,[0,100]] call SpyderAddons_fnc_numberInBounds) then {
+			_result = [_result,[0,100]] call SpyderAddons_fnc_getClosestNumber;
+		};
+	};
+
+	case "generateAggressivenessValue": {
+		_arguments params ["_bravery","_indecisiveness"];
+
+		//-- Average over 10,000 iterations: 34
+		_result = ((ceil random 100) + 15) - (ceil random 30 + (ceil random 30));
+		if !([_result,[0,100]] call SpyderAddons_fnc_numberInBounds) then {
+			_result = [_result,[0,100]] call SpyderAddons_fnc_getClosestNumber;
 		};
 	};
 
@@ -134,13 +168,20 @@ switch (_operation) do {
 	};
 
 	case "getForceAlignment": {
-		_arguments params ["_civ","_force"];
-		_personality = [_logic,"getPersonality", _civ] call MAINCLASS;
+		_arguments params ["_personality","_force"];
 		_sideAlignments = [_personality,"SideAlignments"] call ALiVE_fnc_hashGet;
 		_return = [_sideAlignments,_force] call ALiVE_fnc_hashGet;
 	};
 
-	
+	case "savePersonality": {
+		_arguments params ["_civ","_personality"];
+
+		_civID = _civ getVariable ["agentID", ""];
+		if (_civID == "") exitWith {};
+
+		_civProfile = [ALIVE_agentHandler, "getAgent", _civID] call ALIVE_fnc_agentHandler;
+		[_civProfile,"Personality", _personality] call ALiVE_fnc_hashSet;
+	};
 
 };
 
