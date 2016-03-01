@@ -47,8 +47,6 @@ params [
 #define INVENTORY_GEARLIST		(CIVINTERACT_DISPLAY displayCtrl 9244)
 
 #define INVENTORY_PROGRESSBARTITLE	(CIVINTERACT_DISPLAY displayCtrl 9248)
-#define INVENTORY_PROGRESSBAR		(CIVINTERACT_DISPLAY displayCtrl 9249)
-#define INVENTORY_PROGRESSBAR2		(CIVINTERACT_DISPLAY displayCtrl 8563)
 
 #define INVENTORY_BUTTONONE		(CIVINTERACT_DISPLAY displayCtrl 9242)
 #define INVENTORY_BUTTONTWO		(CIVINTERACT_DISPLAY displayCtrl 9245)
@@ -79,7 +77,7 @@ switch (_operation) do {
 	case "openMenu": {
 		//-- Set progress bar info
 		INVENTORY_PROGRESSBARTITLE ctrlSetText "Opening Inventory";
-		_bar = [MOD(civInteract),"ProgressBar"] call ALiVE_fnc_hashGet;
+		_bar = [MOD(civilianInteraction),"ProgressBar"] call ALiVE_fnc_hashGet;
 		[_bar,.55] spawn SpyderAddons_fnc_progressAnimate;
 
 		//-- Set inventory controls to starting position
@@ -106,7 +104,7 @@ switch (_operation) do {
 			(_this select 0) ctrlEnable true;
 			(_this select 1) ctrlSetText "";
 
-			[SpyderAddons_civInteract,"displayGearContainers"] call MAINCLASS;
+			[SpyderAddons_civilianInteraction,"displayGearContainers"] call MAINCLASS;
 		};
 	};
 
@@ -141,7 +139,7 @@ switch (_operation) do {
 		//-- Glide search button into position
 		INVENTORY_SEARCHBUTTON ctrlSetText "Search";
 		INVENTORY_SEARCHBUTTON ctrlSetTooltip "Search the civilian's inventory";
-		INVENTORY_SEARCHBUTTON buttonSetAction "[SpyderAddons_civInteract,'toggleSearchMenu'] call SpyderAddons_fnc_inventoryHandler";
+		INVENTORY_SEARCHBUTTON buttonSetAction "[SpyderAddons_civilianInteraction,'toggleSearchMenu'] call SpyderAddons_fnc_inventoryHandler";
 		INVENTORY_SEARCHBUTTON ctrlEnable false;
 		[INVENTORY_SEARCHBUTTON, [-.15,0,-0.225], 0.55] call SpyderAddons_fnc_ctrlRelMove;
 
@@ -168,25 +166,25 @@ switch (_operation) do {
 			INVENTORY_BUTTONONE ctrlShow true;
 			INVENTORY_BUTTONONE ctrlSetText "Confiscate";
 			INVENTORY_BUTTONONE ctrlSetTooltip "Take selected item from the civilian";
-			INVENTORY_BUTTONONE buttonSetAction "[SpyderAddons_civInteract,'confiscate'] call SpyderAddons_fnc_inventoryHandler";
+			INVENTORY_BUTTONONE buttonSetAction "[SpyderAddons_civilianInteraction,'confiscate'] call SpyderAddons_fnc_inventoryHandler";
 
 			INVENTORY_BUTTONTWO ctrlShow true;
 			INVENTORY_BUTTONTWO ctrlSetText "View Contents";
 			INVENTORY_BUTTONTWO ctrlSetTooltip "View items inside selected container";
-			INVENTORY_BUTTONTWO buttonSetAction "[SpyderAddons_civInteract,'openGearContainer'] call SpyderAddons_fnc_inventoryHandler";
+			INVENTORY_BUTTONTWO buttonSetAction "[SpyderAddons_civilianInteraction,'openGearContainer'] call SpyderAddons_fnc_inventoryHandler";
 
 			INVENTORY_BUTTONTHREE ctrlShow true;
 			INVENTORY_BUTTONTHREE ctrlSetText "Close";
-			INVENTORY_BUTTONTHREE buttonSetAction "[SpyderAddons_civInteract,'toggleSearchMenu'] call SpyderAddons_fnc_inventoryHandler";
+			INVENTORY_BUTTONTHREE buttonSetAction "[SpyderAddons_civilianInteraction,'toggleSearchMenu'] call SpyderAddons_fnc_inventoryHandler";
 		} else {
 			INVENTORY_BUTTONONE ctrlShow true;
 			INVENTORY_BUTTONONE ctrlSetText "Confiscate";
 			INVENTORY_BUTTONONE ctrlSetTooltip "Take selected item from the civilian";
-			INVENTORY_BUTTONONE buttonSetAction "[SpyderAddons_civInteract,'confiscate'] call SpyderAddons_fnc_inventoryHandler";
+			INVENTORY_BUTTONONE buttonSetAction "[SpyderAddons_civilianInteraction,'confiscate'] call SpyderAddons_fnc_inventoryHandler";
 
 			INVENTORY_BUTTONTWO ctrlShow true;
 			INVENTORY_BUTTONTWO ctrlSetText "Close";
-			INVENTORY_BUTTONTWO buttonSetAction "[SpyderAddons_civInteract,'toggleSearchMenu'] call SpyderAddons_fnc_inventoryHandler";
+			INVENTORY_BUTTONTWO buttonSetAction "[SpyderAddons_civilianInteraction,'toggleSearchMenu'] call SpyderAddons_fnc_inventoryHandler";
 
 			INVENTORY_BUTTONTHREE ctrlShow false;
 		};
@@ -212,7 +210,7 @@ switch (_operation) do {
 			if (_gearmode == "Containers") then {
 				INVENTORY_BUTTONONE ctrlShow true;
 				INVENTORY_BUTTONONE ctrlSetText "Close";
-				INVENTORY_BUTTONONE buttonSetAction "[SpyderAddons_civInteract,'toggleSearchMenu'] call SpyderAddons_fnc_inventoryHandler";
+				INVENTORY_BUTTONONE buttonSetAction "[SpyderAddons_civilianInteraction,'toggleSearchMenu'] call SpyderAddons_fnc_inventoryHandler";
 
 				INVENTORY_BUTTONTWO ctrlShow false;
 				INVENTORY_BUTTONTHREE ctrlShow false;
@@ -220,11 +218,11 @@ switch (_operation) do {
 				INVENTORY_BUTTONONE ctrlShow true;
 				INVENTORY_BUTTONONE ctrlSetText "Close Contents";
 				INVENTORY_BUTTONONE ctrlSetTooltip "Close the container currently being viewed";
-				INVENTORY_BUTTONONE buttonSetAction "[SpyderAddons_civInteract,'displayGearContainers'] call SpyderAddons_fnc_inventoryHandler";
+				INVENTORY_BUTTONONE buttonSetAction "[SpyderAddons_civilianInteraction,'displayGearContainers'] call SpyderAddons_fnc_inventoryHandler";
 
 				INVENTORY_BUTTONTWO ctrlShow true;
 				INVENTORY_BUTTONTWO ctrlSetText "Close";
-				INVENTORY_BUTTONTWO buttonSetAction "[SpyderAddons_civInteract,'toggleSearchMenu'] call SpyderAddons_fnc_inventoryHandler";
+				INVENTORY_BUTTONTWO buttonSetAction "[SpyderAddons_civilianInteraction,'toggleSearchMenu'] call SpyderAddons_fnc_inventoryHandler";
 
 				INVENTORY_BUTTONTHREE ctrlShow false;
 			};
@@ -263,7 +261,7 @@ switch (_operation) do {
 		[_logic,"GearMode", "Containers"] call ALiVE_fnc_hashSet;
 
 		//-- Add EH to list
-		INVENTORY_GEARLIST ctrlAddEventHandler ["LBSelChanged",{[SpyderAddons_civInteract,"onGearClick", _this] call SpyderAddons_fnc_inventoryHandler}];
+		INVENTORY_GEARLIST ctrlAddEventHandler ["LBSelChanged",{[SpyderAddons_civilianInteraction,"onGearClick", _this] call SpyderAddons_fnc_inventoryHandler}];
 
 		//-- Reorder buttons
 		[_logic,"reorderButtons"] call MAINCLASS;

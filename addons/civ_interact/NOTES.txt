@@ -1,3 +1,7 @@
+Dialog String Count = 94 -- Last line: WatchOutThreat
+
+
+
 When questions are asked, remove them from the list (?)
 
 It is a fine day, isn't it?
@@ -8,3 +12,33 @@ You are under arrest, please follow me. (replaced detain button)
 It is not safe here, leave the area (replaces go away button)
 What do you know of NAME - (when told of suspicious people, they are added to a list (for limited time or death). Selecting this option brings up a sublist listing names of those stored suspicious people)
 Do you know of anyone involved in suspicous activity in town
+
+
+
+
+IMPORTANT
+
+The design I've gone with is
+
+Main list holding all initial questions
+	When questions are selected from that list and asked, the question is sent to the questionHandler with
+	the question as the operation, empty arguments. If the question contains additional topics of conversation,
+	send those topics to the "enableSubResponses" operation which will then display those topics in list one.
+
+	If a question has a "... forces" string in it, the second list will appear with all viable forces for 
+	the question. Upon selecting a force, the "Ask Question" button will appear and the player can ask the
+	question as normal. The question will be sent to the questionHandler as normal with the selected force
+	as the arguments.
+
+	When the question handler returns the main response, it will also return any additional responses.
+	For flexibility and ease of expansion, any changes to the civilians personality or info will be made
+	directly in the getResponses function.
+
+	Civilians may choose to give false information on insurgent locations if hostile towards the player
+	and a random chance including their bravery
+
+	When a civilian gives the player information about a force, an installation, a hostile civilian. A hash
+	will be added to the [SpyderAddons_civilianInteraction,"Topics"] hash with the question name and the
+	position of where the information was learned. From this point on, every time the civilian interaction menu
+	is opened, if the new opened location is within ~300m or so from the stored topic location, the topic question
+	will be displayed, otherwise it is deleted.

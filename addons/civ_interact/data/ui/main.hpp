@@ -6,8 +6,8 @@ class Civ_Interact
 {
 	idd = 923;
 	movingEnable = 1;
-	//onLoad = "[SpyderAddons_civInteract,'onLoad'] call SpyderAddons_fnc_civInteract"; //-- Get's executed before the menu is opened.. wtf
-	onUnload = "[SpyderAddons_civInteract,'unLoad'] call SpyderAddons_fnc_civInteract";
+	//onLoad = "[SpyderAddons_civilianInteraction,'onLoad'] call SpyderAddons_fnc_civilianInteraction"; //-- Get's executed before the menu is opened.. wtf
+	onUnload = "[SpyderAddons_civilianInteraction,'unLoad'] call SpyderAddons_fnc_civilianInteraction";
 
 	class controlsBackground {
 		class CivInteract_inventory_Background: CivInteract_RscText
@@ -128,7 +128,7 @@ class Civ_Interact
 		class CivInteract_AskQuestion: CivInteract_RscButton
 		{
 			idc = 9247;
-			action = "[SpyderAddons_civInteract,'prepQuestion'] call SpyderAddons_fnc_civInteract";
+			action = "[SpyderAddons_civilianInteraction,'prepQuestion'] call SpyderAddons_fnc_civilianInteraction";
 
 			text = "Ask Question";
 			x = -1 * GUI_GRID_W + GUI_GRID_X;
@@ -138,9 +138,10 @@ class Civ_Interact
 			colorBackground[] = {0.788,0.443,0.157,0.8};
 			colorSelect[] = {0.788,0.443,0.157,0.8};
 			colorSelect2[] = {0.788,0.443,0.157,0.8};
+			colorBackgroundDisabled[] = {0.788,0.443,0.157,0.5};
 			sizeEx = .85 * GUI_GRID_H;
 		};
-		class CivInteract_ResponseList: CivInteract_RscStructuredText
+		class CivInteract_ResponseBox: CivInteract_RscStructuredText
 		{
 			idc = 9239;
 
@@ -150,7 +151,7 @@ class Civ_Interact
 			h = 8 * GUI_GRID_H;
 			colorBackground[] = {0,0,0,0};
 			colorActive[] = {0,0,0,0};
-			sizeEx = .8 * GUI_GRID_H;
+			sizeEx = .6 * GUI_GRID_H;
 		};
 		class CivInteract_ProgressBarTitle: CivInteract_RscText
 		{
@@ -176,7 +177,7 @@ class Civ_Interact
 		class CivInteract_Detain: CivInteract_RscButton
 		{
 			idc = 92311;
-			action = "[SpyderAddons_civInteract,'Detain'] call SpyderAddons_fnc_civInteract";
+			action = "[SpyderAddons_civilianInteraction,'Detain'] call SpyderAddons_fnc_civilianInteraction";
 
 			text = "Detain";
 			x = 7.5 * GUI_GRID_W + GUI_GRID_X;
@@ -189,7 +190,7 @@ class Civ_Interact
 		class CivInteract_GetDown: CivInteract_RscButton
 		{
 			idc = 92312;
-			action = "[SpyderAddons_civInteract,'getDown'] call SpyderAddons_fnc_civInteract";
+			action = "[SpyderAddons_civilianInteraction,'getDown'] call SpyderAddons_fnc_civilianInteraction";
 
 			text = "Get Down";
 			x = 13.5 * GUI_GRID_W + GUI_GRID_X;
@@ -202,7 +203,7 @@ class Civ_Interact
 		class CivInteract_GoAway: CivInteract_RscButton
 		{
 			idc = 92313;
-			action = "[SpyderAddons_civInteract,'goAway'] call SpyderAddons_fnc_civInteract";
+			action = "[SpyderAddons_civilianInteraction,'goAway'] call SpyderAddons_fnc_civilianInteraction";
 
 			text = "Go Away";
 			x = 19.5 * GUI_GRID_W + GUI_GRID_X;
@@ -228,7 +229,7 @@ class Civ_Interact
 		class CivInteract_Search: CivInteract_RscButton
 		{
 			idc = 9242;
-			action = "[SpyderAddons_civInteract,'toggleSearchMenu'] call SpyderAddons_fnc_inventoryHandler";
+			action = "[SpyderAddons_civilianInteraction,'toggleSearchMenu'] call SpyderAddons_fnc_inventoryHandler";
 
 			text = "Search";
 			tooltip = "Search the civilian's inventory";

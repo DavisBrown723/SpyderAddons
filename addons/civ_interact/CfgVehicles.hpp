@@ -6,7 +6,7 @@ class CfgVehicles
 		scope = 2;
 		author = "SpyderBlack723";
 		displayName = "Civilian Interaction";
-		function = "SpyderAddons_fnc_civInteractInit";
+		function = "SpyderAddons_fnc_civilianInteractionInit";
 		icon = "x\spyderaddons\addons\civ_interact\icon_civ_interact.paa";
 		picture = "x\spyderaddons\addons\civ_interact\icon_civ_interact.paa";
 		functionPriority = 10;
@@ -29,6 +29,23 @@ class CfgVehicles
 					class No {
 						name = "No";
 						value = false;
+					};
+				};
+			};
+
+			class Debug {
+				displayName = "Debug";
+				description = "Enable Debug";
+				class values {
+					class Yes {
+						name = "Yes";
+						value = true;
+					};
+
+					class No {
+						name = "No";
+						value = false;
+						default = 1;
 					};
 				};
 			};

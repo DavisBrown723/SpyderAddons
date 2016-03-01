@@ -56,32 +56,25 @@ switch (_operation) do {
 	};
 
 	case "create": {
-		_hostility = [nil,"generateHostilityValue"] call MAINCLASS;
+		//_hostility = [nil,"generateHostilityValue"] call MAINCLASS;
 		_bravery = [nil,"generateBraveryValue"] call MAINCLASS;
-		_indecisiveness = [nil,"generateIndecisivenessValue", _bravery] call MAINCLASS;
 		_aggressiveness = [nil,"generateAggressivenessValue", [_bravery,_indecisiveness]] call MAINCLASS;
+		_patience = [nil,"generatePatienceValue", _aggressiveness] call MAINCLASS;
+		_indecisiveness = [nil,"generateIndecisivenessValue", _bravery] call MAINCLASS;
 
 		_result = [] call ALiVE_fnc_hashCreate;
-		[_result,"Hostility", _hostility] call ALiVE_fnc_hashSet;
 		[_result,"Bravery", _bravery] call ALiVE_fnc_hashSet;
 		[_result,"Aggressiveness", _aggressiveness] call ALiVE_fnc_hashSet;
+		[_result,"Patience", _patience] call ALiVE_fnc_hashSet;
 		[_result,"Indecisiveness", _indecisiveness] call ALiVE_fnc_hashSet;
 
-		_forces = [SpyderAddons_civInteract,"forces"] call SpyderAddons_fnc_civInteract;
+		_forces = [SpyderAddons_civilianInteraction,"forces"] call SpyderAddons_fnc_civilianInteraction;
 		_forceAlignments = [] call ALiVE_fnc_hashCreate;
 		{
-			[_forceAlignments,[(_x select 0), _x select 2]] call ALiVE_fnc_hashSet;
+			[_forceAlignments,(_x select 2) select 0, (_x select 2) select 2] call ALiVE_fnc_hashSet;
 		} foreach _forces;
 
 		[_result,"ForceAlignments", _forceAlignments] call ALiVE_fnc_hashSet;
-	};
-
-	case "generateHostilityValue": {
-		//-- Average over 10,000 iterations: 65
-		_result = ((ceil random 100) + 30) - (floor random 40);
-		if !([_result,[0,100]] call SpyderAddons_fnc_numberInBounds) then {
-			_result = [_result,[0,100]] call SpyderAddons_fnc_getClosestNumber;
-		};
 	};
 
 	case "generateBraveryValue": {
@@ -92,8 +85,8 @@ switch (_operation) do {
 		};
 	};
 
-	case "generateIndecisivenessValue": {
-		_bravery = _arguments;
+	case "generatePatienceValue": {
+		__aggressiveness = _arguments;
 
 		//-- Average over 10,000 iterations: 59
 		_result = ((ceil random 100) + 30) - (ceil random 20 + (ceil random 20));
@@ -107,6 +100,16 @@ switch (_operation) do {
 
 		//-- Average over 10,000 iterations: 34
 		_result = ((ceil random 100) + 15) - (ceil random 30 + (ceil random 30));
+		if !([_result,[0,100]] call SpyderAddons_fnc_numberInBounds) then {
+			_result = [_result,[0,100]] call SpyderAddons_fnc_getClosestNumber;
+		};
+	};
+
+	case "generateIndecisivenessValue": {
+		_bravery = _arguments;
+
+		//-- Average over 10,000 iterations: 59
+		_result = ((ceil random 100) + 30) - (ceil random 20 + (ceil random 20));
 		if !([_result,[0,100]] call SpyderAddons_fnc_numberInBounds) then {
 			_result = [_result,[0,100]] call SpyderAddons_fnc_getClosestNumber;
 		};
@@ -174,6 +177,7 @@ switch (_operation) do {
 	};
 
 	case "savePersonality": {
+		if !(isServer) exitWith {[_logic,_operation,_arguments] remoteExecCall [QUOTE(MAINCLASS),2]};
 		_arguments params ["_civ","_personality"];
 
 		_civID = _civ getVariable ["agentID", ""];
