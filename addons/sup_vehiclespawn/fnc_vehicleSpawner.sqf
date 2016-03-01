@@ -45,27 +45,24 @@ private ["_result"];
 switch (_operation) do {
 
 	case "init": {
-		private ["_spawnPosition"];
 		_arguments params ["_logic","_syncedUnits"];
 
 		_spawnMarker = _logic getVariable "SpawnPosition";
-		_spawnHeight = _logic getVariable "SpawnHeight";
+		_spawnHeight = call compile (_logic getVariable "SpawnHeight");
 		_factions = [_logic getVariable "VehicleFactions"] call SpyderAddons_fnc_getModuleArray;
 		_whitelist = [_logic getVariable "VehiclesWhitelist"] call SpyderAddons_fnc_getModuleArray;
 		_blacklist = [_logic getVariable "VehiclesBlacklist"] call SpyderAddons_fnc_getModuleArray;
 		_typeBlacklist = [_logic getVariable "VehiclesTypeBlacklist"] call SpyderAddons_fnc_getModuleArray;
 		_typeWhitelist = [_logic getVariable "VehiclesTypeWhitelist"] call SpyderAddons_fnc_getModuleArray;
-		_spawnCode = compile (_logic getVariable "SpawnCode");
+		_code = _logic getVariable "SpawnCode";
 
-		_spawnPosition = getMarkerPos _spawnMarker;
-		_spawnDir = markerDir _spawnMarker;
-
-		if (_spawnHeight != "") then {_spawnPosition = [_spawnPosition select 0, _spawnPosition select 1, call (compile _spawnHeight)]};
+		// Replace references to "this" with "_this"
+		_code = compile ([_code,"this","_this"] call CBA_fnc_replace);
 
 		{
 			if !(_x getVariable ["VehicleSpawner_Settings", false]) then {
 				if (typeName _x == "OBJECT") then {
-					_x setVariable ["VehicleSpawner_Settings", [_spawnPosition, _spawnDir, _factions, _whitelist, _blacklist, _typeBlacklist, _typeWhitelist, _spawnCode]];
+					_x setVariable ["VehicleSpawner_Settings", [[_spawnMarker,_spawnHeight], _spawnDir, _factions, _whitelist, _blacklist, _typeBlacklist, _typeWhitelist, _code]];
 					_x addAction ["Vehicle Spawner", {["open",_this] call SpyderAddons_fnc_vehicleSpawner}];
 				};
 			};
@@ -76,8 +73,8 @@ switch (_operation) do {
 		CreateDialog VEHICLESPAWNER_DIALOG;
 		["onLoad", _arguments] call MAINCLASS;
 
-		MOD(VehicleSpawnerHandler) = [] call CBA_fnc_hashCreate;
-		[MOD(VehicleSpawnerHandler), "CurrentInfo", _arguments] call CBA_fnc_hashSet;
+		MOD(VehicleSpawner) = [] call CBA_fnc_hashCreate;
+		[MOD(VehicleSpawner), "CurrentInfo", _arguments] call CBA_fnc_hashSet;
 	};
 
 	case "onLoad": {
@@ -108,7 +105,6 @@ switch (_operation) do {
 
 		//-- Get whitelisted vehicles
 		{
-			//-- UPDATE 1.55: pushBackUnique
 			if !(_x in _vehicles) then {
 				_configPath = configFile >> "CfgVehicles" >>_x;
 
@@ -168,7 +164,7 @@ switch (_operation) do {
 	};
 
 	case "onUnload": {
-		MOD(VehicleSpawnerHandler) = nil;
+		MOD(VehicleSpawner) = nil;
 	};
 
 	case "updateInfo": {
@@ -205,26 +201,28 @@ switch (_operation) do {
 		if (_index == -1) exitWith {};
 
 		_classname = lbData [VEHICLESPAWNER_VEHICLELIST, _index];
-		_object = ([MOD(VehicleSpawnerHandler), "CurrentInfo"] call CBA_fnc_hashGet) select 0;
+		_object = ([MOD(VehicleSpawner), "CurrentInfo"] call CBA_fnc_hashGet) select 0;
 
 		["spawnVehicle", [_classname, _object]] remoteExecCall [QUOTE(MAINCLASS), 2];
 	};
 
 	case "spawnVehicle": {
-		_arguments params ["_vehicle","_object"];
+		_arguments params ["_classname","_object"];
 
 		_settings = _object getVariable "VehicleSpawner_Settings";
-		_spawnPosition = _settings select 0;
-		_spawnDir = _settings select 1;
-		_spawnCode = _settings select 7;
+		_spawnSettings = _settings select 0;
+		_spawnSettings params ["_spawnmarker","_spawnheight"];
+		_spawnPos = getmarkerpos _spawnmarker;
+		_code = _settings select 7;
 
-		_vehicle = _classname createVehicle _spawnPosition;
+		_vehicle = _classname createVehicle _spawnPos;
 
-		_vehicle setPos _spawnPos;	//-- createVehicle doesn't utilize spawnheight
-		_vehicle setDir _spawnDir;
+		_vehicle setPos [_spawnPos select 0, _spawnPos select 1, _spawnheight];	//-- force vehicle to height
+		_vehicle setDir (markerdir _spawnMarker);
 
-		_vehicle call _spawnCode;
+		_vehicle call _code;
 	};
+
 };
 
 //-- Return result if any exists
