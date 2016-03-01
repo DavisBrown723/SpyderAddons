@@ -48,6 +48,7 @@ strings
 
 ui
 
+	ctrlGetRelDistance
 	ctrlGetRelPos
 	ctrlRelMove
 	displayNotification

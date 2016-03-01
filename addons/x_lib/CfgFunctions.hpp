@@ -121,6 +121,11 @@ class CfgFunctions {
 			};
 
 			//////-- UI --//////
+			class ctrlGetRelDistance {
+				description = "Finds the relative position of control 2, from the position of control 1";
+				file = "\x\spyderaddons\addons\x_lib\functions\ui\ctrlGetRelDistance.sqf";
+				recompile = RECOMPILE;
+			};
 			class ctrlGetRelPos {
 				description = "Finds the positions relative to the passed control's position";
 				file = "\x\spyderaddons\addons\x_lib\functions\ui\ctrlGetRelPos.sqf";
