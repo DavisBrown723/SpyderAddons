@@ -62,102 +62,10 @@ class CfgVehicles
 				defaultValue = "[BLU_F,NATO, .3]";
 			};
 
-			class HostilityChance {
-				displayName = "Hostility Chance";
-				description = "Chance that a civilian will be immediately hostile towards security forces";
-				class values
-				{
-					class HC30 {
-						name = "30";
-						value = "30";
-					};
-					class HC25 {
-						name = "25";
-						value = "25";
-					};
-					class HC20 {
-						name = "20";
-						value = "20";
-					};
-
-					class HC15 {
-						name = "15";
-						value = "15";
-					};
-					class HC10 {
-						name = "10";
-						value = "10";
-						default = 1;
-					};
-					class HC5 {
-						name = "5";
-						value = "5";
-					};
-				};
-			};
-
-			class IrritatedChance {
-				displayName = "Irritation Chance";
-				description = "Chance that a civilian will grow hostile after being asked a question (chance increases with more questions asked)";
-				class values
-				{
-					class 30 {
-						name = "30";
-						value = "30";
-					};
-					class 25 {
-						name = "25";
-						value = "25";
-					};
-					class 20 {
-						name = "20";
-						value = "20";
-					};
-
-					class 15 {
-						name = "15";
-						value = "15";
-						default = 1;
-					};
-					class 10 {
-						name = "10";
-						value = "10";
-					};
-					class 5 {
-						name = "5";
-						value = "5";
-					};
-				};
-			};
-
-			class AnswerChance {
-				displayName = "Answer Chance";
-				description = "Chance that a civilian will give security forces answers";
-				class values
-				{
-					class 75 {
-						name = "75";
-						value = "75";
-					};
-					class 60 {
-						name = "60";
-						value = "60";
-					};
-
-					class 45 {
-						name = "45";
-						value = "45";
-					};
-					class 30 {
-						name = "30";
-						value = "30";
-						default = 1;
-					};
-					class 15 {
-						name = "15";
-						value = "15";
-					};
-				};
+			class IEDClasses {
+				displayName = "IED Classes";
+				description = "IED Classes that civilians will identify and report to players. These classes are in addition to vanilla and ALiVE IED classes.";
+				defaultValue = "";
 			};
 			
 		};
