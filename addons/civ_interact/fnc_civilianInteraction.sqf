@@ -16,7 +16,7 @@ Any - Result of the operation
 
 Examples:
 (begin example)
-[_logic,_operation, _arguments] call SpyderAddons_fnc_civilianInteraction;
+[_logic,_operation, _args] call SpyderAddons_fnc_civilianInteraction;
 (end)
 
 See Also:
@@ -33,7 +33,7 @@ private ["_result"];
 params [
 	["_logic", objNull],
 	["_operation", ""],
-	["_arguments", []]
+	["_args", []]
 ];
 
 //-- Define function shortcuts
@@ -69,9 +69,7 @@ switch (_operation) do {
 		if (isNil QMOD(civilianInteraction)) then {
 			//-- Get settings
 			_debug = _logic getVariable "Debug";
-			_hostilityChance = call compile (_logic getVariable "HostilityChance");
-			_irritatedChance = call compile (_logic getVariable "IrritatedChance");
-			_answerChance = call compile (_logic getVariable "AnswerChance");
+			_IEDclasses = [_logic getVariable "IEDClasses"] call SpyderAddons_fnc_getModuleArray;
 
 			_friendlyForces = _logic getVariable "FriendlyForces";
 			_enemyForces = _logic getVariable "EnemyForces";
@@ -149,20 +147,18 @@ switch (_operation) do {
 
 			//-- Create interact handler object
 			MOD(civilianInteraction) = [nil,"create"] call MAINCLASS;
-			[MOD(civilianInteraction),"Debug", _debug] call ALiVE_fnc_hashSet;
-			[MOD(civilianInteraction),"Hostilitychance", _hostilityChance] call ALiVE_fnc_hashSet;
-			[MOD(civilianInteraction),"IrritatedChance", _irritatedChance] call ALiVE_fnc_hashSet;
-			[MOD(civilianInteraction),"AnswerChance", _answerChance] call ALiVE_fnc_hashSet;
+			[MOD(civilianInteraction),"Debug", call compile _debug] call ALiVE_fnc_hashSet;
 			[MOD(civilianInteraction),"FriendlyForces", _ff] call ALiVE_fnc_hashSet;
 			[MOD(civilianInteraction),"EnemyForces", _ef] call ALiVE_fnc_hashSet;
+			[MOD(civilianInteraction),"IEDClasses", _IEDclasses] call ALiVE_fnc_hashSet;
 			[MOD(civilianInteraction),"Topics", []] call ALiVE_fnc_hashSet
 		};
 	};
 
 	case "debug": {
-		if (typename _arguments == "BOOL") then {
-			[_logic,"Debug", _arguments] call ALiVE_fnc_hashSet;
-			_result = _arguments;
+		if (typename _args == "BOOL") then {
+			[_logic,"Debug", _args] call ALiVE_fnc_hashSet;
+			_result = _args;
 		} else {
 			_result = [_logic,"Debug"] call ALiVE_fnc_hashGet;
 		};
@@ -170,8 +166,8 @@ switch (_operation) do {
 
 	case "forces": {
 		//-- Should probably change forces to be a hash containing the keys "friendly","enemy"
-		if (typeName _arguments == "STRING") then {
-			switch (_arguments) do {
+		if (typeName _args == "STRING") then {
+			switch (_args) do {
 				case "friendly": {_result = [_logic,"FriendlyForces"] call ALiVE_fnc_hashGet};
 				case "enemy": {_result = [_logic,"EnemyForces"] call ALiVE_fnc_hashGet};
 				case "friendly": {_result = ([_logic,"FriendlyForces"] call ALiVE_fnc_hashGet) append ([_logic,"EnemyForces"] call ALiVE_fnc_hashGet)};
@@ -187,7 +183,7 @@ switch (_operation) do {
 	};
 
 	case "getForceByDisplayName": {
-		_displayName = _arguments;
+		_displayName = _args;
 
 		//-- More questions reference enemy forces, check first
 		_enemyForces = [_logic,"EnemyForces"] call ALiVE_fnc_hashGet;
@@ -199,7 +195,7 @@ switch (_operation) do {
 	};
 
 	case "openMenu": {
-		_civ = _arguments;
+		_civ = _args;
 
 		//-- Civ attacks if armed
 		if (count (weapons _civ) > 0) exitWith {[nil,"attackUnit", [_civ,player]] call MAINCLASS};
@@ -255,6 +251,11 @@ switch (_operation) do {
 		[_logic, "CivData", nil] call ALiVE_fnc_hashSet;
 		[_logic, "Civ", nil] call ALiVE_fnc_hashSet;
 
+		_debug = [_logic,"Debug"] call ALiVE_fnc_hashGet;
+		if (_debug) then {
+			hint "";
+		};
+
 		//-- Delete progress bar
 		ctrlDelete ([MOD(civilianInteraction),"ProgressBar"] call ALiVE_fnc_hashGet);
 		[MOD(civilianInteraction),"ProgressBar", nil] call ALiVE_fnc_hashSet;
@@ -262,7 +263,7 @@ switch (_operation) do {
 
 	case "getData": {
 		private ["_opcom","_nearestObjective","_civInfo","_clusterID","_agentProfile","_hostileCivInfo","_name","_installations"];
-		_arguments params ["_player","_civ"];
+		_args params ["_player","_civ"];
 
 		_civPos = getPos _civ;
 
@@ -361,7 +362,7 @@ switch (_operation) do {
 		} foreach (_nearCivs select 1);
 
 		//-- If multiple hostile civilians nearby, pick one at random
-		if (count _hostileCivInfo > 0) then {_hostileCivInfo = _hostileCivInfo call BIS_fnc_selectRandom};	//-- Ensure random hostile civ is picked if there are multiple
+		if (count _hostileCivInfo > 0) then {_hostileCivInfo = selectRandom _hostileCivInfo};	//-- Ensure random hostile civ is picked if there are multiple
 
 		//-- Send data to client
 		[nil,"dataReceived", [_installations, _civInfo,_hostileCivInfo]] remoteExecCall [QUOTE(MAINCLASS),_player];
@@ -378,14 +379,14 @@ switch (_operation) do {
 		};
 
 		_civ = [MOD(civilianInteraction),"Civ"] call ALiVE_fnc_hashGet;
-		_arguments params ["_installations","_civInfo","_hostileCivInfo"];
+		_args params ["_installations","_civInfo","_hostileCivInfo"];
 
 		//-- Get previously given answers -- Use getVariable/setVariable for temp storage
 		_questionsAsked = _civ getVariable ["QuestionsAsked", []]; //-- [_questionsAsked,_questionsAnswerd]
 
 		//-- Create civ info hash
 		_civInfo params ["_name","_personality","_homePos","_hostilityIndividual","_hostilityTown"];
-		if (random 100 > _hostilityIndividual) then {_hostile = true} else {_hostile = false};
+		if (random 100 > _hostilityIndividual) then {_hostile = false} else {_hostile = true};
 		_civInfo = [] call ALiVE_fnc_hashCreate;
 		[_civInfo,"Name", _name] call ALiVE_fnc_hashSet;
 		[_civInfo,"Personality", _personality] call ALiVE_fnc_hashSet;
@@ -423,7 +424,7 @@ switch (_operation) do {
 		//-- Populate question list
 		[MOD(civilianInteraction),"enableMain"] call MAINCLASS;
 
-		_debug = [_logic,"Debug"] call ALiVE_fnc_hashGet;
+		_debug = [MOD(civilianInteraction),"Debug"] call ALiVE_fnc_hashGet;
 		if (_debug) then {
 			[MOD(civilianInteraction),"debugCurrentCiv"] call MAINCLASS;
 		};
@@ -454,18 +455,18 @@ switch (_operation) do {
 			linebreak,
 			parseText _name,
 			linebreak,
-			_individualHostility,
+			parseText _individualHostility,
 			linebreak,
-			_townHostility,
+			parseText _townHostility,
 			linebreak,
 			linebreak,
 			_personalityTitle,
 			linebreak,
-			_bravery,
+			parseText _bravery,
 			linebreak,
-			_aggressiveness,
+			parseText _aggressiveness,
 			linebreak,
-			_indecisiveness,
+			parseText _indecisiveness,
 			linebreak
 		];
 
@@ -488,7 +489,7 @@ switch (_operation) do {
 		CIVINTERACT_LISTONE lbSetData [_index, "['Home', 1.6]"];
 
 		_index = CIVINTERACT_LISTONE lbAdd "Have you seen any IED's lately?";
-		CIVINTERACT_LISTONE lbSetData [_index, "['IEDs', 2]"];
+		CIVINTERACT_LISTONE lbSetData [_index, "['SeenAnyIEDs', 2]"];
 
 		_index = CIVINTERACT_LISTONE lbAdd "Have you seen any ... forces activity lately?";
 		CIVINTERACT_LISTONE lbSetData [_index, "['Insurgents', -1, 'enemy']"];
@@ -522,7 +523,7 @@ switch (_operation) do {
 	};
 
 	case "enableSubResponses": {
-		_responses = _arguments;
+		_responses = _args;
 
 		//-- Reset list two
 		lbclear CIVINTERACT_LISTTWO;
@@ -531,6 +532,7 @@ switch (_operation) do {
 		//-- Clear list
 		lbClear CIVINTERACT_LISTONE;
 
+		//-- Add response selections
 		{
 			_index = CIVINTERACT_LISTONE lbAdd (_x select 0);
 			CIVINTERACT_LISTONE lbsetData [_index,(_x select 1)];
@@ -542,10 +544,12 @@ switch (_operation) do {
 		//-- Add onSel EH to question list
 		CIVINTERACT_LISTONE ctrlRemoveAllEventHandlers "LBSelChanged";
 		CIVINTERACT_LISTONE ctrlAddEventHandler ["LBSelChanged",{[SpyderAddons_civilianInteraction,"subResponsesLBSelChanged", _this] call SpyderAddons_fnc_civilianInteraction}];
+
+		CIVINTERACT_LISTONE lbSetCurSel 0;
 	};
 
 	case "mainListLBSelChanged": {
-		_arguments params ["_control","_index"];
+		_args params ["_control","_index"];
 		_data = call compile (_control lbData _index);
 		_data params ["_question","_askTime",["_dialogType",0]];
 
@@ -615,9 +619,9 @@ switch (_operation) do {
 	};
 
 	case "subResponsesLBSelChanged": {
-		_arguments params ["_control","_index"];
+		_args params ["_control","_index"];
 
-		if (_index == (lbSize _control - 1)) exitWith {
+		if (_control lbText _index == "Back") exitWith {
 			//-- Back selected
 			[_logic,"enableMain"] call MAINCLASS;
 		};
@@ -705,7 +709,7 @@ switch (_operation) do {
 
 	case "askQuestion": {
 		private ["_responses"];
-		_arguments params ["_question","_askTime"];
+		_args params ["_question","_askTime"];
 
 		//-- ["Response Text", [["FollowupResponse1","Data1"],["FollowupResponse2","Data2"]]]
 
@@ -748,9 +752,7 @@ switch (_operation) do {
 		CIVINTERACT_RESPONSEBOX ctrlSetText _response;
 
 		//-- Check for followup questions
-		if (count _additionalQuestions > 0) then {
-			CIVINTERACT_LISTTWO ctrlShow true;
-
+		if (count _additionalQuestions != 0) then {
 			//-- Display additional questions/conversation topics
 			[_logic,"enableSubResponses", _additionalQuestions] call MAINCLASS;
 		};
@@ -766,7 +768,7 @@ switch (_operation) do {
 	};
 
 	case "isIrritated": {
-		_arguments params ["_hostile","_asked","_civ"];
+		_args params ["_hostile","_asked","_civ"];
 
 		//-- Raise hostility if civilian is irritated
 		if !(_hostile) then {
@@ -778,7 +780,7 @@ switch (_operation) do {
 					_response3 = " Please leave me alone now.";
 					_response4 = " I do not want to talk to you anymore.";
 					_response5 = " Can I go now?";
-					_response = [_response1, _response2, _response3, _response4, _response5] call BIS_fnc_selectRandom;
+					_response = selectRandom [_response1, _response2, _response3, _response4, _response5];
 					CIVINTERACT_RESPONSELIST ctrlSetText ((ctrlText CIVINTERACT_RESPONSELIST) + _response);
 				};
 			};
@@ -791,7 +793,7 @@ switch (_operation) do {
 					_response3 = " Are you done yet?";
 					_response4 = " You ask too many questions.";
 					_response5 = " You need to leave now.";
-					_response = [_response1, _response2, _response3,_response4, _response5] call BIS_fnc_selectRandom;
+					_response = selectRandom [_response1, _response2, _response3,_response4, _response5];
 					CIVINTERACT_RESPONSELIST ctrlSetText ((ctrlText CIVINTERACT_RESPONSELIST) + _response);
 				};
 			};
@@ -801,8 +803,8 @@ switch (_operation) do {
 	case "UpdateHostility": {
 		//-- Change local civilian hostility
 		private ["_townHostilityValue"];
-		_arguments params ["_civ","_value"];
-		if (count _arguments > 2) then {_townHostilityValue = _arguments select 2};
+		_args params ["_civ","_value"];
+		if (count _args > 2) then {_townHostilityValue = _args select 2};
 
 		if (isNil "_townHostilityValue") then {
 			if (isNil {[SpyderAddons_civilianInteraction_Logic, "CurrentCivData"] call ALiVE_fnc_hashGet}) exitWith {};
@@ -839,7 +841,7 @@ switch (_operation) do {
 	};
 
 	case "getActivePlan": {
-		_activeCommand = _arguments;
+		_activeCommand = _args;
 
 		switch (toLower _activeCommand) do {
 			case "alive_fnc_cc_suicide": {
@@ -848,7 +850,7 @@ switch (_operation) do {
 				_activePlan3 = "planning a bombing";
 				_activePlan4 = "getting ready to bomb your forces";
 				_activePlan5 = "about to bomb your forces";
-				_result = [_activePlan1,_activePlan2,_activePlan3,_activePlan4,_activePlan5] call BIS_fnc_selectRandom;
+				_result = selectRandom [_activePlan1,_activePlan2,_activePlan3,_activePlan4,_activePlan5];
 			};
 			case "alive_fnc_cc_suicidetarget": {
 				_activePlan1 = "planning on carrying out a suicide bombing";
@@ -856,7 +858,7 @@ switch (_operation) do {
 				_activePlan3 = "planning a bombing";
 				_activePlan4 = "getting ready to bomb your forces";
 				_activePlan5 = "about to bomb your forces";
-				_result = [_activePlan1,_activePlan2,_activePlan3,_activePlan4,_activePlan5] call BIS_fnc_selectRandom;
+				_result = selectRandom [_activePlan1,_activePlan2,_activePlan3,_activePlan4,_activePlan5];
 			};
 			case "alive_fnc_cc_rogue": {
 				_activePlan1 = "storing a weapon in his house";
@@ -864,7 +866,7 @@ switch (_operation) do {
 				_activePlan3 = "planning on shooting a patrol";
 				_activePlan4 = "looking for patrols to shoot at";
 				_activePlan5 = "paid to shoot at your forces";
-				_result = [_activePlan1,_activePlan2,_activePlan3,_activePlan4,_activePlan5] call BIS_fnc_selectRandom;
+				_result = selectRandom [_activePlan1,_activePlan2,_activePlan3,_activePlan4,_activePlan5];
 			};
 			case "alive_fnc_cc_roguetarget": {
 				_activePlan1 = "storing a weapon in his house";
@@ -872,7 +874,7 @@ switch (_operation) do {
 				_activePlan3 = "planning on shooting a patrol";
 				_activePlan4 = "looking for somebody to shoot at";
 				_activePlan5 = "paid to shoot at your forces";
-				_result = [_activePlan1,_activePlan2,_activePlan3,_activePlan4,_activePlan5] call BIS_fnc_selectRandom;
+				_result = selectRandom [_activePlan1,_activePlan2,_activePlan3,_activePlan4,_activePlan5];
 			};
 			case "alive_fnc_cc_sabotage": {
 				_activePlan1 = "planning on sabotaging a building";
@@ -880,7 +882,7 @@ switch (_operation) do {
 				_activePlan3 = "planting explosives nearby";
 				_activePlan4 = "getting ready to plant explosives";
 				_activePlan5 = "paid to shoot at your forces";
-				_result = [_activePlan1,_activePlan2,_activePlan3,_activePlan4,_activePlan5] call BIS_fnc_selectRandom;
+				_result = selectRandom [_activePlan1,_activePlan2,_activePlan3,_activePlan4,_activePlan5];
 			};
 			case "alive_fnc_cc_getweapons": {
 				_activePlan1 = "retrieving weapons from a nearby weapons depot";
@@ -890,7 +892,7 @@ switch (_operation) do {
 				_activePlan5 = "paid to attack your forces";
 				_activePlan6 = "forced to join the insurgents";
 				_activePlan7 = "preparing to attack your forces";
-				_result = [_activePlan1,_activePlan2,_activePlan3,_activePlan4,_activePlan5] call BIS_fnc_selectRandom;
+				_result = selectRandom [_activePlan1,_activePlan2,_activePlan3,_activePlan4,_activePlan5];
 			};
 		};
 	};
@@ -945,6 +947,26 @@ switch (_operation) do {
 				_fleePos = [position _civ, 30, 50, 1, 0, 1, 0] call BIS_fnc_findSafePos;
 				_civ doMove _fleePos;
 			};
+		};
+	};
+
+	case "markIEDLocation": {
+		_args params [
+			["_pos", [0,0,0]],
+			["_radius", 0],
+			["_exact", false],
+			["_size", 1.2]
+		];
+
+		_pos = [_pos, _radius] call CBA_fnc_randPos;
+
+		if (_exact) then {
+			_text = [str _pos,_pos,"ICON", [_size,_size],"ColorRed","Possible IED Location", "n_installation", "Solid",0,0.5] call ALIVE_fnc_createMarkerGlobal;
+			_text spawn {sleep 60; deletemarker _this};
+		} else {
+			_marker = [str _pos, _pos, "ELLIPSE", [_size, _size], "ColorEAST", "", "n_installation", "FDiagonal", 0, 0.5] call ALIVE_fnc_createMarkerGlobal;
+			_text = [str (str _pos),_pos,"ICON", [0.1,0.1],"ColorRed","Possible IED Location", "mil_dot", "FDiagonal",0,0.5] call ALIVE_fnc_createMarkerGlobal;
+			[_marker,_text] spawn {sleep 60; {deletemarker _x} foreach _this};
 		};
 	};
 

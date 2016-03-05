@@ -163,8 +163,8 @@ class CivInteract_RscListBox
 	shadow = 0; 			// Shadow (0 - none, 1 - directional, color affected by colorShadow, 2 - black outline)
 	colorText[] = {1,1,1,1}; 		// Text and frame color
 	colorDisabled[] = {1,1,1,0.5}; 		// Disabled text color
-	colorSelect[] = {1,1,1,1}; 		// Text selection color
-	colorSelect2[] = {1,1,1,1}; 		// Text selection color (oscillates between this and colorSelect)
+	colorSelect[] = {0,0,0,0.5}; 		// Text selection color
+	colorSelect2[] = {0,0,0,1}; 		// Text selection color (oscillates between this and colorSelect)
 	colorShadow[] = {0,0,0,0.5}; 		// Text shadow color (used only when shadow is 1)
 
 	pictureColor[] = {1,0.5,0,1}; 		// Picture color
@@ -176,12 +176,12 @@ class CivInteract_RscListBox
 	tooltipColorText[] = {1,1,1,1}; 		// Tooltip text color
 	tooltipColorBox[] = {1,1,1,1}; 		// Tooltip frame color
 
-	period = 1; 			// Oscillation time between colorSelect/colorSelectBackground2 and colorSelect2/colorSelectBackground when selected
+	period = 1.7; 			// Oscillation time between colorSelect/colorSelectBackground2 and colorSelect2/colorSelectBackground when selected
 
 	rowHeight = 1.5 * GUI_GRID_CENTER_H; 	// Row height
-	itemSpacing = 0; 				// Height of empty space between items
+	itemSpacing = .005; 			// Height of empty space between items
 	maxHistoryDelay = 1; 			// Time since last keyboard type search to reset it
-	canDrag = 1; 				// 1 (true) to allow item dragging
+	canDrag = 0; 				// 1 (true) to allow item dragging
 
 	soundSelect[] = {"\A3\ui_f\data\sound\RscListbox\soundSelect",0.09,1}; // Sound played when an item is selected
 

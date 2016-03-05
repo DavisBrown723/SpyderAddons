@@ -32,7 +32,7 @@ private ["_result"];
 params [
 	["_logic", objNull],
 	["_operation", ""],
-	["_arguments", []]
+	["_args", []]
 ];
 
 //-- Define function shortcuts
@@ -153,7 +153,7 @@ switch (_operation) do {
 	};
 
 	case "onGearClick": {
-		_arguments params ["_control","_index"];
+		_args params ["_control","_index"];
 		_civ = [_logic,"Civ"] call ALiVE_fnc_hashGet;
 		_item = _control lbData _index;
 
@@ -289,7 +289,7 @@ switch (_operation) do {
 
 	case "displayContainerItems": {
 		private ["_configPath"];
-		_items = _arguments;
+		_items = _args;
 
 		lbClear INVENTORY_GEARLIST;
 
@@ -313,14 +313,14 @@ switch (_operation) do {
 					INVENTORY_GEARLIST lbSetData [_index, (configName _configPath)];
 				};
 			};	
-		} forEach _arguments;
+		} forEach _args;
 
 		//-- Reorder buttons
 		[_logic,"reorderButtons"] call MAINCLASS;
 	};
 
 	case "addToInventory": {
-		_arguments params ["_receiver","_item"];
+		_args params ["_receiver","_item"];
 		_result = false;
 
 		if (_receiver canAddItemToBackpack _item) then {
@@ -440,7 +440,7 @@ switch (_operation) do {
 
 	case "createItemOnGround": {
 		private ["_weaponholder"];
-		_arguments params ["_item","_pos",["_items",[]]];
+		_args params ["_item","_pos",["_items",[]]];
 
 		//-- Store item in a weaponholder
 		if (isNil {[_logic,"WeaponHolder"] call ALiVE_fnc_hashGet}) then {

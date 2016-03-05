@@ -106,6 +106,7 @@ class Civ_Interact
 			idc = 9234;
 
 			text = "";
+			font = "PuristaMedium";
 			x = -1 * GUI_GRID_W + GUI_GRID_X;
 			y = 1.5 * GUI_GRID_H + GUI_GRID_Y;
 			w = 17 * GUI_GRID_W;
@@ -118,6 +119,7 @@ class Civ_Interact
 			idc = 9235;
 
 			text = "";
+			font = "PuristaMedium";
 			x = 16.5 * GUI_GRID_W + GUI_GRID_X;
 			y = 1.5 * GUI_GRID_H + GUI_GRID_Y;
 			w = 16.5 * GUI_GRID_W;
