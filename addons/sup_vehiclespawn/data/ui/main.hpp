@@ -28,6 +28,7 @@ class SpyderAddons_VehicleSpawner
 		{
 			idc = 572;
 
+			moving = 1;
 			text = "Vehicle Spawner";
 			x = 7 * GUI_GRID_W + GUI_GRID_X;
 			y = 3 * GUI_GRID_H + GUI_GRID_Y;
