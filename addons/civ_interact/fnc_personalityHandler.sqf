@@ -79,7 +79,7 @@ switch (_operation) do {
 
 	case "generateBraveryValue": {
 		//-- Average over 10,000 iterations: 24
-		_result = (ceil random 100) - (floor random 70);
+		_result = 10 + ((ceil random 100) - (floor random 60));
 		if !([_result,[0,100]] call SpyderAddons_fnc_numberInBounds) then {
 			_result = [_result,[0,100]] call SpyderAddons_fnc_getClosestNumber;
 		};
@@ -109,7 +109,7 @@ switch (_operation) do {
 		_bravery = _arguments;
 
 		//-- Average over 10,000 iterations: 59
-		_result = ((ceil random 100) + 30) - (ceil random 20 + (ceil random 20));
+		_result = ((ceil random 100) + 20) - (ceil random 15 + (ceil random 15));
 		if !([_result,[0,100]] call SpyderAddons_fnc_numberInBounds) then {
 			_result = [_result,[0,100]] call SpyderAddons_fnc_getClosestNumber;
 		};
@@ -176,7 +176,7 @@ switch (_operation) do {
 		_return = [_sideAlignments,_force] call ALiVE_fnc_hashGet;
 	};
 
-	case "savePersonality": {
+	case "save": {
 		if !(isServer) exitWith {[_logic,_operation,_arguments] remoteExecCall [QUOTE(MAINCLASS),2]};
 		_arguments params ["_civ","_personality"];
 
