@@ -32,7 +32,7 @@ private ["_result","_responses"];
 params [
 	["_logic", objNull],
 	["_question", ""],
-	["_args",[]]
+	["_args", []]
 ];
 
 //-- Define function macros
@@ -178,9 +178,12 @@ switch (_question) do {
 				_responses = ["Move along.","I will not share that.","Leave me alone!","I am busy.","I do not give that information out.","Why would I tell you?","I don't trust you."];
 
 				_result = selectRandom _responses;
-				_result = [_result, [["Could you please reconsider?","['PleaseReconsider',1.5]"]]];
+				_result = [_result, [
+					["Could you please reconsider?","['PleaseReconsider',1.5]"],
+					["Give me answers now!","['GiveMeAnswersThreat',1.5,2]"]
+				]];
 
-				[_logic,"ReconsiderQuestion",[_operation,_args]] call ALiVE_fnc_hashSet;
+				[_logic,"CurrentQuestion",[_operation,_args]] call ALiVE_fnc_hashSet;
 			};
 		} else {
 			if (random 100 > ([_personality,"Indecisiveness"] call ALiVE_fnc_hashGet)) then {
@@ -200,9 +203,12 @@ switch (_question) do {
 				_responses = ["I don't know if I can tell you that..","That is very personal information.","I do not wish to give that type of information out.","I am sorry but I cannot tell you that.","Please, no personal questions."];
 
 				_result = selectRandom _responses;
-				_result = [_result, [["Could you please reconsider?","['PleaseReconsider',1.5]"]]];
+				_result = [_result, [
+					["Could you please reconsider?","['PleaseReconsider',1.5]"],
+					["Give me answers now!","['GiveMeAnswersThreat',1.5,2]"]
+				]];
 
-				[_logic,"ReconsiderQuestion",[_operation,_args]] call ALiVE_fnc_hashSet;
+				[_logic,"CurrentQuestion",[_operation,_args]] call ALiVE_fnc_hashSet;
 			};
 		};
 	};
@@ -210,7 +216,7 @@ switch (_question) do {
 	case "PleaseReconsider": {
 		if (random 100 > (([_personality,"Indecisiveness"] call ALiVE_fnc_hashGet) + 15)) then {
 			//-- Reconsider question
-			_questionData = [_logic,"ReconsiderQuestion"] call ALiVE_fnc_hashGet;
+			_questionData = [_logic,"CurrentQuestion"] call ALiVE_fnc_hashGet;
 			[_logic,(_questionData select 0),(_questionData select 1)] call SpyderAddons_fnc_getResponses;
 			_result = ["",[]];
 		} else {
@@ -244,23 +250,25 @@ switch (_question) do {
 			_pos = getPos (selectRandom _nearIEDs);
 
 			if (_hostile) then {
+				//-- Hostile
 				if (random 100 > [_personality,"Indecisiveness"] call ALiVE_fnc_hashGet) then {
-					//-- Hostile
+					//-- Not Indecisive
 					_responses = ["Leave now!","I would not endanger myself for you.","I won't tell you anything.","Do you really think I would help you?","Leave me alone.","You are not welcome here!"];
 					_result = selectRandom _responses;
 					_result = [_result, [
-						["Could you please reconsider?","['PleaseReconsider',1.5]"],
+						["Sorry to bother you","['SorryForBother',1,1]"],
 						["You need to calm down","['CalmDown',1,1]"],
-						["Sorry to bother you","['SorryForBother',1,1]"]
+						["Could you please reconsider?","['PleaseReconsider',1.5]"],
+						["Give me answers now!","['GiveMeAnswersThreat',1.5,2]"]
 					]];
 
-					[_logic,"ReconsiderQuestion",[_operation,_args]] call ALiVE_fnc_hashSet;
+					[_logic,"CurrentQuestion",[_operation,_args]] call ALiVE_fnc_hashSet;
 				} else {
 					//-- Civilian chokes, gives answer
 
 					//-- Mark on map
 					if (random 100 >= 50) then {
-						[_logic,"markIEDLocation", [_pos,0,false,150]] call CIVILIANINTERACTION;
+						[_logic,"markIEDLocation", [_pos,140,false,150]] call CIVILIANINTERACTION;
 						_responses = ["Yes, I saw insurgents with IED equipment in a nearby area.","I saw insurgents planting IED's nearby.","Yes, insurgents target this area frequently.","I will show you an area that you should sweep for IED's.","Yes, let me show you the area where I saw them."];
 					} else {
 						[_logic,"markIEDLocation", [_pos,0,true]] call CIVILIANINTERACTION;
@@ -272,15 +280,17 @@ switch (_question) do {
 					_result = [_result, [["Thank you","['ThankYou',0.8,1]"]]];
 				};
 			} else {
-				if (random 100 > [_personality,"Bravery"] call ALiVE_fnc_hashGet) then {
+				if (20 + (random 80) > [_personality,"Bravery"] call ALiVE_fnc_hashGet) then {
 					//-- Not Brave
 					_responses = ["They would not like me talking to you.","I would not endanger myself for you.","I cannot tell you anything.","Do you want to get me killed!","I cannot help you, please leave.","They cannot see me talking to you."];
 					_result = selectRandom _responses;
 					_result = [_result, [
-						["Could you please reconsider?","['PleaseReconsider',1.5]"]
+						["Sorry to bother you","['SorryForBother',1,1]"],
+						["Could you please reconsider?","['PleaseReconsider',1.5]"],
+						["Give me answers now!","['GiveMeAnswersThreat',1.5,2]"]
 					]];
 
-					[_logic,"ReconsiderQuestion",[_operation,_args]] call ALiVE_fnc_hashSet;
+					[_logic,"CurrentQuestion",[_operation,_args]] call ALiVE_fnc_hashSet;
 				} else {
 					//-- Brave, gives answer
 
@@ -302,17 +312,18 @@ switch (_question) do {
 			//-- No IED's nearby
 			if (_hostile) then {
 				//-- Hostile
-				if (random 100 > [_personality,"Bravery"] call ALiVE_fnc_hashGet) then {
+				if (20 + (random 80) > [_personality,"Bravery"] call ALiVE_fnc_hashGet) then {
 					//-- Not Brave
 					_responses = ["Like I would tell you.","I would not endanger myself for you.","I cannot tell you anything.","Do you want to get me killed!","I cannot help you, please leave.","You are not welcome here!"];
 					_result = selectRandom _responses;
 					_result = [_result, [
-						["Could you please reconsider?","['PleaseReconsider',1.5]"],
+						["Sorry to bother you","['SorryForBother',1,1]"],
 						["You need to calm down","['CalmDown',1,1]"],
-						["Sorry to bother you","['SorryForBother',1,1]"]
+						["Could you please reconsider?","['PleaseReconsider',1.5]"],
+						["Give me answers now!","['GiveMeAnswersThreat',1.5,2]"]
 					]];
 
-					[_logic,"ReconsiderQuestion",[_operation,_args]] call ALiVE_fnc_hashSet;
+					[_logic,"CurrentQuestion",[_operation,_args]] call ALiVE_fnc_hashSet;
 				} else {
 					//-- Brave
 					if (random 100 < [_personality,"Aggressiveness"] call ALiVE_fnc_hashGet) then {
@@ -324,12 +335,12 @@ switch (_question) do {
 						//-- Mark on map
 						if (count _nearRoads > 0) then {
 							_pos = getPos (selectRandom _nearRoads);
-							[_logic,"markIEDLocation", [_pos,0,false,150]] call CIVILIANINTERACTION;
+							[_logic,"markIEDLocation", [_pos,30,false,150]] call CIVILIANINTERACTION;
 
 							_responses = ["Insurgents planted one on a nearby road.","There is one on the road over there.","Yes, I hear there was one nearby.","Insurgents like to target this area, you might want to sweep it.","Yes, I will show you.","I know the location of one nearby."];
 						} else {
 							_pos = getPos player;
-							[_logic,"markIEDLocation", [_pos,0,false,150]] call CIVILIANINTERACTION;
+							[_logic,"markIEDLocation", [_pos,500,false,150]] call CIVILIANINTERACTION;
 
 							_responses = ["There might be a few around here.","I've heard that one might be near here.","This area is always a target.","You might want to give it a sweep, there could be IED's nearby.","I saw insurgents planting IED's somewhere nearby.","Yes, I can't remember where, but there are some nearby."];
 						};
@@ -340,20 +351,28 @@ switch (_question) do {
 					} else {
 						_responses = ["Sorry, I cannot help you.","I would not endanger myself for you.","I cannot tell you anything.","Do you want to get me killed!","I cannot help you, please leave.","You are not welcome here!"];
 						_result = selectRandom _responses;
-						_result = [_result, [["Could you please reconsider?","['PleaseReconsider',1.5]"]]];
+						_result = [_result, [
+							["Sorry to bother you","['SorryForBother',1,1]"],
+							["Could you please reconsider?","['PleaseReconsider',1.5]"],
+							["Give me answers now!","['GiveMeAnswersThreat',1.5,2]"]
+						]];
 
-						[_logic,"ReconsiderQuestion",[_operation,_args]] call ALiVE_fnc_hashSet;
+						[_logic,"CurrentQuestion",[_operation,_args]] call ALiVE_fnc_hashSet;
 					};
 				};
 			} else {
 				//-- Not hostile
-				if (random 100 > [_personality,"Bravery"] call ALiVE_fnc_hashGet) then {
+				if (20 + (random 80) > [_personality,"Bravery"] call ALiVE_fnc_hashGet) then {
 					//-- Not Brave
 					_responses = ["They would not like me talking to you.","I would not endanger myself for you.","I cannot tell you anything.","Do you want to get me killed!","I cannot help you, please leave.","They cannot see me talking to you."];
 					_result = selectRandom _responses;
-					_result = [_result, [["Could you please reconsider?","['PleaseReconsider',1.5]"]]];
+					_result = [_result, [
+						["Sorry to bother you","['SorryForBother',1,1]"],
+						["Could you please reconsider?","['PleaseReconsider',1.5]"],
+						["Give me answers now!","['GiveMeAnswersThreat',1.5,2]"]
+					]];
 
-					[_logic,"ReconsiderQuestion",[_operation,_args]] call ALiVE_fnc_hashSet;
+					[_logic,"CurrentQuestion",[_operation,_args]] call ALiVE_fnc_hashSet;
 				} else {
 					//-- Brave
 					_responses = ["There are no IED's nearby.","They have not planted any here.","Thankfully, no.","We are safe from IED's here.","You are safe from IED's in this area."];
@@ -381,7 +400,220 @@ switch (_question) do {
 		};
 	};
 
-	
+	case "GiveMeAnswersThreat": {
+		//-- Both hostile and non-hostile states use the same two sets of dialog, so define it once to save space
+		_unaggressiveResponses = ["Do not threaten me.","I will not succumb to your threats.","Threatening me gets you nowhere.","I do not enjoy be talked to like that.","You are no longer welcome here.","Leave now."];
+		_aggressiveResponses = ["Do not threaten me!","I will not succumb to your threats.","Threatening me will not get you answers.","You are no longer welcome here!","You disgust me!","I will not talk to you anymore!"];
+
+		if (_hostile) then {
+			if (50 + (random 80) > (([_personality,"Bravery"] call ALiVE_fnc_hashGet) + ([_personality,"Bravery"] call ALiVE_fnc_hashGet))) then {
+				//-- Don't give answer
+				if (random 100 > [_personality,"Aggressiveness"] call ALiVE_fnc_hashGet) then {
+					//-- Not aggressive
+					_result = selectRandom _unaggressiveResponses;
+					_result = [_result, [["Sorry to bother you","['SorryForBother',1,1]"]]];
+				} else {
+					//-- Aggressive
+					_result = selectRandom _aggressiveResponses;
+					_result = [_result, [["Sorry to bother you","['SorryForBother',1,1]"]]];
+				};
+			} else {
+				//-- Succumbs to threat
+				//_responses = ["Sorry, I will you answers.","I am sorry, let me tell you what I know.","Please, forgive me.","I am sorry for my behavior, allow me to help you now.","I understand, let me tell you what I know.","Please do not hurt me, I will give you the answers you seek."];
+
+				_questionData = [_logic,"CurrentQuestion"] call ALiVE_fnc_hashGet;
+				[_logic,(_questionData select 0),(_questionData select 1)] call SpyderAddons_fnc_getResponses;
+				_result = ["",[]];
+			};
+		} else {
+			if (40 + (random 75) > (([_personality,"Bravery"] call ALiVE_fnc_hashGet) + ([_personality,"Bravery"] call ALiVE_fnc_hashGet))) then {
+				//-- Don't give answer
+				if (random 100 > [_personality,"Aggressiveness"] call ALiVE_fnc_hashGet) then {
+					//-- Not aggressive
+					_result = selectRandom _unaggressiveResponses;
+					_result = [_result, [["Sorry to bother you","['SorryForBother',1,1]"]]];
+				} else {
+					//-- Aggressive
+					_result = selectRandom _aggressiveResponses;
+					_result = [_result, [["Sorry to bother you","['SorryForBother',1,1]"]]];
+				};
+			} else {
+				//-- Succumbs to threat
+				//_responses = ["Sorry, I will you answers.","I am sorry, let me tell you what I know.","Please, forgive me.","I am sorry for my behavior, allow me to help you now.","I understand, let me tell you what I know.","Please do not hurt me, I will give you the answers you seek."];
+
+				_questionData = [_logic,"CurrentQuestion"] call ALiVE_fnc_hashGet;
+systemchat format ["Reasking question \n %1 \n with data \n %2", _questionData select 0, _questionData select 1];
+				[_logic,(_questionData select 0),(_questionData select 1)] call SpyderAddons_fnc_getResponses;
+				_result = ["",[]];
+			};
+		};
+	};
+
+	case "SeenForces": {
+		_faction = _args;
+		_nearunits = [];
+
+		//-- Get nearby faction units
+		{
+			if (faction _x == _faction && {_x distance2D player < 800}) then {
+				_nearunits pushback _x;
+			};
+		} foreach allUnits;
+
+		//-- Get force display name
+		_force = [_logic,"getForceByFaction", _faction] call MAINCLASS;
+		_factionname = _force select 2 select 1;
+		_civForceRelations = _force select 2 select 2;
+
+		if (count _nearunits > 0) then {
+			//-- Units nearby
+
+			if (_hostile) then {
+				//-- Hostile
+
+				if (random 100 > [_personality,"Indecisiveness"] call ALiVE_fnc_hashGet) then {
+					_responses = ["I will not disgrace them.","I would not endanger them for you.","I won't tell you anything!","Do you really think I would help you?",(format ["Long live %1 troops!", _factionname]),"Why, so you can see how real troops train?"];
+					_result = selectRandom _responses;
+					_result = [_result, [
+						["Sorry to bother you","['SorryForBother',1,1]"],
+						["You need to calm down","['CalmDown',1,1]"],
+						["Could you please reconsider?","['PleaseReconsider',1.5]"],
+						["Tell me where they are!","['GiveMeAnswersThreat',1.5,2]"]
+					]];
+
+					[_logic,"CurrentQuestion",[_operation,_args]] call ALiVE_fnc_hashSet;
+				} else {
+					if (_civForceRelations >= 0 && {random 100 > 25}) then {
+						//-- Civ likes force, tells player to fuck off
+
+						_responses = ["I will not disgrace them.","I would not endanger them for you.","I won't tell you anything!","Do you really think I would help you?",(format ["Long live %1 troops!", _factionname]),"Why? so you can see how real troops train?"];
+						_result = selectRandom _responses;
+						_result = [_result, [
+							["Sorry to bother you","['SorryForBother',1,1]"],
+							["You need to calm down","['CalmDown',1,1]"],
+							["Could you please reconsider?","['PleaseReconsider',1.5]"],
+							["Give me their location!","['GiveMeAnswersThreat',1.5,2]"]
+						]];
+					} else {
+						//-- Civ dislikes force, gives answer
+
+						//-- Mark on map
+						_pos = getPos (selectRandom _nearunits);
+						if (random 100 >= 50) then {
+							[_logic,"markForceLocation", [_faction,_pos,170]] call CIVILIANINTERACTION;
+						} else {
+							[_logic,"markForceLocation", [_faction,_pos,90]] call CIVILIANINTERACTION;
+						};
+
+						_responses = ["Yes, I saw a few recently.","Yes, Let me show you their location.","I have, allow me to help you.","I can show you the location of some.","I have! They are nearby.","There were some nearby here earlier."];
+						_result = selectRandom _responses;
+						_result = format ["%1 (Possible %2 Troop location marked on map)", _result, _factionname];
+						_result = [_result, [["Thank you","['ThankYou',0.8,1]"]]];
+					};
+				};
+			} else {
+				//-- Non Hostile
+				if (_civForceRelations <= 0) then {
+					if (20 + (random 80) > [_personality,"Bravery"] call ALiVE_fnc_hashGet) then {
+						//-- Not Brave
+						_responses = ["They would not like me talking to you.","I would not endanger myself for you.","I cannot tell you anything.","Do you want to get me killed!","I cannot help you, please leave.","They cannot see me talking to you."];
+						_result = selectRandom _responses;
+						_result = [_result, [
+							["Sorry to bother you","['SorryForBother',1,1]"],
+							["Could you please reconsider?","['PleaseReconsider',1.5]"],
+							["Give me answers now!","['GiveMeAnswersThreat',1.5,2]"]
+						]];
+
+						[_logic,"CurrentQuestion",[_operation,_args]] call ALiVE_fnc_hashSet;
+					} else {
+						//-- Brave, gives answer
+
+						//-- Mark on map
+						_pos = getPos (selectRandom _nearunits);
+						if (random 100 >= 50) then {
+							[_logic,"markForceLocation", [_faction,_pos,170]] call CIVILIANINTERACTION;
+						} else {
+							[_logic,"markForceLocation", [_faction,_pos,90]] call CIVILIANINTERACTION;
+						};
+
+						_responses = ["Yes, I saw a few recently.","Yes, Let me show you their location.","I have, allow me to help you.","I can show you the location of some.","I have! They are nearby.","There were some nearby here earlier."];
+						_result = selectRandom _responses;
+						_result = format ["%1 (Possible %2 Troop location marked on map)", _result, _factionname];
+						_result = [_result, [["Thank you","['ThankYou',0.8,1]"]]];
+					};
+				} else {
+					//-- Mark on map
+					_pos = getPos (selectRandom _nearunits);
+					if (random 100 >= 50) then {
+						[_logic,"markForceLocation", [_faction,_pos,170]] call CIVILIANINTERACTION;
+					} else {
+						[_logic,"markForceLocation", [_faction,_pos,90]] call CIVILIANINTERACTION;
+					};
+
+					_responses = ["Yes, I saw a few recently.","Yes, Let me show you their location.","I have, allow me to help you.","I can show you the location of some.","I have! They are nearby.","There were some nearby here earlier."];
+					_result = selectRandom _responses;
+					_result = format ["%1 (Possible %2 Troop location marked on map)", _result, _factionname];
+					_result = [_result, [["Thank you","['ThankYou',0.8,1]"]]];
+				};
+			};
+		} else {
+			//-- No units nearby
+
+			if (_hostile) then {
+				if (random 100 > [_personality,"Aggressiveness"] call ALiVE_fnc_hashGet) then {
+					//-- Hostile
+					_responses = ["I will not disgrace them.","I would not endanger them for you.","I won't tell you anything!","Do you really think I would help you?",(format ["Long live %1 troops!", _factionname]),"Why, so you can see how real troops train?"];
+					_result = selectRandom _responses;
+					_result = [_result, [
+						["Sorry to bother you","['SorryForBother',1,1]"],
+						["You need to calm down","['CalmDown',1,1]"],
+						["Could you please reconsider?","['PleaseReconsider',1.5]"],
+						["Tell me where they are!","['GiveMeAnswersThreat',1.5,2]"]
+					]];
+				} else {
+					_responses = ["I cannot help you.","Leave me out of this.","I won't tell you anything!","Do you really think I would help you?",(format ["Long live %1 troops!", _factionname]),"Why, so you can see how real troops train?"];
+					_result = selectRandom _responses;
+					_result = [_result, [
+						["Sorry to bother you","['SorryForBother',1,1]"],
+						["You need to calm down","['CalmDown',1,1]"],
+						["Could you please reconsider?","['PleaseReconsider',1.5]"],
+						["Tell me where they are!","['GiveMeAnswersThreat',1.5,2]"]
+					]];
+				};
+
+				[_logic,"CurrentQuestion",[_operation,_args]] call ALiVE_fnc_hashSet;
+			} else {
+				//-- Non Hostile
+
+				if (_civForceRelations >= 0 && {random 100 > 25}) then {
+					//-- Civ and force are on good relations
+					_responses = ["There are none nearby.","No, sorry.","None of them have been near this area recently.","I haven't seen any lately.","They haven't been here lately.","Sorry, there aren't any nearby."];
+					_result = selectRandom _responses;
+					_result = [_result, [["Thank you","['ThankYou',0.8,1]"]]];
+				} else {
+					//-- Civ and force are not on good relations
+
+					if (random 100 > [_personality,"Bravery"] call ALiVE_fnc_hashGet) then {
+						//-- Brave
+						_responses = ["There are none nearby.","No, sorry.","None of them have been near this area recently.","I haven't seen any lately.","They haven't been here lately.","Sorry, there aren't any nearby."];
+						_result = selectRandom _responses;
+						_result = [_result, [["Thank you","['ThankYou',0.8,1]"]]];
+					} else {
+						//-- Not brave
+						_responses = ["They would not like me talking to you.","I would not endanger myself for you.","I cannot tell you anything.","Do you want to get me killed!","I cannot help you, please leave.","They cannot see me talking to you."];
+						_result = selectRandom _responses;
+						_result = [_result, [
+							["Sorry to bother you","['SorryForBother',1,1]"],
+							["Could you please reconsider?","['PleaseReconsider',1.5]"],
+							["Tell me where they are!","['GiveMeAnswersThreat',1.5,2]"]
+						]];
+					};
+
+					[_logic,"CurrentQuestion",[_operation,_args]] call ALiVE_fnc_hashSet;
+				};
+			};
+		};
+	};
 
 };
 

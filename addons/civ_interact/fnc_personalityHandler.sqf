@@ -16,7 +16,7 @@ Any - Result of the operation
 
 Examples:
 (begin example)
-[_logic,_operation, _arguments] call SpyderAddons_fnc_personalityHandler
+[_logic,_operation, _args] call SpyderAddons_fnc_personalityHandler
 (end)
 
 See Also:
@@ -32,7 +32,7 @@ private ["_result"];
 params [
 	["_logic", objNull],
 	["_operation", ""],
-	["_arguments", []]
+	["_args", []]
 ];
 
 //-- Define function shortcuts
@@ -41,7 +41,7 @@ params [
 switch (_operation) do {
 
 	case "getPersonality": {
-		_civ = _arguments;
+		_civ = _args;
 		_civID = _civ getVariable ["agentID", ""];
 
 		if (_civID == "") exitWith {};
@@ -79,14 +79,14 @@ switch (_operation) do {
 
 	case "generateBraveryValue": {
 		//-- Average over 10,000 iterations: 24
-		_result = 10 + ((ceil random 100) - (floor random 60));
+		_result = 10 + ((ceil random 90) - (floor random 50));
 		if !([_result,[0,100]] call SpyderAddons_fnc_numberInBounds) then {
 			_result = [_result,[0,100]] call SpyderAddons_fnc_getClosestNumber;
 		};
 	};
 
 	case "generatePatienceValue": {
-		__aggressiveness = _arguments;
+		__aggressiveness = _args;
 
 		//-- Average over 10,000 iterations: 59
 		_result = ((ceil random 100) + 30) - (ceil random 20 + (ceil random 20));
@@ -96,7 +96,7 @@ switch (_operation) do {
 	};
 
 	case "generateAggressivenessValue": {
-		_arguments params ["_bravery","_indecisiveness"];
+		_args params ["_bravery","_indecisiveness"];
 
 		//-- Average over 10,000 iterations: 34
 		_result = ((ceil random 100) + 15) - (ceil random 30 + (ceil random 30));
@@ -106,7 +106,7 @@ switch (_operation) do {
 	};
 
 	case "generateIndecisivenessValue": {
-		_bravery = _arguments;
+		_bravery = _args;
 
 		//-- Average over 10,000 iterations: 59
 		_result = ((ceil random 100) + 20) - (ceil random 15 + (ceil random 15));
@@ -115,70 +115,51 @@ switch (_operation) do {
 		};
 	};
 
-	case "positivity": {
-		if (typename _arguments == "OBJECT") then {
-			_civ = _arguments;
-			_civPersonality = [_logic,"getPersonality"] call MAINCLASS;
-			_return = [_logic,"Positivity"] call ALiVE_fnc_hashGet;
-		} else {
-			_arguments params ["_civ","_value"];
-			[_logic,"Positivity", ([_logic,"Positivity"] call ALiVE_fnc_hashGet) + _value] call ALiVE_fnc_hashSet;
-		};
-	};
-
-	case "negativity": {
-		if (typename _arguments == "OBJECT") then {
-			_civ = _arguments;
-			_civPersonality = [_logic,"getPersonality"] call MAINCLASS;
-			_return = [_logic,"Negativity"] call ALiVE_fnc_hashGet;
-		} else {
-			_arguments params ["_civ","_value"];
-			[_logic,"Negativity", ([_logic,"Negativity"] call ALiVE_fnc_hashGet) + _value] call ALiVE_fnc_hashSet;
-		};
-	};
-
 	case "bravery": {
-		if (typename _arguments == "OBJECT") then {
-			_civ = _arguments;
-			_civPersonality = [_logic,"getPersonality"] call MAINCLASS;
-			_return = [_logic,"Bravery"] call ALiVE_fnc_hashGet;
+		if (typename _args == "ARRAY") then {
+			_result = [_logic,"Bravery"] call ALiVE_fnc_hashGet;
 		} else {
-			_arguments params ["_civ","_value"];
-			[_logic,"Bravery", ([_logic,"Bravery"] call ALiVE_fnc_hashGet) + _value] call ALiVE_fnc_hashSet;
+			[_logic,"Bravery", _args] call ALiVE_fnc_hashSet;
+			_result = _args;
 		};
 	};
 
 	case "indecisiveness": {
-		if (typename _arguments == "OBJECT") then {
-			_civ = _arguments;
-			_civPersonality = [_logic,"getPersonality"] call MAINCLASS;
-			_return = [_logic,"Indecisiveness"] call ALiVE_fnc_hashGet;
+		if (typename _args == "ARRAY") then {
+			_result = [_logic,"Indecisiveness"] call ALiVE_fnc_hashGet;
 		} else {
-			_arguments params ["_civ","_value"];
-			[_logic,"Indecisiveness", ([_logic,"Indecisiveness"] call ALiVE_fnc_hashGet) + _value] call ALiVE_fnc_hashSet;
+			[_logic,"Indecisiveness", _args] call ALiVE_fnc_hashSet;
+			_result = _args;
 		};
 	};
 
 	case "aggressiveness": {
-		if (typename _arguments == "OBJECT") then {
-			_civ = _arguments;
-			_civPersonality = [_logic,"getPersonality"] call MAINCLASS;
-			_return = [_logic,"Aggressiveness"] call ALiVE_fnc_hashGet;
+		if (typename _args == "ARRAY") then {
+			_result = [_logic,"Aggressiveness"] call ALiVE_fnc_hashGet;
 		} else {
-			_arguments params ["_civ","_value"];
-			[_logic,"Aggressiveness", ([_logic,"Aggressiveness"] call ALiVE_fnc_hashGet) + _value] call ALiVE_fnc_hashSet;
+			[_logic,"Aggressiveness", _args] call ALiVE_fnc_hashSet;
+			_result = _args;
+		};
+	};
+
+	case "patience": {
+		if (typename _args == "ARRAY") then {
+			_result = [_logic,"patience"] call ALiVE_fnc_hashGet;
+		} else {
+			[_logic,"patience", _args] call ALiVE_fnc_hashSet;
+			_result = _args;
 		};
 	};
 
 	case "getForceAlignment": {
-		_arguments params ["_personality","_force"];
+		_args params ["_personality","_force"];
 		_sideAlignments = [_personality,"SideAlignments"] call ALiVE_fnc_hashGet;
 		_return = [_sideAlignments,_force] call ALiVE_fnc_hashGet;
 	};
 
 	case "save": {
-		if !(isServer) exitWith {[_logic,_operation,_arguments] remoteExecCall [QUOTE(MAINCLASS),2]};
-		_arguments params ["_civ","_personality"];
+		if !(isServer) exitWith {[_logic,_operation,_args] remoteExecCall [QUOTE(MAINCLASS),2]};
+		_args params ["_civ","_personality"];
 
 		_civID = _civ getVariable ["agentID", ""];
 		if (_civID == "") exitWith {};

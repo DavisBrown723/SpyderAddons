@@ -177,6 +177,16 @@ switch (_operation) do {
 		};
 	};
 
+	case "getForceByFaction": {
+		_faction = _args;
+
+		{
+			if ((_x select 2 select 0) == _faction) exitWith {
+				_result = _x;
+			};
+		} foreach (([_logic,"FriendlyForces"] call ALiVE_fnc_hashGet) + ([_logic,"EnemyForces"] call ALiVE_fnc_hashGet));
+	};
+
 	case "topics": {
 		//-- Not really sure how to discern between user-sent empty array and default arguments
 		_result = [_logic,"Topics"] call ALiVE_fnc_hashGet;
@@ -230,7 +240,7 @@ switch (_operation) do {
 			CIVINTERACT_DETAIN ctrlSetText "Release";
 		};
 
-		//-- Create progress bar --> doesn't like working when created via main.hpp (fix) --> This needs to be created relative to progressTitle (ctrlGetRelPos)
+		//-- Create progress bar --> doesn't like working when created via main.hpp
 		_bar = CIVINTERACT_DISPLAY ctrlCreate ["RscProgress", -1];
 		_bar ctrlSetPosition [-0.0275, 0.86, 0.85, 0.04]; 
 		_bar ctrlSetTextColor [0.788,0.443,0.157,1];
@@ -448,6 +458,7 @@ switch (_operation) do {
 		_personalityTitle =  parseText "<t size='1.8'>Personality</t>";
 		_bravery = format ["<t align='left'>Bravery: %1</t>", [_personality,"Bravery"] call ALiVE_fnc_hashGet]; 
 		_aggressiveness = format ["<t align='left'>Aggressiveness: %1</t>", [_personality,"Aggressiveness"] call ALiVE_fnc_hashGet];
+		_patience = format ["<t align='left'>Patience: %1</t>", [_personality,"Patience"] call ALiVE_fnc_hashGet];
 		_indecisiveness = format ["<t align='left'>Indecisiveness: %1</t>", [_personality,"Indecisiveness"] call ALiVE_fnc_hashGet];
 
 		_text = composeText [_civInfoTitle,
@@ -466,11 +477,17 @@ switch (_operation) do {
 			linebreak,
 			parseText _aggressiveness,
 			linebreak,
+			parseText _patience,
+			linebreak,
 			parseText _indecisiveness,
 			linebreak
 		];
 
 		hint _text;
+	};
+
+	case "addTopic": {
+		([_logic,"Topics"] call ALiVE_fnc_hashGet) pushback _args; // [_position,_questionText,_questionData]
 	};
 
 	case "enableMain": {
@@ -488,11 +505,11 @@ switch (_operation) do {
 		_index = CIVINTERACT_LISTONE lbAdd "Where do you live?";
 		CIVINTERACT_LISTONE lbSetData [_index, "['Home', 1.6]"];
 
-		_index = CIVINTERACT_LISTONE lbAdd "Have you seen any IED's lately?";
+		_index = CIVINTERACT_LISTONE lbAdd "Have you seen any IED's in this area?";
 		CIVINTERACT_LISTONE lbSetData [_index, "['SeenAnyIEDs', 2]"];
 
-		_index = CIVINTERACT_LISTONE lbAdd "Have you seen any ... forces activity lately?";
-		CIVINTERACT_LISTONE lbSetData [_index, "['Insurgents', -1, 'enemy']"];
+		_index = CIVINTERACT_LISTONE lbAdd "Have you seen any ... forces activity nearby?";
+		CIVINTERACT_LISTONE lbSetData [_index, "['SeenForces', 2, 'enemy']"];
 
 		_index = CIVINTERACT_LISTONE lbAdd "Do you know the location of any insurgent hideouts?";
 		CIVINTERACT_LISTONE lbSetData [_index, "['Hideouts', 2.5]"];
@@ -513,7 +530,7 @@ switch (_operation) do {
 				CIVINTERACT_LISTONE lbSetData [_index, (_x select 2)];
 				_topics pushBack _x;
 			};
-		} forEach ([_logic,"Topics",[]] call ALiVE_fnc_hashGet); //-- [[_position,_questionText",_questionData],[_position,_questionText",_questionData]]
+		} forEach ([_logic,"Topics",[]] call ALiVE_fnc_hashGet); // [_position,_questionText,_questionData]
 
 		[_logic,"Topics", _topics] call ALiVE_fnc_hashSet;
 
@@ -583,8 +600,8 @@ switch (_operation) do {
 
 			//-- Populate list 2 with forces
 			{
-				_index = CIVINTERACT_LISTTWO lbAdd ((_x select 2) select 1);
-				CIVINTERACT_LISTTWO lbSetData [_index, _question];
+				_index = CIVINTERACT_LISTTWO lbAdd (_x select 2 select 1);
+				CIVINTERACT_LISTTWO lbSetData [_index, _x select 2 select 0];
 			} forEach _forces;
 
 			//-- Add onSel EH to question list
@@ -711,8 +728,6 @@ switch (_operation) do {
 		private ["_responses"];
 		_args params ["_question","_askTime"];
 
-		//-- ["Response Text", [["FollowupResponse1","Data1"],["FollowupResponse2","Data2"]]]
-
 		//-- Wait until progress bar is filled
 		sleep _askTime;
 
@@ -739,11 +754,11 @@ switch (_operation) do {
 				CIVINTERACT_LISTONE lbDelete (lbCurSel CIVINTERACT_LISTONE);
 			};
 
-			_responses = [SpyderAddons_civilianInteraction,_question,_force] call SpyderAddons_fnc_getResponses;
+			_responses = [_logic,_question,_force] call SpyderAddons_fnc_getResponses;
 		} else {
 			CIVINTERACT_LISTONE lbDelete (lbCurSel CIVINTERACT_LISTONE);
 
-			_responses = [SpyderAddons_civilianInteraction,_question] call SpyderAddons_fnc_getResponses;
+			_responses = [_logic,_question] call SpyderAddons_fnc_getResponses;
 		};
 
 		_responses params ["_response","_additionalQuestions","_civInfoAdjustments"];
@@ -958,16 +973,44 @@ switch (_operation) do {
 			["_size", 1.2]
 		];
 
+		//-- Get marker properties
 		_pos = [_pos, _radius] call CBA_fnc_randPos;
 
+		//-- Create marker
 		if (_exact) then {
 			_text = [str _pos,_pos,"ICON", [_size,_size],"ColorRed","Possible IED Location", "n_installation", "Solid",0,0.5] call ALIVE_fnc_createMarkerGlobal;
 			_text spawn {sleep 60; deletemarker _this};
 		} else {
 			_marker = [str _pos, _pos, "ELLIPSE", [_size, _size], "ColorEAST", "", "n_installation", "FDiagonal", 0, 0.5] call ALIVE_fnc_createMarkerGlobal;
+			_marker setMarkerAlpha .7;
 			_text = [str (str _pos),_pos,"ICON", [0.1,0.1],"ColorRed","Possible IED Location", "mil_dot", "FDiagonal",0,0.5] call ALIVE_fnc_createMarkerGlobal;
 			[_marker,_text] spawn {sleep 60; {deletemarker _x} foreach _this};
 		};
+	};
+
+	case "markForceLocation": {
+		_args params [
+			["_faction",""],
+			["_pos", [0,0,0]],
+			["_size", 120]
+		];
+
+		//-- Exit if faction is undefined
+		if (_faction == "") exitWith {["[Civilian Interaction]: markForceLocation - Force undefined"] call SpyderAddons_fnc_log};
+
+		//-- Get faction display name
+		_force = [_logic,"getForceByFaction", _faction] call MAINCLASS;
+		_displayname = _force select 2 select 1;
+
+		//-- Get marker properties
+		_pos = [_pos, _size - 15] call CBA_fnc_randPos;
+		_markertext = format ["Possible %1 troops", _displayname];
+
+		//-- Create marker
+		_marker = [str _pos, _pos, "ELLIPSE", [_size, _size], "ColorEAST", "", "n_installation", "FDiagonal", 0, 0.5] call ALIVE_fnc_createMarkerGlobal;
+		_marker setMarkerAlpha .7;
+		_text = [str (str _pos),_pos,"ICON", [0.1,0.1],"ColorRed",_markertext, "mil_dot", "FDiagonal",0,0.5] call ALIVE_fnc_createMarkerGlobal;
+		[_marker,_text] spawn {sleep 60; {deletemarker _x} foreach _this};
 	};
 
 };
