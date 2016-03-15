@@ -284,7 +284,7 @@ switch (_operation) do {
 		_objects = _logic getVariable "Objects";
 
 		//-- Select animal to spawn
-		_herdType = _classes call BIS_fnc_selectRandom;
+		_herdType = selectRandom _classes;
 		_newGroup = createGroup civilian;
 
 		//-- Create animals. Use spawn to reduce lag on unit creation
@@ -322,18 +322,18 @@ switch (_operation) do {
 		if ((floor random 100 <= _enemyChance) and (_enemies)) then {
 			_unitClasses = _enemyClasses;
 			_enemyVehicle = true;
-			_driver = _unitClasses call BIS_fnc_selectRandom;
+			_driver = selectRandom _unitClasses;
 		} else {
 			_unitClasses = _civClasses;
 			_enemyVehicle = false;
-			_driver = _unitClasses call BIS_fnc_selectRandom;
+			_driver = selectRandom _unitClasses;
 		};
 
 		//-- Create vehicle
-		_road = (_pos nearRoads 400) call BIS_fnc_selectRandom;
+		_road = selectRandom (_pos nearRoads 400);
 		if (isNil "_road") exitWith {};
-		_vehicle = (_vehClasses call BIS_fnc_selectRandom) createVehicle (getPos _road);
-		_driver = _group createUnit [(_unitClasses call BIS_fnc_selectRandom), [0,0,0], [], 5, "NONE"];
+		_vehicle = (selectRandom _vehClasses) createVehicle (getPos _road);
+		_driver = _group createUnit [(selectRandom _unitClasses), [0,0,0], [], 5, "NONE"];
 		_objects pushBack _vehicle;
 
 		//-- Assign driver
@@ -345,7 +345,7 @@ switch (_operation) do {
 		_seats = _vehicle emptyPositions "cargo";
 		if (_seats > 4) then {_seats  = ceil random 3};
 		for "_i" from 0 to (floor random _seats) step 1 do {
-			_unit = _group createUnit [(_unitClasses call BIS_fnc_selectRandom), [0,0,0], [], 5, "NONE"];
+			_unit = _group createUnit [(selectRandom _unitClasses), [0,0,0], [], 5, "NONE"];
 			_unit assignAsCargo _vehicle;
 			_unit moveInCargo _vehicle;
 			_objects pushBack _unit;
@@ -356,7 +356,7 @@ switch (_operation) do {
 		//-- Assign waypoints
 		_roads = _pos nearRoads 800;
 		for "_i" from 0 to 4 step 1 do {
-			_road = _roads call BIS_fnc_selectRandom;
+			_road = selectRandom _roads;
 			if (!isNil "_road") then {
 				_wp =_group addWaypoint [getPos _road, 0];
 				_wp setWaypointSpeed "Limited";
@@ -426,7 +426,7 @@ switch (_operation) do {
 
 		switch true do {
 			case (_action > 4): {
-				_retreatPos = [_vehicle, 400, ((getDir _vehicle) - 180)] call BIS_fnc_relPos;	//-- *UPDATE 1.55* _retreatPos = _vehicle getRelPos [300, ((getDir _vehicle) - 180)];
+				_retreatPos = _vehicle getRelPos [400, (getDir _vehicle) - 180];
 				(driver _vehicle) doMove _retreatPos;
 				_group setCombatMode "BLUE";
 				(driver _vehicle) forceSpeed 70;
@@ -439,7 +439,7 @@ switch (_operation) do {
 					};
 				} forEach allPlayers; 
 
-				_target = _targets call BIS_fnc_selectRandom;
+				_target = selectRandom _targets;
 				(driver _vehicle) forceSpeed 60;
 
 				[_vehicle,_target] spawn {
