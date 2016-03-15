@@ -24,6 +24,7 @@ class Recruitment_Menu
 		};
 		class Recruitment_Header: Recruitment_RscText
 		{
+			moving = 1;
 			idc = 572;
 			text = "Recruitment";
 			x = 7 * GUI_GRID_W + GUI_GRID_X;
