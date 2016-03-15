@@ -127,7 +127,7 @@ switch (_operation) do {
 		//-- Add IED command on nearby civilians
 		_movePos = getposATL _HQ;
 		_housePositions = [_movePos,15] call ALIVE_fnc_findIndoorHousePositions;
-		_movePos = if (count _housePositions > 0) then {_housePositions call BIS_fnc_SelectRandom} else {_movePos};
+		_movePos = if (count _housePositions > 0) then {selectRandom _housePositions} else {_movePos};
 		_agents = [_objective, "agents",[]] call ALiVE_fnc_hashGet;
 		{
 			private ["_agent"];
@@ -192,7 +192,7 @@ switch (_operation) do {
 		//-- Add get weapons command on nearby civilians
 		_movePos = getposATL _depot;
 		_housePositions = [_movePos,15] call ALIVE_fnc_findIndoorHousePositions;
-		_movePos = if (count _housePositions > 0) then {_housePositions call BIS_fnc_SelectRandom} else {_movePos};
+		_movePos = if (count _housePositions > 0) then {selectRandom _housePositions} else {_movePos};
 		_agents = [_objective, "agents",[]] call ALiVE_fnc_hashGet;
 		{
 			private ["_agent"];
@@ -260,7 +260,7 @@ switch (_operation) do {
 		//-- Add IED command on nearby civilians
 		_movePos = getposATL _factory;
 		_housePositions = [_movePos,15] call ALIVE_fnc_findIndoorHousePositions;
-		_movePos = if (count _housePositions > 0) then {_housePositions call BIS_fnc_SelectRandom} else {_movePos};
+		_movePos = if (count _housePositions > 0) then {selectRandom _housePositions} else {_movePos};
 		_agents = [_objective, "agents",[]] call ALiVE_fnc_hashGet;
 		{
 			private ["_agent"];
@@ -303,7 +303,7 @@ This should be changed to "orderRoadblocks". There can only be one roadblock com
 		_center = [_objective,"center"] call ALiVE_fnc_hashGet;
 		_size = [_objective,"size"] call ALiVE_fnc_hashGet;
 
-		_sideEnemy = ([_opcom, "sidesenemy"] call ALiVE_fnc_hashGet) call BIS_fnc_selectRandom;
+		_sideEnemy = selectRandom ([_opcom, "sidesenemy"] call ALiVE_fnc_hashGet);
 		_agents = [_objective, "agents",[]] call ALiVE_fnc_hashGet;
 		{
 			private ["_agent"];

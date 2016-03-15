@@ -241,7 +241,7 @@ switch (_operation) do {
 					_message1 = "Insurgents planning ambush";
 					_message2 = "Ambush underway";
 					_message3 = "Insurgents setting up ambush point";
-					_message = [_message1,_message2,_message3] call BIS_fnc_selectRandom;
+					_message = selectRandom [_message1,_message2,_message3];
 
 					_ambush = [[],"convertObject",[_objective,"ambush",[]] call ALiVE_fnc_HashGet] call ALiVE_fnc_OPCOM;
 					_pos = getPosATL _ambush;
@@ -249,7 +249,7 @@ switch (_operation) do {
 				case "OPCOM_DEFEND": {
 					_message1 = "Retreat issued for units in this sector";
 					_message2 = "Insurgents retreating";
-					_message = [_message1,_message2] call BIS_fnc_selectRandom;
+					_message = selectRandom [_message1,_message2];
 				};
 				case "INSTALLATION_CREATED": {
 					_installation = _data select 1;
@@ -261,7 +261,7 @@ switch (_operation) do {
 					_message1 = "Group recruited from recruitment HQ";
 					_message2 = "Insurgent group recruited";
 					_message3 = "Recruitment HQ recruited group";
-					_message = [_message1,_message2,_message3] call BIS_fnc_selectRandom;
+					_message = selectRandom [_message1,_message2,_message3];
 				};
 			};
 
