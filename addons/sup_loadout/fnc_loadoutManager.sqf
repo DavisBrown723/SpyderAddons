@@ -990,7 +990,7 @@ switch (_operation) do {
 
 		_data = [MOD(loadoutManager),"TransferData"] call CBA_fnc_hashGet;
 
-		if (isPlayer _unit) then {
+		if (!isnil "_unit" && {isPlayer _unit}) then {
 			[nil,"storeTransferredData", [name player, _data]] remoteExecCall [QUOTE(MAINCLASS), _unit];
 		} else {
 			_loadout = _data select 1;
