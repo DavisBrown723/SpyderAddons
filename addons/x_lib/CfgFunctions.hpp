@@ -14,6 +14,33 @@ class CfgFunctions {
 				recompile = RECOMPILE;
 			};
 
+			//////-- Hashes --//////
+			class hashCreate {
+				description = "Creates an object to store settings";
+				file = "\x\spyderaddons\addons\x_lib\functions\hashes\hashCreate.sqf";
+				recompile = RECOMPILE;
+			};
+			class hashGet {
+				description = "Retrieves the value tied to the passed key from a hash";
+				file = "\x\spyderaddons\addons\x_lib\functions\hashes\hashGet.sqf";
+				recompile = RECOMPILE;
+			};
+			class hashRem {
+				description = "Removes a value-data pair from an object";
+				file = "\x\spyderaddons\addons\x_lib\functions\hashes\hashRem.sqf";
+				recompile = RECOMPILE;
+			};
+			class hashSet {
+				description = "Stores a value-data pair to an object";
+				file = "\x\spyderaddons\addons\x_lib\functions\hashes\hashSet.sqf";
+				recompile = RECOMPILE;
+			};
+			class isHash {
+				description = "Determines whether or not the passed variable is a hash";
+				file = "\x\spyderaddons\addons\x_lib\functions\hashes\isHash.sqf";
+				recompile = RECOMPILE;
+			};
+
 			//////-- Logging --//////
 			class log {
 				description = "Logs a value to the rpt";

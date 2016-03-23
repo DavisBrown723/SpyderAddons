@@ -5,6 +5,14 @@ asymmetric
 	getCivilianRole
 	getPositionSideHostility
 
+hashes
+
+	hashCreate
+	hashGet
+	hashRem
+	hashSet
+	isHash
+
 logging
 
 	inspectArray
