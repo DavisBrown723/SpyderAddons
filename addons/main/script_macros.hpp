@@ -1,10 +1,10 @@
-#define MPATH                   \PPREFIX\PREFIX\addons
+#define MPATH                   \x\PREFIX\addons
 #define CPATH(component)        MPATH\component
 
-#define CDATA(component)        QUOTE(CPATH(component)\data)
-#define CUI(component)          QUOTE(CDATA(component)\ui)
-#define CIMAGES(component)      QUOTE(CDATA(component)\images)
-#define CSOUNDS(component)      QUOTE(CDATA(component)\sounds)
+#define CDATA(component)        CPATH(component)\data
+#define CUI(component)          CDATA(component)\ui
+#define CIMAGES(component)      CDATA(component)\images
+#define CSOUNDS(component)      CDATA(component)\sounds
 
 #define PREVFOLDER              ..\
 

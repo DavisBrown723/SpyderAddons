@@ -1,4 +1,3 @@
-#define PPREFIX     x
 #define PREFIX      SpyderAddons
 #define MPREFIX     SA
 
