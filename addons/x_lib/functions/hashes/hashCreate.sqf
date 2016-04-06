@@ -26,9 +26,9 @@ private ["_result"];
 
 if (typename _this == "ARRAY") then {
     if (count _this == 0) then {
-        _result = ["SA_HASH",[],[]];
+        _result = ["#SA_HASH#",[],[]];
     } else {
-        _result = ["SA_HASH",_this select 0,_this select 1];
+        _result = ["#SA_HASH#",_this select 0,_this select 1];
     };
 };
 

@@ -10,11 +10,33 @@ class CfgFunctions {
 			};
 			class getPositionSideHostility {
 				description = "Returns the hostility towards a side at a given location";
-				file = "\x\spyderaddons\addons\x_lib\functions\asymmetric\getPositionSideHostility.sqf";
+                			file = "\x\spyderaddons\addons\x_lib\functions\asymmetric\getPositionSideHostility.sqf";
+				recompile = RECOMPILE;
+			};
+
+			//////-- Events --//////
+			class addEvent {
+				description = "Registers an event on the server";
+				file = "\x\spyderaddons\addons\x_lib\functions\events\fnc_addEvent.sqf";
+				recompile = RECOMPILE;
+			};
+			class event {
+				description = "Creates an event";
+				file = "\x\spyderaddons\addons\x_lib\functions\events\fnc_event.sqf";
+				recompile = RECOMPILE;
+			};
+			class eventHandler {
+				description = "Main handler for events";
+				file = "\x\spyderaddons\addons\x_lib\functions\events\fnc_eventHandler.sqf";
 				recompile = RECOMPILE;
 			};
 
 			//////-- Hashes --//////
+			class hashAppend {
+				description = "Appends one hash to the back of another";
+				file = "\x\spyderaddons\addons\x_lib\functions\hashes\hashAppend.sqf";
+				recompile = RECOMPILE;
+			};
 			class hashCreate {
 				description = "Creates an object to store settings";
 				file = "\x\spyderaddons\addons\x_lib\functions\hashes\hashCreate.sqf";
@@ -137,13 +159,6 @@ class CfgFunctions {
 			class isProfileAlive {
 				description = "Returns whether or not the profile is still alive";
 				file = "\x\spyderaddons\addons\x_lib\functions\profiles\isProfileAlive.sqf";
-				recompile = RECOMPILE;
-			};
-
-			//////-- Strings --//////
-			class strFind {
-				description = "Finds the next instance of a character sequence within a string";
-				file = "\x\spyderaddons\addons\x_lib\functions\strings\strFind.sqf";
 				recompile = RECOMPILE;
 			};
 

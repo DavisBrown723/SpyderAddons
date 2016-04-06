@@ -34,4 +34,8 @@ if (_object call SpyderAddons_fnc_isHash) then {
     };
 };
 
-if (isnil "_result") then {if (typename _defaultValue == "ARRAY") then {+_defaultValue} else {_defaultValue}} else {_result};
+if (isnil "_result") then {
+    if (!isnil "_defaultValue") then {
+        if (typename _defaultValue == "ARRAY") then {+_defaultValue} else {_defaultValue};
+    };
+} else {_result};

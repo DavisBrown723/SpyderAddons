@@ -5,6 +5,12 @@ asymmetric
 	getCivilianRole
 	getPositionSideHostility
 
+events
+
+	addEvent
+	event
+	eventHandler
+
 hashes
 
 	hashCreate
@@ -49,10 +55,6 @@ profiles
 
 	isProfileAlive
 	profilePatrol
-
-strings
-
-	strFind
 
 ui
 

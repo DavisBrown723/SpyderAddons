@@ -25,4 +25,4 @@ peer reviewed:
 -nil
 ---------------------------------------------------------------------------- */
 
-if (typename _this == "ARRAY" && {count _this == 3} && {(_this select 0) in ["SA_HASH","CBA_HASH"]}) then {true} else {false};
+if (typename _this == "ARRAY" && {count _this == 3 || count _this == 4} && {(_this select 0) in ["#SA_HASH#","#CBA_HASH#"]}) then {true} else {false};

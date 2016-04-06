@@ -24,7 +24,7 @@ Author: SpyderBlack723
 ---------------------------------------------------------------------------- */
 
 disableSerialization;
-_this params [
+params [
 	"_bar",
 	"_time",
 	["_reset", true]
