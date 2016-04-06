@@ -191,7 +191,8 @@ switch (_operation) do {
 		lbAdd [VEHICLESPAWNER_INFOLIST, _vehFuel];
 
 		//-- Get passenger seats
-		_vehCargo = getNumber (_configPath >> "transportSoldier");
+		//_vehCargo = getNumber (_configPath >> "transportSoldier");
+		_vehCargo = ([_classname, true] call BIS_fnc_crewCount) - ([_classname, false] call BIS_fnc_crewCount);
 		_vehCargo = format ["Passenger Seats: %1", _vehCargo];
 		lbAdd [VEHICLESPAWNER_INFOLIST, _vehCargo];
 	};
