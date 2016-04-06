@@ -49,12 +49,12 @@ switch (_operation) do {
 		_whitelist = [_logic getVariable "RecruitableUnits"] call SpyderAddons_fnc_getModuleArray;
 		_blacklist = [_logic getVariable "BlacklistedUnits"] call SpyderAddons_fnc_getModuleArray;
 		_maxUnits = call compile (_logic getVariable "MaximumUnits");
-		_spawnCode = compile (_logic getVariable "SpawnCode");
+		_code = compile (_logic getVariable "SpawnCode");
 
 		{
 			if !(_x getVariable ["Recruitment_Settings", false]) then {
 				if (typeName _x == "OBJECT") then {
-					_x setVariable ["Recruitment_Settings", [_factions,_whitelist,_blacklist,_maxUnits,_spawnCode]];
+					_x setVariable ["Recruitment_Settings", [_factions,_whitelist,_blacklist,_maxUnits,_code]];
 					_x addAction ["Recruit", {["open",_this] call SpyderAddons_fnc_recruitment}];
 				};
 			};
@@ -197,12 +197,12 @@ switch (_operation) do {
 		_arguments params ["_data","_classname"];
 		_data params ["_object","_player"];
 		_settings = _object getVariable "Recruitment_Settings";
-		_spawnCode = _settings select 4;
+		_code = _settings select 4;
 
 		_unit = (group _player) createUnit [_classname, (getPos _player), [], 15, "FORM"];
 		addSwitchableUnit _unit;
 
-		_unit call _spawnCode;
+		_unit spawn _code;
 	};
 
 };
