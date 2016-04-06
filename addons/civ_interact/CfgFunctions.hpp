@@ -26,9 +26,9 @@ class CfgFunctions {
 				file = "\x\spyderaddons\addons\civ_interact\fnc_inventoryHandler.sqf";
 				recompile = RECOMPILE;
 			};
-			class personalityHandler {
-				description = "Main handler for civilian personalities";
-				file = "\x\spyderaddons\addons\civ_interact\fnc_personalityHandler.sqf";
+			class personality {
+				description = "Personality for civilians";
+				file = "\x\spyderaddons\addons\civ_interact\fnc_personality.sqf";
 				recompile = RECOMPILE;
 			};
 		};

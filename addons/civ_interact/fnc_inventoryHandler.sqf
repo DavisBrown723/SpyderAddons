@@ -60,7 +60,7 @@ switch (_operation) do {
 	};
 
 	case "mainMenuClosed": {
-		[_logic,"WeaponHolder", nil] call ALiVE_fnc_hashSet;
+		[_logic,"WeaponHolder", nil] call SpyderAddons_fnc_hashSet;
 	};
 
 	case "toggleSearchMenu": {
@@ -77,7 +77,7 @@ switch (_operation) do {
 	case "openMenu": {
 		//-- Set progress bar info
 		INVENTORY_PROGRESSBARTITLE ctrlSetText "Opening Inventory";
-		_bar = [MOD(civilianInteraction),"ProgressBar"] call ALiVE_fnc_hashGet;
+		_bar = [MOD(civilianInteraction),"ProgressBar"] call SpyderAddons_fnc_hashGet;
 		[_bar,.55] spawn SpyderAddons_fnc_progressAnimate;
 
 		//-- Set inventory controls to starting position
@@ -118,7 +118,7 @@ switch (_operation) do {
 
 		//-- Modify progress bar
 		INVENTORY_PROGRESSBARTITLE ctrlSetText "Closing Inventory";
-		_bar = [_logic,"ProgressBar"] call ALiVE_fnc_hashGet;
+		_bar = [_logic,"ProgressBar"] call SpyderAddons_fnc_hashGet;
 		[_bar,.55] spawn SpyderAddons_fnc_progressAnimate;
 
 		//-- Move inventory controls
@@ -154,7 +154,7 @@ switch (_operation) do {
 
 	case "onGearClick": {
 		_args params ["_control","_index"];
-		_civ = [_logic,"Civ"] call ALiVE_fnc_hashGet;
+		_civ = [_logic,"Civ"] call SpyderAddons_fnc_hashGet;
 		_item = _control lbData _index;
 
 		//-- Remove tooltips
@@ -205,7 +205,7 @@ switch (_operation) do {
 				INVENTORY_GEARLIST lbSetCurSel 0;
 			};
 		} else {
-			_gearmode = [_logic,"GearMode"] call ALiVE_fnc_hashGet;
+			_gearmode = [_logic,"GearMode"] call SpyderAddons_fnc_hashGet;
 
 			if (_gearmode == "Containers") then {
 				INVENTORY_BUTTONONE ctrlShow true;
@@ -231,7 +231,7 @@ switch (_operation) do {
 
 	case "displayGearContainers": {
 		private ["_configPath"];
-		_civ = [_logic, "Civ"] call ALiVE_fnc_hashGet;
+		_civ = [_logic, "Civ"] call SpyderAddons_fnc_hashGet;
 
 		lbClear INVENTORY_GEARLIST;
 
@@ -258,7 +258,7 @@ switch (_operation) do {
 		} forEach ((assignedItems _civ) + [headgear _civ, goggles _civ, uniform _civ, vest _civ, backpack _civ]);
 
 		//-- Set gear mode
-		[_logic,"GearMode", "Containers"] call ALiVE_fnc_hashSet;
+		[_logic,"GearMode", "Containers"] call SpyderAddons_fnc_hashSet;
 
 		//-- Add EH to list
 		INVENTORY_GEARLIST ctrlAddEventHandler ["LBSelChanged",{[SpyderAddons_civilianInteraction,"onGearClick", _this] call SpyderAddons_fnc_inventoryHandler}];
@@ -268,21 +268,21 @@ switch (_operation) do {
 	};
 
 	case "openGearContainer": {
-		_civ = [_logic, "Civ"] call ALiVE_fnc_hashGet;
+		_civ = [_logic, "Civ"] call SpyderAddons_fnc_hashGet;
 		_item = INVENTORY_GEARLIST lbData (lbCurSel INVENTORY_GEARLIST);
 
 		if (_item == backpack _civ) exitWith {
-			[_logic,"GearMode", "Backpack"] call ALiVE_fnc_hashSet;
+			[_logic,"GearMode", "Backpack"] call SpyderAddons_fnc_hashSet;
 			[_logic,"displayContainerItems", backpackItems _civ] call MAINCLASS;
 		};
 
 		if (_item == vest _civ) exitWith {
-			[_logic,"GearMode", "Vest"] call ALiVE_fnc_hashSet;
+			[_logic,"GearMode", "Vest"] call SpyderAddons_fnc_hashSet;
 			[_logic,"displayContainerItems", vestItems _civ] call MAINCLASS;
 		};
 
 		if (_item == uniform _civ) exitWith {
-			[_logic,"GearMode", "Uniform"] call ALiVE_fnc_hashSet;
+			[_logic,"GearMode", "Uniform"] call SpyderAddons_fnc_hashSet;
 			[_logic,"displayContainerItems", uniformItems _civ] call MAINCLASS;
 		};
 	};
@@ -340,8 +340,8 @@ switch (_operation) do {
 	};
 
 	case "refreshCurrentContainer": {
-		_gearMode = [_logic,"GearMode"] call ALiVE_fnc_hashGet;
-		_civ = [_logic,"Civ"] call ALiVE_fnc_hashGet;
+		_gearMode = [_logic,"GearMode"] call SpyderAddons_fnc_hashGet;
+		_civ = [_logic,"Civ"] call SpyderAddons_fnc_hashGet;
 
 		switch (_gearMode) do {
 			case "Backpack": {
@@ -362,7 +362,7 @@ switch (_operation) do {
 	case "confiscate": {
 		_index = lbCurSel INVENTORY_GEARLIST;
 		_item = INVENTORY_GEARLIST lbData _index;
-		_civ = [_logic, "Civ"] call ALiVE_fnc_hashGet;
+		_civ = [_logic, "Civ"] call SpyderAddons_fnc_hashGet;
 
 		switch true do {
 			//-- Item is the civ's backpack
@@ -443,12 +443,12 @@ switch (_operation) do {
 		_args params ["_item","_pos",["_items",[]]];
 
 		//-- Store item in a weaponholder
-		if (isNil {[_logic,"WeaponHolder"] call ALiVE_fnc_hashGet}) then {
+		if (isNil {[_logic,"WeaponHolder"] call SpyderAddons_fnc_hashGet}) then {
 			_weaponholder = "GroundWeaponHolder" createVehicle _pos;
 			_weaponholder setPosATL _pos;
-			[_logic,"WeaponHolder", _weaponholder] call ALiVE_fnc_hashSet;
+			[_logic,"WeaponHolder", _weaponholder] call SpyderAddons_fnc_hashSet;
 		} else {
-			_weaponholder = [_logic,"WeaponHolder"] call ALiVE_fnc_hashGet;
+			_weaponholder = [_logic,"WeaponHolder"] call SpyderAddons_fnc_hashGet;
 		};
 
 		//-- Add item to weaponholder

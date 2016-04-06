@@ -39,14 +39,14 @@ params [
 #define CIVILIANINTERACTION SpyderAddons_fnc_civilianInteraction
 
 //-- Get information
-_civ = [_logic,"Civ"] call ALiVE_fnc_hashGet;
-_civData = [_logic,"CivData"] call ALiVE_fnc_hashGet;
-_civInfo = [_civData,"CivInfo"] call ALiVE_fnc_hashGet;
-_personality = [_civInfo,"Personality"] call ALiVE_fnc_hashGet;	// ["Bravery","Aggressiveness","Indecisiveness","ForceAlignments"]
+_civ = [_logic,"Civ"] call SpyderAddons_fnc_hashGet;
+_civData = [_logic,"CivData"] call SpyderAddons_fnc_hashGet;
+_civInfo = [_civData,"CivInfo"] call SpyderAddons_fnc_hashGet;
+_personality = [_civInfo,"Personality"] call SpyderAddons_fnc_hashGet;	// ["Bravery","Aggressiveness","Indecisiveness","ForceAlignments"]
 
-_hostility = [_civInfo,"HostilityIndividual"] call ALiVE_fnc_hashGet;
-_hostile = [_civInfo,"Hostile"] call ALiVE_fnc_hashGet;
-_civName = [_civInfo,"Name"] call ALiVE_fnc_hashGet;
+_hostility = [_civInfo,"HostilityIndividual"] call SpyderAddons_fnc_hashGet;
+_hostile = [_civInfo,"Hostile"] call SpyderAddons_fnc_hashGet;
+_civName = [_civInfo,"Name"] call SpyderAddons_fnc_hashGet;
 
 switch (_question) do {
 
@@ -69,7 +69,7 @@ switch (_question) do {
 			};
 		} else {
 			//-- Negative
-			if (random 100 > [_personality,"Aggressiveness"] call ALiVE_fnc_hashGet) then {
+			if (random 100 > [_personality,"Aggressiveness"] call SpyderAddons_fnc_hashGet) then {
 				//-- Aggressive
 				_responses = ["Get out of here!","Leave me alone you demon!","Leave now!","It will be fine once you leave.","I hate you.",
 				"Every day I have to see you patrol is a day in hell.","Go to hell!","I have no time for you!","I hope you die in a hole!"];
@@ -93,7 +93,7 @@ switch (_question) do {
 	};
 
 	case "CalmDown": {
-		if (random 100 > [_personality,"Aggressiveness"] call ALiVE_fnc_hashGet) then {
+		if (random 100 > [_personality,"Aggressiveness"] call SpyderAddons_fnc_hashGet) then {
 			_responses = ["You're right.","I am sorry.","Forgive me.","I will calm down.","Sorry.",format ["%1 appears to ignore you", _civName]];
 			_result = [selectRandom _responses, []];
 		} else {
@@ -103,13 +103,13 @@ switch (_question) do {
 	};
 
 	case "CalmDownThreat": {
-		if (random 100 > [_personality,"Bravery"] call ALiVE_fnc_hashGet) then {
+		if (random 100 > [_personality,"Bravery"] call SpyderAddons_fnc_hashGet) then {
 			//-- Succumbs to threat
 			_responses = ["I am sorry.","I'm sorry, I shouldn't have said that.","Please forgive me, I do not want to cause trouble.","Oh, please forgive me.","You have my apologies."];
 			_result = [selectRandom _responses, []];
 		} else {
 			//-- Defiant to threat
-			if (random 100 > [_personality,"Aggressiveness"] call ALiVE_fnc_hashGet) then {
+			if (random 100 > [_personality,"Aggressiveness"] call SpyderAddons_fnc_hashGet) then {
 				//-- Non-Aggressive
 				_responses = ["Do not talk to me like that.","I will not be bullied by you.","I will not surrender to you.","I refuse to be spoken to like that.","Your threats do not scare me."];
 				_result = [selectRandom _responses, []];
@@ -123,7 +123,7 @@ switch (_question) do {
 
 	case "SorryForBother": {
 		if (_hostile) then {
-			if (75 > (([_personality,"Aggressiveness"] call ALiVE_fnc_hashGet) + ([_personality,"Patience"] call ALiVE_fnc_hashGet)) * .65) then {
+			if (75 > (([_personality,"Aggressiveness"] call SpyderAddons_fnc_hashGet) + ([_personality,"Patience"] call SpyderAddons_fnc_hashGet)) * .65) then {
 				//-- Non-Aggressive
 				_responses = ["It will take more than that for me to forgive you.","Thank you.","Don't worry about it.","It is ok.","You just remember that for next time we meet.","We can all be bothersome at times."];
 				_result = [selectRandom _responses, []];
@@ -133,7 +133,7 @@ switch (_question) do {
 				_result = [selectRandom _responses, []];
 			};
 		} else {
-			if (random 100 > [_personality,"Patience"] call ALiVE_fnc_hashGet) then {
+			if (random 100 > [_personality,"Patience"] call SpyderAddons_fnc_hashGet) then {
 				//-- Doesn't like being bothered
 				_responses = ["Think next time.","Learn to stop talking.","You need to learn manners.","You will not be favored here with that arrogant attitude.","You just remember that for next time we meet."];
 				_result = [selectRandom _responses, []];
@@ -146,13 +146,13 @@ switch (_question) do {
 	};
 
 	case "WatchOutThreat": {
-		if (random 100 > [_personality,"Bravery"] call ALiVE_fnc_hashGet) then {
+		if (random 100 > [_personality,"Bravery"] call SpyderAddons_fnc_hashGet) then {
 			//-- Succumbs to threat
 			_responses = ["My apologies.","I am sorry.","I'm sorry, I shouldn't have said that.","Please forgive me, I do not want to cause trouble.","Oh, please forgive me.","You have my apologies."];
 			_result = [selectRandom _responses, []];
 		} else {
 			//-- Defiant to threat
-			if (random 100 > [_personality,"Aggressiveness"] call ALiVE_fnc_hashGet) then {
+			if (random 100 > [_personality,"Aggressiveness"] call SpyderAddons_fnc_hashGet) then {
 				//-- Non-Aggressive
 				_responses = ["Your words bring hosility.","Go bully someone else.","I will not surrender to you.","I refuse to be spoken to like that.","Your threats do not scare me."];
 				_result = [selectRandom _responses, []];
@@ -167,7 +167,7 @@ switch (_question) do {
 	//-- Where do you live
 	case "Home": {
 		if (_hostile) then {
-			if (random 100 > [_personality,"Aggressiveness"] call ALiVE_fnc_hashGet) then {
+			if (random 100 > [_personality,"Aggressiveness"] call SpyderAddons_fnc_hashGet) then {
 				//-- Aggressive
 				_responses = ["No!", "Why would I give that information to you?","So you can spy on me? I don't think so.","Do you really think I am so foolish","Move along."];
 
@@ -182,11 +182,9 @@ switch (_question) do {
 					["Could you please reconsider?","['PleaseReconsider',1.5]"],
 					["Give me answers now!","['GiveMeAnswersThreat',1.5,2]"]
 				]];
-
-				[_logic,"CurrentQuestion",[_operation,_args]] call ALiVE_fnc_hashSet;
 			};
 		} else {
-			if (random 100 > ([_personality,"Indecisiveness"] call ALiVE_fnc_hashGet)) then {
+			if (random 100 > ([_personality,"Indecisiveness"] call SpyderAddons_fnc_hashGet)) then {
 				//-- Gives answer
 				_responses = ["I will show you!","Allow me to show you.","I will give you it's location.","It is not too far from here.","It is over there."];
 
@@ -194,7 +192,7 @@ switch (_question) do {
 				_result = [_result, []];
 
 				//-- Create marker on home
-				_pos = [_civInfo,"HomePosition"] call ALiVE_fnc_hashGet;
+				_pos = [_civInfo,"HomePosition"] call SpyderAddons_fnc_hashGet;
 
 				_marker = [str _pos, _pos, "ICON", [1.2, 1.2], "ColorCivilian", (format ["%1's home", _civname]), "SpyderAddons_House"] call ALIVE_fnc_createMarker;
 				_marker spawn {sleep 30; deleteMarker _this};
@@ -207,21 +205,19 @@ switch (_question) do {
 					["Could you please reconsider?","['PleaseReconsider',1.5]"],
 					["Give me answers now!","['GiveMeAnswersThreat',1.5,2]"]
 				]];
-
-				[_logic,"CurrentQuestion",[_operation,_args]] call ALiVE_fnc_hashSet;
 			};
 		};
 	};
 
 	case "PleaseReconsider": {
-		if (random 100 > (([_personality,"Indecisiveness"] call ALiVE_fnc_hashGet) + 15)) then {
+		if (random 100 > (([_personality,"Indecisiveness"] call SpyderAddons_fnc_hashGet) + 15)) then {
 			//-- Reconsider question
-			_questionData = [_logic,"CurrentQuestion"] call ALiVE_fnc_hashGet;
+			_questionData = [_logic,"CurrentQuestion"] call SpyderAddons_fnc_hashGet;
 			[_logic,(_questionData select 0),(_questionData select 1)] call SpyderAddons_fnc_getResponses;
 			_result = ["",[]];
 		} else {
 			//-- Will not reconsider
-			if (random 100 > [_personality,"Aggressiveness"] call ALiVE_fnc_hashGet) then {
+			if (random 100 > [_personality,"Aggressiveness"] call SpyderAddons_fnc_hashGet) then {
 				//-- Non aggressive
 				_responses = ["Please, do not pressure me.","I do not enjoy being pressured.","No, sorry.","I will not reconsider that question.","I have given you your answer already."];
 
@@ -240,7 +236,7 @@ switch (_question) do {
 	case "SeenAnyIEDs": {
 		private ["_pos"];
 		_IEDClasses = ["ALIVE_IEDUrbanSmall_Remote_Ammo","ALIVE_IEDLandSmall_Remote_Ammo","ALIVE_IEDUrbanBig_Remote_Ammo","ALIVE_IEDLandBig_Remote_Ammo"];
-		_IEDClasses append ([_logic,"IEDClasses"] call ALiVE_fnc_hashGet);
+		_IEDClasses append ([_logic,"IEDClasses"] call SpyderAddons_fnc_hashGet);
 
 		_nearIEDs = nearestObjects [player, _IEDClasses, 700];
 
@@ -251,7 +247,7 @@ switch (_question) do {
 
 			if (_hostile) then {
 				//-- Hostile
-				if (random 100 > [_personality,"Indecisiveness"] call ALiVE_fnc_hashGet) then {
+				if (random 100 > [_personality,"Indecisiveness"] call SpyderAddons_fnc_hashGet) then {
 					//-- Not Indecisive
 					_responses = ["Leave now!","I would not endanger myself for you.","I won't tell you anything.","Do you really think I would help you?","Leave me alone.","You are not welcome here!"];
 					_result = selectRandom _responses;
@@ -261,8 +257,6 @@ switch (_question) do {
 						["Could you please reconsider?","['PleaseReconsider',1.5]"],
 						["Give me answers now!","['GiveMeAnswersThreat',1.5,2]"]
 					]];
-
-					[_logic,"CurrentQuestion",[_operation,_args]] call ALiVE_fnc_hashSet;
 				} else {
 					//-- Civilian chokes, gives answer
 
@@ -280,7 +274,7 @@ switch (_question) do {
 					_result = [_result, [["Thank you","['ThankYou',0.8,1]"]]];
 				};
 			} else {
-				if (20 + (random 80) > [_personality,"Bravery"] call ALiVE_fnc_hashGet) then {
+				if (20 + (random 80) > [_personality,"Bravery"] call SpyderAddons_fnc_hashGet) then {
 					//-- Not Brave
 					_responses = ["They would not like me talking to you.","I would not endanger myself for you.","I cannot tell you anything.","Do you want to get me killed!","I cannot help you, please leave.","They cannot see me talking to you."];
 					_result = selectRandom _responses;
@@ -289,8 +283,6 @@ switch (_question) do {
 						["Could you please reconsider?","['PleaseReconsider',1.5]"],
 						["Give me answers now!","['GiveMeAnswersThreat',1.5,2]"]
 					]];
-
-					[_logic,"CurrentQuestion",[_operation,_args]] call ALiVE_fnc_hashSet;
 				} else {
 					//-- Brave, gives answer
 
@@ -312,7 +304,7 @@ switch (_question) do {
 			//-- No IED's nearby
 			if (_hostile) then {
 				//-- Hostile
-				if (20 + (random 80) > [_personality,"Bravery"] call ALiVE_fnc_hashGet) then {
+				if (20 + (random 80) > [_personality,"Bravery"] call SpyderAddons_fnc_hashGet) then {
 					//-- Not Brave
 					_responses = ["Like I would tell you.","I would not endanger myself for you.","I cannot tell you anything.","Do you want to get me killed!","I cannot help you, please leave.","You are not welcome here!"];
 					_result = selectRandom _responses;
@@ -322,11 +314,9 @@ switch (_question) do {
 						["Could you please reconsider?","['PleaseReconsider',1.5]"],
 						["Give me answers now!","['GiveMeAnswersThreat',1.5,2]"]
 					]];
-
-					[_logic,"CurrentQuestion",[_operation,_args]] call ALiVE_fnc_hashSet;
 				} else {
 					//-- Brave
-					if (random 100 < [_personality,"Aggressiveness"] call ALiVE_fnc_hashGet) then {
+					if (random 100 < [_personality,"Aggressiveness"] call SpyderAddons_fnc_hashGet) then {
 						//-- Give false IED location
 
 						//-- Create marker
@@ -356,13 +346,11 @@ switch (_question) do {
 							["Could you please reconsider?","['PleaseReconsider',1.5]"],
 							["Give me answers now!","['GiveMeAnswersThreat',1.5,2]"]
 						]];
-
-						[_logic,"CurrentQuestion",[_operation,_args]] call ALiVE_fnc_hashSet;
 					};
 				};
 			} else {
 				//-- Not hostile
-				if (20 + (random 80) > [_personality,"Bravery"] call ALiVE_fnc_hashGet) then {
+				if (20 + (random 80) > [_personality,"Bravery"] call SpyderAddons_fnc_hashGet) then {
 					//-- Not Brave
 					_responses = ["They would not like me talking to you.","I would not endanger myself for you.","I cannot tell you anything.","Do you want to get me killed!","I cannot help you, please leave.","They cannot see me talking to you."];
 					_result = selectRandom _responses;
@@ -371,8 +359,6 @@ switch (_question) do {
 						["Could you please reconsider?","['PleaseReconsider',1.5]"],
 						["Give me answers now!","['GiveMeAnswersThreat',1.5,2]"]
 					]];
-
-					[_logic,"CurrentQuestion",[_operation,_args]] call ALiVE_fnc_hashSet;
 				} else {
 					//-- Brave
 					_responses = ["There are no IED's nearby.","They have not planted any here.","Thankfully, no.","We are safe from IED's here.","You are safe from IED's in this area."];
@@ -385,7 +371,7 @@ switch (_question) do {
 	};
 
 	case "ThankYou": {
-		if (random 100 > [_personality,"Patience"] call ALiVE_fnc_hashGet) then {
+		if (random 100 > [_personality,"Patience"] call SpyderAddons_fnc_hashGet) then {
 			//-- Not patient
 			_responses = ["You are welcome.","Whatever.","Please leave me alone now.","Is that all?","I am busy, is that all you need?"];
 
@@ -406,9 +392,9 @@ switch (_question) do {
 		_aggressiveResponses = ["Do not threaten me!","I will not succumb to your threats.","Threatening me will not get you answers.","You are no longer welcome here!","You disgust me!","I will not talk to you anymore!"];
 
 		if (_hostile) then {
-			if (50 + (random 80) > (([_personality,"Bravery"] call ALiVE_fnc_hashGet) + ([_personality,"Bravery"] call ALiVE_fnc_hashGet))) then {
+			if (50 + (random 80) > (([_personality,"Bravery"] call SpyderAddons_fnc_hashGet) + ([_personality,"Bravery"] call SpyderAddons_fnc_hashGet))) then {
 				//-- Don't give answer
-				if (random 100 > [_personality,"Aggressiveness"] call ALiVE_fnc_hashGet) then {
+				if (random 100 > [_personality,"Aggressiveness"] call SpyderAddons_fnc_hashGet) then {
 					//-- Not aggressive
 					_result = selectRandom _unaggressiveResponses;
 					_result = [_result, [["Sorry to bother you","['SorryForBother',1,1]"]]];
@@ -421,14 +407,14 @@ switch (_question) do {
 				//-- Succumbs to threat
 				//_responses = ["Sorry, I will you answers.","I am sorry, let me tell you what I know.","Please, forgive me.","I am sorry for my behavior, allow me to help you now.","I understand, let me tell you what I know.","Please do not hurt me, I will give you the answers you seek."];
 
-				_questionData = [_logic,"CurrentQuestion"] call ALiVE_fnc_hashGet;
+				_questionData = [_logic,"CurrentQuestion"] call SpyderAddons_fnc_hashGet;
 				[_logic,(_questionData select 0),(_questionData select 1)] call SpyderAddons_fnc_getResponses;
 				_result = ["",[]];
 			};
 		} else {
-			if (40 + (random 75) > (([_personality,"Bravery"] call ALiVE_fnc_hashGet) + ([_personality,"Bravery"] call ALiVE_fnc_hashGet))) then {
+			if (40 + (random 75) > (([_personality,"Bravery"] call SpyderAddons_fnc_hashGet) + ([_personality,"Bravery"] call SpyderAddons_fnc_hashGet))) then {
 				//-- Don't give answer
-				if (random 100 > [_personality,"Aggressiveness"] call ALiVE_fnc_hashGet) then {
+				if (random 100 > [_personality,"Aggressiveness"] call SpyderAddons_fnc_hashGet) then {
 					//-- Not aggressive
 					_result = selectRandom _unaggressiveResponses;
 					_result = [_result, [["Sorry to bother you","['SorryForBother',1,1]"]]];
@@ -441,7 +427,7 @@ switch (_question) do {
 				//-- Succumbs to threat
 				//_responses = ["Sorry, I will you answers.","I am sorry, let me tell you what I know.","Please, forgive me.","I am sorry for my behavior, allow me to help you now.","I understand, let me tell you what I know.","Please do not hurt me, I will give you the answers you seek."];
 
-				_questionData = [_logic,"CurrentQuestion"] call ALiVE_fnc_hashGet;
+				_questionData = [_logic,"CurrentQuestion"] call SpyderAddons_fnc_hashGet;
 systemchat format ["Reasking question \n %1 \n with data \n %2", _questionData select 0, _questionData select 1];
 				[_logic,(_questionData select 0),(_questionData select 1)] call SpyderAddons_fnc_getResponses;
 				_result = ["",[]];
@@ -455,15 +441,15 @@ systemchat format ["Reasking question \n %1 \n with data \n %2", _questionData s
 
 		//-- Get nearby faction units
 		{
-			if (faction _x == _faction && {_x distance2D player < 800}) then {
+			if (faction _x == _faction && {_x distance player < 800}) then {
 				_nearunits pushback _x;
 			};
 		} foreach allUnits;
 
 		//-- Get force display name
-		_force = [_logic,"getForceByFaction", _faction] call MAINCLASS;
-		_factionname = _force select 2 select 1;
-		_civForceRelations = _force select 2 select 2;
+		_force = [_logic,"getForceByFaction", _faction] call CIVILIANINTERACTION;
+		_factionname = [_force,"displayName"] call SpyderAddons_fnc_hashGet;
+		_civForceRelations = [_force,"hostility"] call SpyderAddons_fnc_hashGet;
 
 		if (count _nearunits > 0) then {
 			//-- Units nearby
@@ -471,7 +457,7 @@ systemchat format ["Reasking question \n %1 \n with data \n %2", _questionData s
 			if (_hostile) then {
 				//-- Hostile
 
-				if (random 100 > [_personality,"Indecisiveness"] call ALiVE_fnc_hashGet) then {
+				if (random 100 > [_personality,"Indecisiveness"] call SpyderAddons_fnc_hashGet) then {
 					_responses = ["I will not disgrace them.","I would not endanger them for you.","I won't tell you anything!","Do you really think I would help you?",(format ["Long live %1 troops!", _factionname]),"Why, so you can see how real troops train?"];
 					_result = selectRandom _responses;
 					_result = [_result, [
@@ -480,11 +466,9 @@ systemchat format ["Reasking question \n %1 \n with data \n %2", _questionData s
 						["Could you please reconsider?","['PleaseReconsider',1.5]"],
 						["Tell me where they are!","['GiveMeAnswersThreat',1.5,2]"]
 					]];
-
-					[_logic,"CurrentQuestion",[_operation,_args]] call ALiVE_fnc_hashSet;
 				} else {
 					if (_civForceRelations >= 0 && {random 100 > 25}) then {
-						//-- Civ likes force, tells player to fuck off
+						//-- Civ likes force, tells player to leave
 
 						_responses = ["I will not disgrace them.","I would not endanger them for you.","I won't tell you anything!","Do you really think I would help you?",(format ["Long live %1 troops!", _factionname]),"Why? so you can see how real troops train?"];
 						_result = selectRandom _responses;
@@ -514,7 +498,7 @@ systemchat format ["Reasking question \n %1 \n with data \n %2", _questionData s
 			} else {
 				//-- Non Hostile
 				if (_civForceRelations <= 0) then {
-					if (20 + (random 80) > [_personality,"Bravery"] call ALiVE_fnc_hashGet) then {
+					if (20 + (random 80) > [_personality,"Bravery"] call SpyderAddons_fnc_hashGet) then {
 						//-- Not Brave
 						_responses = ["They would not like me talking to you.","I would not endanger myself for you.","I cannot tell you anything.","Do you want to get me killed!","I cannot help you, please leave.","They cannot see me talking to you."];
 						_result = selectRandom _responses;
@@ -523,8 +507,6 @@ systemchat format ["Reasking question \n %1 \n with data \n %2", _questionData s
 							["Could you please reconsider?","['PleaseReconsider',1.5]"],
 							["Give me answers now!","['GiveMeAnswersThreat',1.5,2]"]
 						]];
-
-						[_logic,"CurrentQuestion",[_operation,_args]] call ALiVE_fnc_hashSet;
 					} else {
 						//-- Brave, gives answer
 
@@ -560,7 +542,7 @@ systemchat format ["Reasking question \n %1 \n with data \n %2", _questionData s
 			//-- No units nearby
 
 			if (_hostile) then {
-				if (random 100 > [_personality,"Aggressiveness"] call ALiVE_fnc_hashGet) then {
+				if (random 100 > [_personality,"Aggressiveness"] call SpyderAddons_fnc_hashGet) then {
 					//-- Hostile
 					_responses = ["I will not disgrace them.","I would not endanger them for you.","I won't tell you anything!","Do you really think I would help you?",(format ["Long live %1 troops!", _factionname]),"Why, so you can see how real troops train?"];
 					_result = selectRandom _responses;
@@ -580,8 +562,6 @@ systemchat format ["Reasking question \n %1 \n with data \n %2", _questionData s
 						["Tell me where they are!","['GiveMeAnswersThreat',1.5,2]"]
 					]];
 				};
-
-				[_logic,"CurrentQuestion",[_operation,_args]] call ALiVE_fnc_hashSet;
 			} else {
 				//-- Non Hostile
 
@@ -593,7 +573,7 @@ systemchat format ["Reasking question \n %1 \n with data \n %2", _questionData s
 				} else {
 					//-- Civ and force are not on good relations
 
-					if (random 100 > [_personality,"Bravery"] call ALiVE_fnc_hashGet) then {
+					if (random 100 > [_personality,"Bravery"] call SpyderAddons_fnc_hashGet) then {
 						//-- Brave
 						_responses = ["There are none nearby.","No, sorry.","None of them have been near this area recently.","I haven't seen any lately.","They haven't been here lately.","Sorry, there aren't any nearby."];
 						_result = selectRandom _responses;
@@ -608,13 +588,179 @@ systemchat format ["Reasking question \n %1 \n with data \n %2", _questionData s
 							["Tell me where they are!","['GiveMeAnswersThreat',1.5,2]"]
 						]];
 					};
-
-					[_logic,"CurrentQuestion",[_operation,_args]] call ALiVE_fnc_hashSet;
 				};
 			};
 		};
 	};
 
+	case "SeenBases": {
+		private ["_installationName"];
+		_installationArray = [_civData,"Installations"] call SpyderAddons_fnc_hashGet;
+		_installations = [];
+
+		{
+			if (count _x > 0) then {
+				switch (_forEachIndex) do {
+					case "0": {_installationName = selectRandom ["HQ","recruitment HQ","recruiting headquarters"]};
+					case "1": {_installationName = selectRandom ["munitions depot","weapons depot","weapons stash"]};
+					case "2": {_installationName = selectRandom ["IED factory","bomb factory","explosives factory"]};
+					case "3": {_installationName = selectRandom ["roadblocks","checkpoint"]};
+				};
+
+				_installations pushback [_installationName,_x];
+			};
+		} foreach _installationArray;
+
+		if (_hostile) then {
+			// hostile
+
+			if (count _installations > 0) then {
+				// installations nearby
+
+				if (random 100 > [_personality,"Indecisiveness"] call SpyderAddons_fnc_hashGet) then {
+					//-- Not Indecisive
+					_responses = ["Leave now!","I would not endanger myself for you.","I won't tell you anything.","Do you really think I would help you?","Leave me alone.","You are not welcome here!"];
+					_result = selectRandom _responses;
+					_result = [_result, [
+						["My apologies","['SorryForBother',1,1]"],
+						["Please calm down","['CalmDown',1,1]"],
+						["I am not trying to endanger you, can you please answer the question?","['PleaseReconsider',1.5]"],
+						["Tell me where their bases are!","['GiveMeAnswersThreat',1.5,2]"]
+					]];
+				} else {
+					//-- Civilian chokes, gives answer
+
+					//-- Mark on map
+					_installation = selectRandom _installations;
+					_installationName = _installation select 0;
+					_installation = selectRandom (_installation select 1);
+
+					_pos = getPos (selectRandom _nearunits);
+					_text = format ["Possible insurgent %1", _installationName];
+					if (random 100 >= 50) then {
+						[_logic,"markInstallationLocation", [_text,getPosATL _installation,true]] call CIVILIANINTERACTION;
+					} else {
+						[_logic,"markInstallationLocation", [_text,getPosATL _installation,false,140,150]] call CIVILIANINTERACTION;
+					};
+
+					_responses = ["Yes! let me show you it's location.","I can show you where the location of one is.","Yes, but you must protect me, they might come for me if they found out I told you.","You are lucky you came to me, I can show you where one might be.","I saw insurgents setting one up not too long ago.","Here, hurry and you might catch them."];
+					_result = selectRandom _responses;
+					_result = format ["%1 (Possible Insurgent %1 location marked on map)", _installationName];
+					_result = [_result, [["Thank you","['ThankYou',0.8,1]"]]];
+				};
+			} else {
+				// no installations nearby
+				if (20 + (random 80) > [_personality,"Bravery"] call SpyderAddons_fnc_hashGet) then {
+					//-- Not Brave
+
+					_responses = ["Like I would tell you.","I would not endanger myself for you.","I cannot tell you anything.","Do you want to get me killed!","I cannot help you, please leave.","You are not welcome here!"];
+					_result = selectRandom _responses;
+					_result = [_result, [
+						["Sorry to bother you","['SorryForBother',1,1]"],
+						["You need to calm down","['CalmDown',1,1]"],
+						["Could you please reconsider?","['PleaseReconsider',1.5]"],
+						["Give me answers now!","['GiveMeAnswersThreat',1.5,2]"]
+					]];
+				} else {
+					//-- Brave
+
+					if (random 100 < [_personality,"Aggressiveness"] call SpyderAddons_fnc_hashGet) then {
+						//-- Give false IED location
+
+						//-- Create marker
+						_nearRoads = player nearRoads 500;
+
+						//-- Mark on map
+						if (count _nearRoads > 0) then {
+							_pos = getPos (selectRandom _nearRoads);
+							[_logic,"markIEDLocation", [_pos,30,false,150]] call CIVILIANINTERACTION;
+
+							_responses = ["Insurgents planted one on a nearby road.","There is one on the road over there.","Yes, I hear there was one nearby.","Insurgents like to target this area, you might want to sweep it.","Yes, I will show you.","I know the location of one nearby."];
+						} else {
+							_pos = getPos player;
+							[_logic,"markIEDLocation", [_pos,500,false,150]] call CIVILIANINTERACTION;
+
+							_responses = ["There might be a few around here.","I've heard that one might be near here.","This area is always a target.","You might want to give it a sweep, there could be IED's nearby.","I saw insurgents planting IED's somewhere nearby.","Yes, I can't remember where, but there are some nearby."];
+						};
+
+						_result = selectRandom _responses;
+						_result = format ["%1 (Possible IED location marked on map)", _result];
+						_result = [_result, [["Thank you","['ThankYou',0.8,1]"]]];
+					} else {
+						_responses = ["Sorry, I cannot help you.","I would not endanger myself for you.","I cannot tell you anything.","Do you want to get me killed!","I cannot help you, please leave.","You are not welcome here!"];
+						_result = selectRandom _responses;
+						_result = [_result, [
+							["Sorry to bother you","['SorryForBother',1,1]"],
+							["Could you please reconsider?","['PleaseReconsider',1.5]"],
+							["Give me answers now!","['GiveMeAnswersThreat',1.5,2]"]
+						]];
+					};
+				};
+			};
+		} else {
+			// non hostile
+
+			if (count _installations > 0) then {
+				// installations nearby
+
+				if (20 + (random 80) > [_personality,"Bravery"] call SpyderAddons_fnc_hashGet) then {
+					//-- Not Brave
+
+					_responses = ["They would not like me talking to you.","I would not endanger myself for you.","I cannot tell you anything.","Do you want to get me killed!","I cannot help you, please leave.","They cannot see me talking to you."];
+					_result = selectRandom _responses;
+					_result = [_result, [
+						["Sorry to bother you","['SorryForBother',1,1]"],
+						["You are safe, you can tell me.","['PleaseReconsider',1.5]"],
+						["Where are the insurgents hiding!","['GiveMeAnswersThreat',1.5,2]"]
+					]];
+				} else {
+					//-- Brave, gives answer
+
+					//-- Mark on map
+					_installation = selectRandom _installations;
+					_installationName = _installation select 0;
+					_installation = selectRandom (_installation select 1);
+
+					_pos = getPos (selectRandom _nearunits);
+					_text = format ["Possible insurgent %1", _installationName];
+					if (random 100 >= 50) then {
+						[_logic,"markInstallationLocation", [_text,getPosATL _installation,true]] call CIVILIANINTERACTION;
+					} else {
+						[_logic,"markInstallationLocation", [_text,getPosATL _installation,false,140,150]] call CIVILIANINTERACTION;
+					};
+
+					_responses = ["Yes! let me show you it's location.","I can show you where the location of one is.","Yes, but you must protect me, they might come for me if they found out I told you.","You are lucky you came to me, I can show you where one might be.","I saw insurgents setting one up not too long ago.","Here, hurry and you might catch them."];
+					_result = selectRandom _responses;
+					_result = format ["%1 (Possible Insurgent %1 location marked on map)", _installationName];
+					_result = [_result, [["Thank you","['ThankYou',0.8,1]"]]];
+				};
+			} else {
+				// no installations nearby
+
+				if (20 + (random 80) > [_personality,"Bravery"] call SpyderAddons_fnc_hashGet) then {
+					//-- Not Brave
+
+					_responses = ["They would not like me talking to you.","I would not endanger myself for you.","I cannot tell you anything.","Do you want to get me killed!","I cannot help you, please leave.","They cannot see me talking to you."];
+					_result = selectRandom _responses;
+					_result = [_result, [
+						["Sorry to bother you","['SorryForBother',1,1]"],
+						["You are safe, you can tell me.","['PleaseReconsider',1.5]"],
+						["Where are the insurgents hiding!","['GiveMeAnswersThreat',1.5,2]"]
+					]];
+				} else {
+					_responses = ["There are no insurgent bases here.","Thankfully, no.","This city is insurgent free!","You will not find any insurgent bases in our town.","I have not seen any setup.","Sorry, I have not.","Not that I have seen.","I haven't seen any."];
+					_result = selectRandom _responses;
+					_result = [_result, [["Thank you","['ThankYou',0.8,1]"]]];
+				};
+			};
+		};
+	};
+
+};
+
+// save general question info
+if !(_operation in ["PleaseReconsider","GiveMeAnswersThreat"]) then {
+	[_logic,"CurrentQuestion",[_operation,_args]] call SpyderAddons_fnc_hashSet;
 };
 
 //-- Return result if any exists

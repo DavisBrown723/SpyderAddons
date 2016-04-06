@@ -50,16 +50,16 @@ class CfgVehicles
 				};
 			};
 
-			class EnemyForces {
-				displayName = "Enemy Forces";
-				description = "Enemy forces should be structured in this format [Faction_Classname,Faction_DisplayName, AttitudeTowardsFaction (1 being good, -1 being bad)";
-				defaultValue = "[OPF_G_F,Guerilla, -.3]";
-			};
-
 			class FriendlyForces {
 				displayName = "Friendly Forces";
 				description = "Friendly forces should be structured in this format [Faction_Classname,Faction_DisplayName, AttitudeTowardsFaction (1 being good, -1 being bad)]";
 				defaultValue = "[BLU_F,NATO, .3]";
+			};
+
+			class EnemyForces {
+				displayName = "Enemy Forces";
+				description = "Enemy forces should be structured in this format [Faction_Classname,Faction_DisplayName, AttitudeTowardsFaction (1 being good, -1 being bad)";
+				defaultValue = "[OPF_G_F,Guerilla, -.3]";
 			};
 
 			class IEDClasses {
