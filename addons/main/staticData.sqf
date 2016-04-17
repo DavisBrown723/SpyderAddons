@@ -1,3 +1,4 @@
-//SpyderAddons_GlobalSettings = [] call CBA_fnc_hashCreate;
+#include <script_component.hpp>
 
-//SpyderAddons_StaticData_Loaded = true;
+MOD(eventSystem) = [nil,"create"] call SpyderAddons_fnc_eventSystem;
+[MOD(eventSystem),"init"] call SpyderAddons_fnc_eventSystem;
