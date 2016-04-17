@@ -25,9 +25,9 @@ class CfgFunctions {
 				file = "\x\spyderaddons\addons\x_lib\functions\events\fnc_event.sqf";
 				recompile = RECOMPILE;
 			};
-			class eventHandler {
-				description = "Main handler for events";
-				file = "\x\spyderaddons\addons\x_lib\functions\events\fnc_eventHandler.sqf";
+			class eventSystem {
+				description = "Main handler for listeners and events";
+				file = "\x\spyderaddons\addons\x_lib\functions\events\fnc_eventSystem.sqf";
 				recompile = RECOMPILE;
 			};
 

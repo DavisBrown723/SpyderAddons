@@ -31,10 +31,16 @@ nil
 ---------------------------------------------------------------------------- */
 
 params [
-	["_type", ""],
+	["_type", "", [""]],
 	["_data", []],
-	["_from", ""],
-	["_message",""]
+	["_from", "", [""]],
+	["_message","", [""]]
 ];
 
-["SA_HASH",["type","data","from","message"],[_type,_data,_from,_message]];
+_event = [] call SpyderAddons_fnc_hashCreate;
+[_event,"type", _type] call SpyderAddons_fnc_hashSet;
+[_event,"data", _data] call SpyderAddons_fnc_hashSet;
+[_event,"from", _from] call SpyderAddons_fnc_hashSet;
+[_event,"message", _message] call SpyderAddons_fnc_hashSet;
+
+_event
