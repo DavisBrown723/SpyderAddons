@@ -27,63 +27,63 @@ Peer Reviewed:
 nil
 ---------------------------------------------------------------------------- */
 
+private ["_result"];
 params [
 	["_operation", ""],
-	["_arguments", []]
+	["_args", []]
 ];
-private ["_result"];
 
-//-- Define function shortcuts
-#define MAINCLASS SpyderAddons_fnc_vehicleSpawner
+// define function shortcuts
 
-//-- Define control ID's
-#define VEHICLESPAWNER_DIALOG "SpyderAddons_VehicleSpawner"
+#define MAINCLASS FUNC(vehicleSpawner)
+
+// define control ID's
+
 #define VEHICLESPAWNER_VEHICLELISTCONTROL (findDisplay 570 displayCtrl 574)
 #define VEHICLESPAWNER_VEHICLELIST 574
 #define VEHICLESPAWNER_INFOLIST 576
 
 switch (_operation) do {
 
-	case "init": {
-		_arguments params ["_logic","_syncedUnits"];
+	method("init") {
+		_args params ["_logic","_syncedUnits"];
 
-		_spawnMarker = _logic getVariable "SpawnPosition";
+		_spawnMarkers = [_logic getVariable "SpawnPosition"] call FUNC(getModuleArray);
 		_spawnHeight = call compile (_logic getVariable "SpawnHeight");
-		_factions = [_logic getVariable "VehicleFactions"] call SpyderAddons_fnc_getModuleArray;
-		_whitelist = [_logic getVariable "VehiclesWhitelist"] call SpyderAddons_fnc_getModuleArray;
-		_blacklist = [_logic getVariable "VehiclesBlacklist"] call SpyderAddons_fnc_getModuleArray;
-		_typeBlacklist = [_logic getVariable "VehiclesTypeBlacklist"] call SpyderAddons_fnc_getModuleArray;
-		_typeWhitelist = [_logic getVariable "VehiclesTypeWhitelist"] call SpyderAddons_fnc_getModuleArray;
+		_factions = [_logic getVariable "VehicleFactions"] call FUNC(getModuleArray);
+		_whitelist = [_logic getVariable "VehiclesWhitelist"] call FUNC(getModuleArray);
+		_blacklist = [_logic getVariable "VehiclesBlacklist"] call FUNC(getModuleArray);
+		_typeBlacklist = [_logic getVariable "VehiclesTypeBlacklist"] call FUNC(getModuleArray);
+		_typeWhitelist = [_logic getVariable "VehiclesTypeWhitelist"] call FUNC(getModuleArray);
 		_code = _logic getVariable "SpawnCode";
 
-		// Replace references to "this" with "_this"
 		_code = compile ([_code,"this","_this"] call CBA_fnc_replace);
 
 		{
 			if !(_x getVariable ["VehicleSpawner_Settings", false]) then {
 				if (typeName _x == "OBJECT") then {
-					_x setVariable ["VehicleSpawner_Settings", [[_spawnMarker,_spawnHeight], _spawnDir, _factions, _whitelist, _blacklist, _typeBlacklist, _typeWhitelist, _code]];
+					_x setVariable ["VehicleSpawner_Settings", [[_spawnMarkers,_spawnHeight], _spawnDir, _factions, _whitelist, _blacklist, _typeBlacklist, _typeWhitelist, _code]];
 					_x addAction ["Vehicle Spawner", {["open",_this] call SpyderAddons_fnc_vehicleSpawner}];
 				};
 			};
 		} forEach _syncedUnits;
 	};
-	
-	case "open": {
-		CreateDialog VEHICLESPAWNER_DIALOG;
-		["onLoad", _arguments] call MAINCLASS;
+
+	method("open") {
+		CreateDialog "SpyderAddons_VehicleSpawner";
+		["onLoad", _args] call MAINCLASS;
 
 		MOD(VehicleSpawner) = [] call CBA_fnc_hashCreate;
-		[MOD(VehicleSpawner), "CurrentInfo", _arguments] call CBA_fnc_hashSet;
+		[MOD(VehicleSpawner), "CurrentInfo", _args] call CBA_fnc_hashSet;
 	};
 
-	case "onLoad": {
+	method("onLoad") {
 		private ["_vehicles"];
-		_arguments params ["_object","_caller"];
+		_args params ["_object","_caller"];
 
 		_settings = _object getVariable "VehicleSpawner_Settings";
 		_settings params [
-			"_spawnPosition",
+			"_spawnPositions",
 			"_spawnDir",
 			"_factions",
 			"_whitelist",
@@ -93,17 +93,20 @@ switch (_operation) do {
 			"_spawnCode"
 		];
 
-		//-- Get faction vehicles
-		_vehicles = "(
-			((getText (_x >> 'faction')) in _factions) and
-			{(((configName _x) isKindOf 'LandVehicle') or ((configName _x) isKindOf 'Air') or ((configName _x) isKindOf 'Ship')) and
-			{!((configName _x) isKindOf 'Static') and
-			{!((configName _x) isKindOf 'StaticWeapon') and
-			{!((configName _x) isKindOf 'ParachuteBase') and
-			{!((configName _x) in _blacklist)
-		}}}}})" configClasses (configFile >> "CfgVehicles");
+		// get faction vehicles
 
-		//-- Get whitelisted vehicles
+		_vehicles = "(
+			(getNumber (_x >> 'scope') >= 2) &&
+			{(getText (_x >> 'faction')) in _factions} &&
+			{(((configName _x) isKindOf 'LandVehicle') || ((configName _x) isKindOf 'Air') || ((configName _x) isKindOf 'Ship'))} &&
+			{!((configName _x) isKindOf 'Static')} &&
+			{!((configName _x) isKindOf 'StaticWeapon')} &&
+			{!((configName _x) isKindOf 'ParachuteBase')} &&
+			{!((configName _x) in _blacklist)}
+		)" configClasses (configFile >> "CfgVehicles");
+
+		// get whitelisted vehicles
+
 		{
 			if !(_x in _vehicles) then {
 				_configPath = configFile >> "CfgVehicles" >>_x;
@@ -114,38 +117,38 @@ switch (_operation) do {
 			};
 		} forEach _whitelist;
 
-		//-- Validate vehicles
+		// validate vehicles
 		_validVehicles = [];
 		{
 			private ["_valid"];
 			_valid = true;
 			_vehicle = _x;
 
-			//-- If type whitelist exists, use those vehicle types. Otherwise, exclude type blacklists
+			// if type whitelist exists, use those vehicle types. Otherwise, exclude type blacklists
+
 			if !(_typeWhitelist isEqualTo []) then {
-				//-- Validate with whitelist
+				// validate with whitelist
 				{
 					if (configName _vehicle isKindOf _x) then {
 						_validVehicles pushBack _vehicle;
 					};
 				} forEach _typeWhitelist;
 			} else {
-				//-- Validate with blacklist
+				// validate with blacklist
 				if !(_typeBlacklist isEqualTo []) then {
 					{
 						if (!(configName _vehicle isKindOf _x) and {_valid}) then {_valid = true} else {_valid = false};
 					} forEach _typeBlacklist;
 
-					//-- Make sure the vehicle isn't validated by not being in another blacklist
+					// make sure the vehicle isn't validated by not being in another blacklist
 					if (_valid) then {_validVehicles pushBack _vehicle};
 				} else {
-					//-- No blacklist or whitelist, just add the vehicle
+					// no blacklist or whitelist, just add the vehicle
 					_validVehicles pushBack _vehicle;
 				};
 			};
 		} forEach _vehicles;
 
-		//-- Add to list
 		{
 			_name = getText (_x >> "displayName");
 			_icon = getText (_x >> "icon");
@@ -157,72 +160,140 @@ switch (_operation) do {
 				};
 		} forEach _validVehicles;
 
-		//-- Track vehicle list selection
+		// track vehicle list selection
+
 		VEHICLESPAWNER_VEHICLELISTCONTROL  ctrlAddEventHandler ["LBSelChanged","
 			['updateInfo'] call SpyderAddons_fnc_vehicleSpawner;
 		"];
 	};
 
-	case "onUnload": {
+	method("onUnload") {
 		MOD(VehicleSpawner) = nil;
 	};
 
-	case "updateInfo": {
-		//-- Clear list
+	method("updateInfo") {
 		lbClear VEHICLESPAWNER_INFOLIST;
 
 		_index = lbCurSel VEHICLESPAWNER_VEHICLELIST;
 		_classname = lbData [VEHICLESPAWNER_VEHICLELIST, _index];
 		_configPath = configFile >> "CfgVehicles" >> _classname;
 
-		//-- Get speed
 		_vehSpeed = getNumber (_configPath >> "maxSpeed");
 		_vehSpeed = format ["Top Speed: %1", _vehSpeed];
 		lbAdd [VEHICLESPAWNER_INFOLIST, _vehSpeed];
 
-		//-- Get armor
 		_vehArmor = getNumber (_configPath >> "armor");
 		_vehArmor = format ["Armor: %1", _vehArmor];
 		lbAdd [VEHICLESPAWNER_INFOLIST, _vehArmor];
 
-		//-- Get fuel
 		_vehFuel = getNumber (_configPath >> "fuelCapacity");
 		_vehFuel = format ["Fuel Capacity: %1", _vehFuel];
 		lbAdd [VEHICLESPAWNER_INFOLIST, _vehFuel];
 
-		//-- Get passenger seats
-		//_vehCargo = getNumber (_configPath >> "transportSoldier");
 		_vehCargo = ([_classname, true] call BIS_fnc_crewCount) - ([_classname, false] call BIS_fnc_crewCount);
 		_vehCargo = format ["Passenger Seats: %1", _vehCargo];
 		lbAdd [VEHICLESPAWNER_INFOLIST, _vehCargo];
 	};
 
-	case "getSelectedVehicle": {
+	method("getSelectedVehicle") {
 		_index = lbCurSel VEHICLESPAWNER_VEHICLELIST;
 		if (_index == -1) exitWith {};
 
 		_classname = lbData [VEHICLESPAWNER_VEHICLELIST, _index];
 		_object = ([MOD(VehicleSpawner), "CurrentInfo"] call CBA_fnc_hashGet) select 0;
 
-		["spawnVehicle", [_classname, _object]] remoteExecCall [QUOTE(MAINCLASS), 2];
+		["onVehicleRequest", [_classname, _object]] remoteExec [QUOTE(MAINCLASS), 2];
 	};
 
-	case "spawnVehicle": {
-		_arguments params ["_classname","_object"];
+    method("getVehiclesInRadius") {
 
-		_settings = _object getVariable "VehicleSpawner_Settings";
-		_spawnSettings = _settings select 0;
-		_spawnSettings params ["_spawnmarker","_spawnheight"];
-		_spawnPos = getmarkerpos _spawnmarker;
-		_code = _settings select 7;
+        _args params ["_pos","_radius"];
 
-		_vehicle = _classname createVehicle _spawnPos;
+        _result = nearestObjects [_pos, ["AllVehicles"], _radius];
 
-		_vehicle setPos [_spawnPos select 0, _spawnPos select 1, _spawnheight];	//-- force vehicle to height
-		_vehicle setDir (markerdir _spawnMarker);
+    };
 
-		_vehicle call _code;
+    method("clearVehiclesInRadius") {
+
+        _args params ["_pos","_radius"];
+
+        private _nearVehicles = ["getVehiclesInRadius", [_pos,_radius]] call MAINCLASS;
+
+         private _allPlayers = allPlayers;
+        {
+            if (({_x in _allPlayers} count (crew _x)) == 0) then {
+                deleteVehicle _x;
+            };
+        } foreach _nearVehicles;
+
+    };
+
+    method("getOpenMarkers") {
+
+        private ["_marker","_markerPos"];
+
+        _args params ["_markers","_radius"];
+
+        _result = [];
+
+        {
+            _marker = _x;
+            _markerPos = markerPos _marker;
+
+            _vehicleNearMarker = ["getVehiclesInRadius", [_markerPos,_radius]] call MAINCLASS;
+
+            if (count _vehicleNearMarker == 0) then {
+                _result pushback _marker;
+            };
+        } foreach _markers;
+
+    };
+
+	method("onVehicleRequest") {
+
+        private ["_markerToSpawn"];
+
+		_args params ["_class","_object"];
+
+		private _settings = _object getVariable "VehicleSpawner_Settings";
+
+		private _spawnSettings = _settings select 0;
+		_spawnSettings params ["_spawnMarkers","_spawnHeight"];
+
+        private _radius = ((sizeof _class) / 2) max 5;
+		private _openMarkers = ["getOpenMarkers", [_spawnMarkers,_radius]] call MAINCLASS;
+
+        if (count _openMarkers > 0) then {
+            _markerToSpawn = _openMarkers select 0;
+        } else {
+            _markerToSpawn = _spawnMarkers select 0;
+            ["clearVehiclesInRadius", [markerPos _markerToSpawn,_radius]] call MAINCLASS;
+        };
+
+        private _pos = markerPos _markerToSpawn;
+        private _dir = markerDir _markerToSpawn;
+		private _code = _settings select 7;
+
+		_pos set [2,_spawnheight];
+
+        sleep 0.1;
+
+        ["createVehicle", [_class,_pos,_dir,_code]] call MAINCLASS;
+
 	};
+
+    method("createVehicle") {
+
+        _args params ["_class","_pos","_dir","_code"];
+
+        private _vehicle = _class createVehicle [0,0,0];
+		_vehicle setPos _pos;
+        _vehicle setDir _dir;
+		_vehicle setVectorUp (surfaceNormal _pos);
+
+		_vehicle spawn _code;
+
+    };
 
 };
 

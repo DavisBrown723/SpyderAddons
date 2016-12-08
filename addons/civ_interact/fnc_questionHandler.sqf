@@ -334,6 +334,7 @@ switch (_question) do {
 		_actions params ["_ambush","_sabotage","_ied","_suicide"];
 
 		if ((_factory isEqualTo []) and (_HQ isEqualTo []) and (_depot isEqualTo []) and (_roadblocks isEqualTo [])) then {
+
 			if !(_hostile) then {
 				if (floor random 100 > 30) then {
 					_response1 = "Insurgents have not established any installations here.";
@@ -371,6 +372,7 @@ switch (_question) do {
 				CIVINTERACT_RESPONSELIST ctrlSetText _response;
 			};
 		} else {
+
 			private ["_installation","_type","_typeName","_installationData"];
 			for "_i" from 0 to 3 do {
 				_installationArray = _installations call BIS_fnc_selectRandom;
@@ -388,6 +390,7 @@ switch (_question) do {
 			};			
 
 			if ((isNil "_type") or (isNil "_installation")) exitWith {
+
 				_response1 = "I can't talk about that.";
 				_response2 = "They would kill me.";
 				_response3 = "Are you crazy.";

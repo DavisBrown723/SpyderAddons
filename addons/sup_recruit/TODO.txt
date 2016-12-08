@@ -1,1 +1,0 @@
-- Add module option to specify whether or not recruited units can be switched to in SP (need to do a check and addSwitchableUnit if SP and addPlayableUnit if MP)

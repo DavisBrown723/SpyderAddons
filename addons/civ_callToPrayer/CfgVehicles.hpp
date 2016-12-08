@@ -9,7 +9,7 @@ class CfgVehicles {
         icon = QUOTE(CPATH(COMPONENT)\icon_civ_callToPrayer.paa);
         picture = QUOTE(CPATH(COMPONENT)\icon_civ_callToPrayer.paa);
         functionPriority = 30;
-        isGlobal = 2;
+        isGlobal = 0;
 
 		class Arguments {
 

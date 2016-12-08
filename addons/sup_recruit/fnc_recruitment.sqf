@@ -28,8 +28,8 @@ nil
 ---------------------------------------------------------------------------- */
 
 params [
-	["_operation", ""],
-	["_arguments", []]
+    ["_operation", ""],
+    ["_arguments", []]
 ];
 private ["_result"];
 
@@ -42,168 +42,169 @@ private ["_result"];
 
 switch (_operation) do {
 
-	case "init": {
-		_arguments params ["_logic","_syncedUnits"];
+    case "init": {
+        _arguments params ["_logic","_syncedUnits"];
 
-		_factions = [_logic getVariable "RecruitableFactions"] call SpyderAddons_fnc_getModuleArray;
-		_whitelist = [_logic getVariable "RecruitableUnits"] call SpyderAddons_fnc_getModuleArray;
-		_blacklist = [_logic getVariable "BlacklistedUnits"] call SpyderAddons_fnc_getModuleArray;
-		_maxUnits = call compile (_logic getVariable "MaximumUnits");
-		_code = compile (_logic getVariable "SpawnCode");
+        _factions = [_logic getVariable "RecruitableFactions"] call SpyderAddons_fnc_getModuleArray;
+        _whitelist = [_logic getVariable "RecruitableUnits"] call SpyderAddons_fnc_getModuleArray;
+        _blacklist = [_logic getVariable "BlacklistedUnits"] call SpyderAddons_fnc_getModuleArray;
+        _maxUnits = call compile (_logic getVariable "MaximumUnits");
+        _code = compile (_logic getVariable "SpawnCode");
 
-		{
-			if !(_x getVariable ["Recruitment_Settings", false]) then {
-				if (typeName _x == "OBJECT") then {
-					_x setVariable ["Recruitment_Settings", [_factions,_whitelist,_blacklist,_maxUnits,_code]];
-					_x addAction ["Recruit", {["open",_this] call SpyderAddons_fnc_recruitment}];
-				};
-			};
-		} forEach _syncedUnits;
-	};
-	
-	case "open": {
-		CreateDialog "Recruitment_Menu";
-		["onLoad", _arguments] call SpyderAddons_fnc_recruitment;
+        {
+            if !(_x getVariable ["Recruitment_Settings", false]) then {
+                if (typeName _x == "OBJECT") then {
+                    _x setVariable ["Recruitment_Settings", [_factions,_whitelist,_blacklist,_maxUnits,_code]];
+                    _x addAction ["Recruit", {["open",_this] call SpyderAddons_fnc_recruitment}];
+                };
+            };
+        } forEach _syncedUnits;
+    };
 
-		MOD(recruitmentHandler) = [] call CBA_fnc_hashCreate;
-		[MOD(recruitmentHandler),"Data", _arguments] call CBA_fnc_hashSet;
-	};
+    case "open": {
+        CreateDialog "SpyderAddons_Recruitment";
+        ["onLoad", _arguments] call SpyderAddons_fnc_recruitment;
 
-	case "onLoad": {
-		private ["_factions"];
-		_arguments params ["_object","_caller"];
+        MOD(recruitmentHandler) = [] call CBA_fnc_hashCreate;
+        [MOD(recruitmentHandler),"Data", _arguments] call CBA_fnc_hashSet;
+    };
 
-		player setVariable ["Recruitment_CurrentObject", _object];
+    case "onLoad": {
+        private ["_factions"];
+        _arguments params ["_object","_caller"];
 
-		//-- Get settings
-		_settings = _object getVariable "Recruitment_Settings";
-		_settings params [
-			"_factions",
-			"_whitelist",
-			"_blacklist"
-		];
+        player setVariable ["Recruitment_CurrentObject", _object];
 
-		//-- Get faction units
-		_units = "(
-			((getText (_x >> 'faction')) in _factions) and
-			{(configName _x) isKindOf 'Man' and
-			{!((getText (_x >> '_generalMacro') == 'B_Soldier_base_F')) and
-			{count (getArray (_x >> 'weapons')) > 2 and
-			{!((configName _x) in _blacklist)
-		}}}})" configClasses (configFile >> "CfgVehicles");
+        //-- Get settings
+        _settings = _object getVariable "Recruitment_Settings";
+        _settings params [
+            "_factions",
+            "_whitelist",
+            "_blacklist"
+        ];
 
-		//-- Add whitelisted units
-		{
-			if ((typeName _x == "STRING") and !(_x in _units)) then {
-				_units pushBack (configFile >> "CfgVehicles" >> _x);
-			};
-		} forEach _whitelist;
+        //-- Get faction units
+        _units = "(
+            (getNumber (_x >> 'scope') > 1) &&
+            {((getText (_x >> 'faction')) in _factions) &&
+            {(configName _x) isKindOf 'Man' &&
+            {!((getText (_x >> '_generalMacro') == 'B_Soldier_base_F')) &&
+            {count (getArray (_x >> 'weapons')) > 2 &&
+            {!((configName _x) in _blacklist)
+        }}}}})" configClasses (configFile >> "CfgVehicles");
 
-		//-- Build list with retrieved units
-		{
-			_name = getText (_x >> "displayName");
+        //-- Add whitelisted units
+        {
+            if ((typeName _x == "STRING") && !(_x in _units)) then {
+                _units pushBack (configFile >> "CfgVehicles" >> _x);
+            };
+        } forEach _whitelist;
 
-			lbAdd [RECRUITMENT_UNITLIST, _name];
-			lbSetData [RECRUITMENT_UNITLIST, _forEachIndex, configName _x];
-		} forEach _units;
+        //-- Build list with retrieved units
+        {
+            _name = getText (_x >> "displayName");
 
-		//-- Track group list selection
-		(findDisplay 570 displayCtrl RECRUITMENT_UNITLIST)  ctrlAddEventHandler ["LBSelChanged","
-			['updateGear'] call SpyderAddons_fnc_recruitment;
-		"];
-	};
+            lbAdd [RECRUITMENT_UNITLIST, _name];
+            lbSetData [RECRUITMENT_UNITLIST, _forEachIndex, configName _x];
+        } forEach _units;
 
-	case "onUnload": {
-		MOD(recruitmentHandler) = nil;
-	};
+        //-- Track group list selection
+        (findDisplay 570 displayCtrl RECRUITMENT_UNITLIST)  ctrlAddEventHandler ["LBSelChanged","
+            ['updateGear'] call SpyderAddons_fnc_recruitment;
+        "];
+    };
 
-	case "updateGear": {
-		//-- Clear any existing data
-		lbClear RECRUITMENT_GEARLIST;
+    case "onUnload": {
+        MOD(recruitmentHandler) = nil;
+    };
 
-		//-- Get currently selected unit
-		_index = lbCurSel RECRUITMENT_UNITLIST;
-		_class = lbData [RECRUITMENT_UNITLIST, _index];
+    case "updateGear": {
+        //-- Clear any existing data
+        lbClear RECRUITMENT_GEARLIST;
 
-		//-- Get config entry
-		_configClass = configfile >> "CfgVehicles" >> _class;
-		_weapons = getArray (_configClass >> "weapons");
-		_magazines = getArray (_configClass >> "magazines");
-		_items = getArray (_configClass >> "Items");
+        //-- Get currently selected unit
+        _index = lbCurSel RECRUITMENT_UNITLIST;
+        _class = lbData [RECRUITMENT_UNITLIST, _index];
 
-		private ["_index"];
-		_index = 0;
+        //-- Get config entry
+        _configClass = configfile >> "CfgVehicles" >> _class;
+        _weapons = getArray (_configClass >> "weapons");
+        _magazines = getArray (_configClass >> "magazines");
+        _items = getArray (_configClass >> "Items");
 
-		//-- Weapons
-		{
-			if !((_x == "Throw") or (_x == "Put")) then {
-				_configPath = configfile >> "CfgWeapons" >> _x;
-				if (isClass _configPath) then {
-					_displayName = getText (_configPath >> "displayName");
-					_picture = getText (_configPath >> "picture");
+        private ["_index"];
+        _index = 0;
 
-					lbAdd [RECRUITMENT_GEARLIST, _displayName];
-					lbSetPicture [RECRUITMENT_GEARLIST, _index, _picture];
-					_index = _index + 1;
-				};
-			};
-		} forEach _weapons;
+        //-- Weapons
+        {
+            if !((_x == "Throw") or (_x == "Put")) then {
+                _configPath = configfile >> "CfgWeapons" >> _x;
+                if (isClass _configPath) then {
+                    _displayName = getText (_configPath >> "displayName");
+                    _picture = getText (_configPath >> "picture");
 
-		_itemArray = _magazines + _items;
-		{
-			private ["_item","_count","_configPath"];
-			_item = _x;
-			_count = {_x == _item} count _itemArray;
+                    lbAdd [RECRUITMENT_GEARLIST, _displayName];
+                    lbSetPicture [RECRUITMENT_GEARLIST, _index, _picture];
+                    _index = _index + 1;
+                };
+            };
+        } forEach _weapons;
 
-			if !(_count == 0) then {
-				for "_i" from 0 to _count step 1 do {_itemArray = _itemArray - [_item]};
+        _itemArray = _magazines + _items;
+        {
+            private ["_item","_count","_configPath"];
+            _item = _x;
+            _count = {_x == _item} count _itemArray;
 
-				_configPath = configfile >> "CfgWeapons" >> _item;
-				if !(isClass _configPath) then {_configPath = configfile >> "CfgMagazines" >> _item};
-				if !(isClass _configPath) then {_configPath = configfile >> "CfgVehicles" >> _item};
+            if !(_count == 0) then {
+                for "_i" from 0 to _count step 1 do {_itemArray = _itemArray - [_item]};
 
-				if !(isClass _configPath) then {
-					_displayName = getText (_configPath >> "displayName");
-					_picture = getText (_configPath >> "picture");
-					_itemInfo = format ["%1: %2", _displayName, _count];
+                _configPath = configfile >> "CfgWeapons" >> _item;
+                if !(isClass _configPath) then {_configPath = configfile >> "CfgMagazines" >> _item};
+                if !(isClass _configPath) then {_configPath = configfile >> "CfgVehicles" >> _item};
 
-					lbAdd [RECRUITMENT_GEARLIST, _itemInfo];
-					lbSetPicture [RECRUITMENT_GEARLIST, _index, _picture];
-					_index = _index + 1;
-				};
-			};
-		} forEach _itemArray;
-	};
+                if !(isClass _configPath) then {
+                    _displayName = getText (_configPath >> "displayName");
+                    _picture = getText (_configPath >> "picture");
+                    _itemInfo = format ["%1: %2", _displayName, _count];
 
-	case "getSelectedUnit": {
-		_data = [MOD(recruitmentHandler),"Data"] call CBA_fnc_hashGet;
-		_currentObject = _data select 0;
+                    lbAdd [RECRUITMENT_GEARLIST, _itemInfo];
+                    lbSetPicture [RECRUITMENT_GEARLIST, _index, _picture];
+                    _index = _index + 1;
+                };
+            };
+        } forEach _itemArray;
+    };
 
-		//-- Exit if too many units in player group
-		_settings = _currentObject getVariable "Recruitment_Settings";
-		_maxUnits = _settings select 3;
+    case "getSelectedUnit": {
+        _data = [MOD(recruitmentHandler),"Data"] call CBA_fnc_hashGet;
+        _currentObject = _data select 0;
 
-		if (count units group player >= _maxUnits) exitWith {
-			hint format ["You have too many units in your group. You may not recruit more until you have less than %1 units in your group.", _maxUnits];
-		};
+        //-- Exit if too many units in player group
+        _settings = _currentObject getVariable "Recruitment_Settings";
+        _maxUnits = _settings select 3;
 
-		_index = lbCurSel RECRUITMENT_UNITLIST;
-		_classname = lbData [RECRUITMENT_UNITLIST, _index];
+        if (count units group player >= _maxUnits) exitWith {
+            hint format ["You have too many units in your group. You may not recruit more until you have less than %1 units in your group.", _maxUnits];
+        };
 
-		["spawnUnit", [_data, _classname]] remoteExecCall [QUOTE(MAINCLASS), 2];
-	};
+        _index = lbCurSel RECRUITMENT_UNITLIST;
+        _classname = lbData [RECRUITMENT_UNITLIST, _index];
 
-	case "spawnUnit": {
-		_arguments params ["_data","_classname"];
-		_data params ["_object","_player"];
-		_settings = _object getVariable "Recruitment_Settings";
-		_code = _settings select 4;
+        ["spawnUnit", [_data, _classname]] remoteExecCall [QUOTE(MAINCLASS), 2];
+    };
 
-		_unit = (group _player) createUnit [_classname, (getPos _player), [], 15, "FORM"];
-		addSwitchableUnit _unit;
+    case "spawnUnit": {
+        _arguments params ["_data","_classname"];
+        _data params ["_object","_player"];
+        _settings = _object getVariable "Recruitment_Settings";
+        _code = _settings select 4;
 
-		_unit spawn _code;
-	};
+        _unit = (group _player) createUnit [_classname, (getPos _player), [], 15, "FORM"];
+        addSwitchableUnit _unit;
+
+        _unit spawn _code;
+    };
 
 };
 

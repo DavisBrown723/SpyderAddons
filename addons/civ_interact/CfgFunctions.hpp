@@ -6,29 +6,19 @@ class CfgFunctions {
 				file = "\x\spyderaddons\addons\civ_interact\fnc_addCivilianAction.sqf";
 				recompile = RECOMPILE;
 			};
-			class civilianInteraction {
+			class civInteract {
 				description = "Main handler for civilian interraction";
-				file = "\x\spyderaddons\addons\civ_interact\fnc_civilianInteraction.sqf";
+				file = "\x\spyderaddons\addons\civ_interact\fnc_civInteract.sqf";
 				recompile = RECOMPILE;
 			};
-			class civilianInteractionInit {
+			class civInteractInit {
 				description = "Initializes civilian interaction";
-				file = "\x\spyderaddons\addons\civ_interact\fnc_civilianInteractionInit.sqf";
+				file = "\x\spyderaddons\addons\civ_interact\fnc_civInteractInit.sqf";
 				recompile = RECOMPILE;
 			};
-			class getResponses {
-				description = "Returns any responses for a question";
-				file = "\x\spyderaddons\addons\civ_interact\fnc_getResponses.sqf";
-				recompile = RECOMPILE;
-			};
-			class inventoryHandler {
+			class questionHandler {
 				description = "Main handler for questions";
-				file = "\x\spyderaddons\addons\civ_interact\fnc_inventoryHandler.sqf";
-				recompile = RECOMPILE;
-			};
-			class personality {
-				description = "Personality for civilians";
-				file = "\x\spyderaddons\addons\civ_interact\fnc_personality.sqf";
+				file = "\x\spyderaddons\addons\civ_interact\fnc_questionHandler.sqf";
 				recompile = RECOMPILE;
 			};
 		};

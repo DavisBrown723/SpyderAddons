@@ -6,7 +6,7 @@ class CfgVehicles
 		scope = 2;
 		author = "SpyderBlack723";
 		displayName = "Civilian Interaction";
-		function = "SpyderAddons_fnc_civilianInteractionInit";
+		function = "SpyderAddons_fnc_civInteractInit";
 		icon = "x\spyderaddons\addons\civ_interact\icon_civ_interact.paa";
 		picture = "x\spyderaddons\addons\civ_interact\icon_civ_interact.paa";
 		functionPriority = 10;
@@ -32,11 +32,12 @@ class CfgVehicles
 					};
 				};
 			};
-
-			class Debug {
+			class Debug
+  			{
 				displayName = "Debug";
-				description = "Enable Debug";
-				class values {
+				description = "Enable debug";
+				class values
+				{
 					class Yes {
 						name = "Yes";
 						value = true;
@@ -50,21 +51,9 @@ class CfgVehicles
 				};
 			};
 
-			class FriendlyForces {
-				displayName = "Friendly Forces";
-				description = "Friendly forces should be structured in this format [Faction_Classname,Faction_DisplayName, AttitudeTowardsFaction (1 being good, -1 being bad)]";
-				defaultValue = "[BLU_F,NATO, .3]";
-			};
-
-			class EnemyForces {
-				displayName = "Enemy Forces";
-				description = "Enemy forces should be structured in this format [Faction_Classname,Faction_DisplayName, AttitudeTowardsFaction (1 being good, -1 being bad)";
-				defaultValue = "[OPF_G_F,Guerilla, -.3]";
-			};
-
-			class IEDClasses {
-				displayName = "IED Classes";
-				description = "IED Classes that civilians will identify and report to players. These classes are in addition to vanilla and ALiVE IED classes.";
+			class EnemyFaction {
+				displayName = "Insurgent Faction";
+				description = "Faction used for enemy insurgents";
 				defaultValue = "";
 			};
 			

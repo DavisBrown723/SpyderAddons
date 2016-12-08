@@ -1,11 +1,12 @@
 class CfgPatches {
-	class ADDON {
+	class COMPONENT {
 		units[] = {};
 		weapons[] = {};
-		requiredVersion = 1.50;
+		requiredVersion = 1.60;
 		requiredAddons[] = {"A3_Modules_F","cba_xeh_a3"};
 		versionDesc = "Spyder Addons";
-		author[] = {"SpyderBlack723"};
+		author = MOD_AUTHOR;
+		authors[] = {"SpyderBlack723"};
 	};
 };
 

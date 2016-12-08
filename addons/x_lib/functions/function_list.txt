@@ -1,5 +1,3 @@
-//-- This is WIP, some included functions may not work correctly (getAsymm..will fix when I'm not lazy) or are subject to change/removal
-
 asymmetric
 
 	getCivilianRole
@@ -21,6 +19,7 @@ hashes
 
 logging
 
+	dumpModuleInit
 	inspectArray
 	inspectHash
 	log
@@ -46,10 +45,17 @@ objectives
 	getObjectiveInstallations
 	getSideDominantObjectives
 
+oop
+
+	baseClass
+	baseClassHash
+
 opcom
 
+	getOpcomByFaction
 	getOpcoms
-	getAsymmOpcoms
+	getOpcomsBySide
+	isAsymmetric
 
 profiles
 

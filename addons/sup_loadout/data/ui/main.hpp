@@ -1,310 +1,275 @@
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////				 Loadout Manager							/////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 #include "common.hpp"
 
-//-- GUI editor: configfile >> "Loadout_Manager"
+class SpyderAddons_LoadoutManager {
+    idd = 7200;
+    movingEnable = 1;
+    onUnload = "['onUnload', _this] call SpyderAddons_fnc_loadoutManagerOnAction";
 
-class Loadout_Manager
-{
-	idd = 721;
-	movingEnable = 1;
-	onUnload = "[SpyderAddons_loadoutManager,'onUnload'] call SpyderAddons_fnc_loadoutManager";
+    class controlsBackground {
 
-	class controlsBackground {
-		class LoadoutManager_Background: LoadoutManager_RscText
-		{
-			idc = -1;
+        class SpyderAddons_LoadoutManager_Background: LoadoutManager_RscText {
+            idc = 7201;
 
-			x = 0.5 * GUI_GRID_W + GUI_GRID_X;
-			y = -3 * GUI_GRID_H + GUI_GRID_Y;
-			w = 39 * GUI_GRID_W;
-			h = 29.5 * GUI_GRID_H;
-			colorBackground[] = {0,0,0,0.6};
-		};
-		class LoadoutManager_Title: LoadoutManager_RscText
-		{
-			idc = -1;
+            x = 0.2375 * safezoneW + safezoneX;
+            y = 0.15 * safezoneH + safezoneY;
+            w = 0.35 * safezoneW;
+            h = 0.658 * safezoneH;
+            colorBackground[] = {0,0,0,0.5};
+        };
 
-			text = "Loadout Manager";
-			moving = 1;
-			x = 0.5 * GUI_GRID_W + GUI_GRID_X;
-			y = -3.97 * GUI_GRID_H + GUI_GRID_Y;
-			w = 39 * GUI_GRID_W;
-			h = 1 * GUI_GRID_H;
-			colorBackground[] = {0.788,0.443,0.157,0.65};
-		};
+        class SpyderAddons_LoadoutManager_Title: LoadoutManager_RscText {
+            idc = 7202;
+            moving = 1;
 
-		class LoadoutManager_ListLeftTitle: LoadoutManager_RscText
-		{
-			idc = 7210;
+            text = "Loadout Manager";
+            x = 0.2375 * safezoneW + safezoneX;
+            y = 0.122 * safezoneH + safezoneY;
+            w = 0.35 * safezoneW;
+            h = 0.028 * safezoneH;
+            colorBackground[] = MOD_COLOR_MAIN;
+            sizeEx = "(((((safezoneW / safezoneH) min 1.2) / 1.2) / 25) * 0.7)";
+        };
 
-			text = "Classes";
-			style = 0x02;
-			x = 1 * GUI_GRID_W + GUI_GRID_X;
-			y = -2.5 * GUI_GRID_H + GUI_GRID_Y;
-			w = 16 * GUI_GRID_W;
-			h = 1 * GUI_GRID_H;
-			sizeEx = 1 * GUI_GRID_H;
-		};
-		class LoadoutManager_ListRightTitle: LoadoutManager_RscText
-		{
-			idc = 7211;
+        class SpyderAddons_LoadoutManager_HeaderLeft: LoadoutManager_RscText {
+            idc = 7203;
 
-			text = "";
-			style = 0x02;
-			x = 23 * GUI_GRID_W + GUI_GRID_X;
-			y = -2.5 * GUI_GRID_H + GUI_GRID_Y;
-			w = 15.5 * GUI_GRID_W;
-			h = 1 * GUI_GRID_H;
-			sizeEx = 1 * GUI_GRID_H;
-		};
+            style = 0x02;
+            text = "Loadouts";
+            x = 0.244792 * safezoneW + safezoneX;
+            y = 0.164 * safezoneH + safezoneY;
+            w = 0.167708 * safezoneW;
+            h = 0.042 * safezoneH;
+            sizeEx = "(((((safezoneW / safezoneH) min 1.2) / 1.2) / 25) * 1.1)";
+        };
 
-		class LoadoutManager_InstructionsLeftTop: LoadoutManager_RscText
-		{
-			idc = 7212;
-			x = 1 * GUI_GRID_W + GUI_GRID_X;
-			y = -1.15 * GUI_GRID_H + GUI_GRID_Y;
-			w = 17 * GUI_GRID_W;
-			h = 0.5 * GUI_GRID_H;
-			sizeEx = .6 * GUI_GRID_H;
-		};
-		class LoadoutManager_InstructionsRightTop: LoadoutManager_RscText
-		{
-			idc = 7213;
-			x = 23 * GUI_GRID_W + GUI_GRID_X;
-			y = -1.15 * GUI_GRID_H + GUI_GRID_Y;
-			w = 16.5 * GUI_GRID_W;
-			h = 0.5 * GUI_GRID_H;
-			sizeEx = .6 * GUI_GRID_H;
-		};
+        class SpyderAddons_LoadoutManager_HeaderRight: LoadoutManager_RscText {
+            idc = 7204;
 
-		class LoadoutManager_ListLeftFrame: LoadoutManager_RscFrame
-		{
-			idc = -1;
+            style = 0x02;
+            x = 0.4125 * safezoneW + safezoneX;
+            y = 0.164 * safezoneH + safezoneY;
+            w = 0.167708 * safezoneW;
+            h = 0.042 * safezoneH;
+            sizeEx = "(((((safezoneW / safezoneH) min 1.2) / 1.2) / 25) * 1.1)";
+        };
 
-			x = 1 * GUI_GRID_W + GUI_GRID_X;
-			y = -0.5 * GUI_GRID_H + GUI_GRID_Y;
-			w = 16 * GUI_GRID_W;
-			h = 25 * GUI_GRID_H;
-			colorBackground[] = {-1,-1,-1,0.5};
-		};
-		class LoadoutManager_ListRightFrame: LoadoutManager_RscFrame
-		{
-			idc = -1;
+        class SpyderAddons_LoadoutManager_InstructionsLeft: LoadoutManager_RscText {
+            idc = 7225;
 
-			x = 23 * GUI_GRID_W + GUI_GRID_X;
-			y = -0.5 * GUI_GRID_H + GUI_GRID_Y;
-			w = 16 * GUI_GRID_W;
-			h = 25 * GUI_GRID_H;
-			colorBackground[] = {-1,-1,-1,0.5};
-		};
+            x = 0.241875 * safezoneW + safezoneX;
+            y = 0.2564 * safezoneH + safezoneY;
+            w = 0.167708 * safezoneW;
+            h = 0.014 * safezoneH;
+            sizeEx = "(((((safezoneW / safezoneH) min 1.2) / 1.2) / 25) * 0.6)";
+        };
 
-	};
+        class SpyderAddons_LoadoutManager_InstructionsRight: LoadoutManager_RscText {
+            idc = 7205;
 
-	class controls {
+            x = 0.409583 * safezoneW + safezoneX;
+            y = 0.2564 * safezoneH + safezoneY;
+            w = 0.167708 * safezoneW;
+            h = 0.014 * safezoneH;
+            sizeEx = "(((((safezoneW / safezoneH) min 1.2) / 1.2) / 25) * 0.6)";
+        };
 
-		class LoadoutManager_ListLeft: LoadoutManager_RscListNBox
-		{
-			idc = 7214;
+        class SpyderAddons_LoadoutManager_FrameLeft: RscFrame {
+            idc = 7206;
 
-			x = 1.041 * GUI_GRID_W + GUI_GRID_X;
-			y = -0.4 * GUI_GRID_H + GUI_GRID_Y;
-			w = 15.86 * GUI_GRID_W;
-			h = 24.7 * GUI_GRID_H;
-			colorBackground[] = {0.302,0.302,0.302,0.5};
-		};
+            x = 0.244792 * safezoneW + safezoneX;
+            y = 0.276 * safezoneH + safezoneY;
+            w = 0.153125 * safezoneW;
+            h = 0.266 * safezoneH;
+        };
 
-		class LoadoutManager_CreateFolder: LoadoutManager_RscButton
-		{
-			idc = 7215;
-			action = "[SpyderAddons_loadoutManager,'createFolder'] call SpyderAddons_fnc_loadoutManager";
+        class SpyderAddons_LoadoutManager_FrameRight: RscFrame {
+            idc = 7207;
 
-			text = "Create Folder";
-			x = 17.5 * GUI_GRID_W + GUI_GRID_X;
-			y = .5 * GUI_GRID_H + GUI_GRID_Y;
-			w = 5 * GUI_GRID_W;
-			h = 1.25 * GUI_GRID_H;
-			colorBackground[] = {-1,-1,-1,.8};
-			sizeEx = .75 * GUI_GRID_H;
-		};
-		class LoadoutManager_OpenFolder: LoadoutManager_RscButton
-		{
-			idc = 7227;
-			action = "[SpyderAddons_loadoutManager,'openFolder'] call SpyderAddons_fnc_loadoutManager";
+            x = 0.4125 * safezoneW + safezoneX;
+            y = 0.276 * safezoneH + safezoneY;
+            w = 0.167708 * safezoneW;
+            h = 0.266 * safezoneH;
+        };
 
-			text = "Open Folder";
-			x = 17.5 * GUI_GRID_W + GUI_GRID_X;
-			y = 2.5 * GUI_GRID_H + GUI_GRID_Y;
-			w = 5 * GUI_GRID_W;
-			h = 1.25 * GUI_GRID_H;
-			colorBackground[] = {-1,-1,-1,0.8};
-			sizeEx = .75 * GUI_GRID_H;
-		};
-		class LoadoutManager_CloseFolder: LoadoutManager_RscButton
-		{
-			idc = 7228;
-			action = "[SpyderAddons_loadoutManager,'closeFolder'] call SpyderAddons_fnc_loadoutManager";
+    };
 
-			text = "Close Folder";
-			x = 17.5 * GUI_GRID_W + GUI_GRID_X;
-			y = 4.5 * GUI_GRID_H + GUI_GRID_Y;
-			w = 5 * GUI_GRID_W;
-			h = 1.25 * GUI_GRID_H;
-			colorBackground[] = {-1,-1,-1,0.8};
-			sizeEx = .75 * GUI_GRID_H;
-		};
+    class controls {
 
-		class LoadoutManager_Move: LoadoutManager_RscButton
-		{
-			idc = 7229;
-			action = "[SpyderAddons_loadoutManager,'moveSlot'] call SpyderAddons_fnc_loadoutManager";
+        class SpyderAddons_LoadoutManager_ComboLeft: RscCombo {
+            idc = 7208;
 
-			text = "Move";
-			x = 17.5 * GUI_GRID_W + GUI_GRID_X;
-			y = 8 * GUI_GRID_H + GUI_GRID_Y;
-			w = 5 * GUI_GRID_W;
-			h = 1.25 * GUI_GRID_H;
-			colorBackground[] = {-1,-1,-1,0.8};
-			sizeEx = .75 * GUI_GRID_H;
-		};
-		class LoadoutManager_Transfer: LoadoutManager_RscButton
-		{
-			idc = 7219;
+            x = 0.244792 * safezoneW + safezoneX;
+            y = 0.206 * safezoneH + safezoneY;
+            w = 0.153125 * safezoneW;
+            h = 0.028 * safezoneH;
+        };
+        class SpyderAddons_LoadoutManager_ListLeft: LoadoutManager_RscListBox {
+            idc = 7209;
 
-			text = "Transfer";
-			action = "[SpyderAddons_loadoutManager,'transferSlot'] call SpyderAddons_fnc_loadoutManager";
-			x = 17.5 * GUI_GRID_W + GUI_GRID_X;
-			y = 10 * GUI_GRID_H + GUI_GRID_Y;
-			w = 5 * GUI_GRID_W;
-			h = 1.25 * GUI_GRID_H;
-			colorBackground[] = {-1,-1,-1,.8};
-			sizeEx = .75 * GUI_GRID_H;
-		};
-		class LoadoutManager_Rename: LoadoutManager_RscButton
-		{
-			idc = 7218;
-			action = "[SpyderAddons_loadoutManager,'renameSlot'] call SpyderAddons_fnc_loadoutManager";
+            candrag = 1;
+            x = 0.244792 * safezoneW + safezoneX;
+            y = 0.276 * safezoneH + safezoneY;
+            w = 0.153125 * safezoneW;
+            h = 0.2632 * safezoneH;
+        };
+        class SpyderAddons_LoadoutManager_ListRight: LoadoutManager_RscListBox {
+            idc = 7210;
 
-			text = "Rename";
-			x = 17.5 * GUI_GRID_W + GUI_GRID_X;
-			y = 12 * GUI_GRID_H + GUI_GRID_Y;
-			w = 5 * GUI_GRID_W;
-			h = 1.25 * GUI_GRID_H;
-			colorBackground[] = {-1,-1,-1,.8};
-			sizeEx = .75 * GUI_GRID_H;
-		};
-		class LoadoutManager_Delete: LoadoutManager_RscButton
-		{
-			idc = 7221;
-			action = "[SpyderAddons_loadoutManager,'deleteSlot'] call SpyderAddons_fnc_loadoutManager";
+            sizeEx = 0.0225;
+            x = 0.4125 * safezoneW + safezoneX;
+            y = 0.276 * safezoneH + safezoneY;
+            w = 0.167708 * safezoneW;
+            h = 0.2632 * safezoneH;
+        };
+        class SpyderAddons_LoadoutManager_Button1: LoadoutManager_RscButton {
+            idc = 7211;
 
-			text = "Delete";
-			x = 17.5 * GUI_GRID_W + GUI_GRID_X;
-			y = 14 * GUI_GRID_H + GUI_GRID_Y;
-			w = 5 * GUI_GRID_W;
-			h = 1.25 * GUI_GRID_H;
-			colorBackground[] = {-1,-1,-1,.8};
-			sizeEx = .75 * GUI_GRID_H;
-		};
+            text = "Button 1";
+            x = 0.244792 * safezoneW + safezoneX;
+            y = 0.57 * safezoneH + safezoneY;
+            w = 0.0729167 * safezoneW;
+            h = 0.028 * safezoneH;
+            sizeEx = "(((((safezoneW / safezoneH) min 1.2) / 1.2) / 25) * 0.8)";
+        };
+        class SpyderAddons_LoadoutManager_Button2: LoadoutManager_RscButton {
+            idc = 7212;
 
-		class LoadoutManager_Load: LoadoutManager_RscButton
-		{
-			idc = 7216;
-			action = "[SpyderAddons_loadoutManager,'loadClass'] call SpyderAddons_fnc_loadoutManager";
+            text = "Button 2";
+            x = 0.325 * safezoneW + safezoneX;
+            y = 0.57 * safezoneH + safezoneY;
+            w = 0.0729167 * safezoneW;
+            h = 0.028 * safezoneH;
+            sizeEx = "(((((safezoneW / safezoneH) min 1.2) / 1.2) / 25) * 0.8)";
+        };
+        class SpyderAddons_LoadoutManager_Button3: LoadoutManager_RscButton {
+            idc = 7213;
 
-			text = "Load Class";
-			x = 17.5 * GUI_GRID_W + GUI_GRID_X;
-			y = 18 * GUI_GRID_H + GUI_GRID_Y;
-			w = 5 * GUI_GRID_W;
-			h = 1.25 * GUI_GRID_H;
-			colorBackground[] = {-1,-1,-1,.8};
-			sizeEx = .75 * GUI_GRID_H;
-		};
-		class LoadoutManager_Save: LoadoutManager_RscButton
-		{
-			idc = 7217;
-			action = "[SpyderAddons_loadoutManager,'saveClass'] call SpyderAddons_fnc_loadoutManager";
+            text = "Button 3";
+            x = 0.244792 * safezoneW + safezoneX;
+            y = 0.626 * safezoneH + safezoneY;
+            w = 0.0729167 * safezoneW;
+            h = 0.028 * safezoneH;
+            sizeEx = "(((((safezoneW / safezoneH) min 1.2) / 1.2) / 25) * 0.8)";
+        };
+        class SpyderAddons_LoadoutManager_Button4: LoadoutManager_RscButton {
+            idc = 7214;
 
-			text = "Save Class";
-			x = 17.5 * GUI_GRID_W + GUI_GRID_X;
-			y = 20 * GUI_GRID_H + GUI_GRID_Y;
-			w = 5 * GUI_GRID_W;
-			h = 1.25 * GUI_GRID_H;
-			colorBackground[] = {-1,-1,-1,.8};
-			sizeEx = .75 * GUI_GRID_H;
-		};
-		class LoadoutManager_LoadOnRespawn: LoadoutManager_RscButton
-		{
-			idc = 7220;
-			action = "[SpyderAddons_loadoutManager,'setLoadOnRespawn'] call SpyderAddons_fnc_loadoutManager";
+            text = "Button 4";
+            x = 0.325 * safezoneW + safezoneX;
+            y = 0.626 * safezoneH + safezoneY;
+            w = 0.0729167 * safezoneW;
+            h = 0.028 * safezoneH;
+            sizeEx = "(((((safezoneW / safezoneH) min 1.2) / 1.2) / 25) * 0.8)";
+        };
+        class SpyderAddons_LoadoutManager_Button5: LoadoutManager_RscButton {
+            idc = 7215;
 
-			text = "Load on Respawn";
-			x = 17.5 * GUI_GRID_W + GUI_GRID_X;
-			y = 22 * GUI_GRID_H + GUI_GRID_Y;
-			w = 5 * GUI_GRID_W;
-			h = 1.25 * GUI_GRID_H;
-			colorBackground[] = {-1,-1,-1,.8};
-			sizeEx = .6 * GUI_GRID_H;
-		};
+            text = "Button 5";
+            x = 0.244792 * safezoneW + safezoneX;
+            y = 0.668 * safezoneH + safezoneY;
+            w = 0.0729167 * safezoneW;
+            h = 0.028 * safezoneH;
+            sizeEx = "(((((safezoneW / safezoneH) min 1.2) / 1.2) / 25) * 0.8)";
+        };
+        class SpyderAddons_LoadoutManager_Button6: LoadoutManager_RscButton {
+            idc = 7216;
 
-		class LoadoutManager_ListRight: LoadoutManager_RscListNBox
-		{
-			idc = 7222;
-			rowHeight = 0.07;
+            text = "Button 6";
+            x = 0.325 * safezoneW + safezoneX;
+            y = 0.668 * safezoneH + safezoneY;
+            w = 0.0729167 * safezoneW;
+            h = 0.028 * safezoneH;
+            sizeEx = "(((((safezoneW / safezoneH) min 1.2) / 1.2) / 25) * 0.8)";
+        };
+        class SpyderAddons_LoadoutManager_Button7: LoadoutManager_RscButton {
+            idc = 7217;
 
-			x = 23.1 * GUI_GRID_W + GUI_GRID_X;
-			y = -0.4 * GUI_GRID_H + GUI_GRID_Y;
-			w = 15.86 * GUI_GRID_W;
-			h = 24.75 * GUI_GRID_H;
-			colorBackground[] = {0.302,0.302,0.302,0.5};
-		};
+            text = "Button 7";
+            x = 0.244792 * safezoneW + safezoneX;
+            y = 0.71 * safezoneH + safezoneY;
+            w = 0.0729167 * safezoneW;
+            h = 0.028 * safezoneH;
+            sizeEx = "(((((safezoneW / safezoneH) min 1.2) / 1.2) / 25) * 0.8)";
+        };
+        class SpyderAddons_LoadoutManager_Button8: LoadoutManager_RscButton {
+            idc = 7218;
 
-		class LoadoutManager_InputBox: LoadoutManager_RscEdit
-		{
-			idc = 7223;
+            text = "Button 8";
+            x = 0.325 * safezoneW + safezoneX;
+            y = 0.71 * safezoneH + safezoneY;
+            w = 0.0729167 * safezoneW;
+            h = 0.028 * safezoneH;
+            sizeEx = "(((((safezoneW / safezoneH) min 1.2) / 1.2) / 25) * 0.8)";
+        };
+        class SpyderAddons_LoadoutManager_ButtonBig1: LoadoutManager_RscButton {
+            idc = 7219;
 
-			text = "New Slot";
-			x = 1 * GUI_GRID_W + GUI_GRID_X;
-			y = 24.75 * GUI_GRID_H + GUI_GRID_Y;
-			w = 16 * GUI_GRID_W;
-			h = 1.5 * GUI_GRID_H;
-			colorBackground[] = {-1,-1,-1,.8};
-		};
-		class LoadoutManager_ButtonRightBlank: LoadoutManager_RscButton
-		{
-			idc = 7224;
+            text = "Button Big 1";
+            x = 0.4125 * safezoneW + safezoneX;
+            y = 0.57 * safezoneH + safezoneY;
+            w = 0.167708 * safezoneW;
+            h = 0.035 * safezoneH;
+            colorBackground[] = {0,0,0,0.65};
+            colorActive[] = {0,0,0,0.65};
+            sizeEx = "(((((safezoneW / safezoneH) min 1.2) / 1.2) / 25) * 0.9)";
+        };
+        class SpyderAddons_LoadoutManager_ButtonBig2: LoadoutManager_RscButton {
+            idc = 7220;
 
-			x = 23 * GUI_GRID_W + GUI_GRID_X;
-			y = 24.75 * GUI_GRID_H + GUI_GRID_Y;
-			w = 16 * GUI_GRID_W;
-			h = 1.5 * GUI_GRID_H;
-			colorBackground[] = {-1,-1,-1,0.65};
-		};
+            text = "Button Big 2";
+            x = 0.4125 * safezoneW + safezoneX;
+            y = 0.626 * safezoneH + safezoneY;
+            w = 0.167708 * safezoneW;
+            h = 0.035 * safezoneH;
+            colorBackground[] = {0,0,0,0.65};
+            colorActive[] = {0,0,0,0.65};
+            sizeEx = "(((((safezoneW / safezoneH) min 1.2) / 1.2) / 25) * 0.9)";
+        };
+        class SpyderAddons_LoadoutManager_ButtonBig3: LoadoutManager_RscButton {
+            idc = 7221;
 
-		class LoadoutManager_Close: LoadoutManager_RscButton
-		{
-			idc = 7225;
-			action = "closeDialog 0";
+            text = "Button Big 3";
+            x = 0.4125 * safezoneW + safezoneX;
+            y = 0.703 * safezoneH + safezoneY;
+            w = 0.167708 * safezoneW;
+            h = 0.035 * safezoneH;
+            colorBackground[] = {0,0,0,0.65};
+            colorActive[] = {0,0,0,0.65};
+            sizeEx = "(((((safezoneW / safezoneH) min 1.2) / 1.2) / 25) * 0.9)";
+        };
+        class SpyderAddons_LoadoutManager_RenameInput: LoadoutManager_RscEdit {
+            idc = 7222;
 
-			text = "Close";
-			x = 0.5 * GUI_GRID_W + GUI_GRID_X;
-			y = 26.75 * GUI_GRID_H + GUI_GRID_Y;
-			w = 5 * GUI_GRID_W;
-			h = 1.25 * GUI_GRID_H;
-		};
-		class LoadoutManager_Arsenal: LoadoutManager_RscButton
-		{
-			idc = 7226;
-			action = "[SpyderAddons_loadoutManager,'openArsenal'] spawn SpyderAddons_fnc_loadoutManager";
+            x = 0.244792 * safezoneW + safezoneX;
+            y = 0.766 * safezoneH + safezoneY;
+            w = 0.153125 * safezoneW;
+            h = 0.035 * safezoneH;
+        };
+        class SpyderAddons_LoadoutManager_Rename: LoadoutManager_RscButton {
+            idc = 7223;
 
-			text = "Arsenal";
-			x = 30 * GUI_GRID_W + GUI_GRID_X;
-			y = 26.75 * GUI_GRID_H + GUI_GRID_Y;
-			w = 9.5 * GUI_GRID_W;
-			h = 1.25 * GUI_GRID_H;
-			colorBackground[] = {-1,-1,-1,0.65};
-		};
-	};
+            text = "Rename";
+            x = 0.4125 * safezoneW + safezoneX;
+            y = 0.766 * safezoneH + safezoneY;
+            w = 0.167708 * safezoneW;
+            h = 0.035 * safezoneH;
+            colorBackground[] = {0,0,0,0.65};
+            colorActive[] = {0,0,0,0.65};
+            sizeEx = "(((((safezoneW / safezoneH) min 1.2) / 1.2) / 25) * 0.9)";
+        };
+        class SpyderAddons_LoadoutManager_Close: LoadoutManager_RscButton {
+            idc = 7224;
+            action = "closeDialog 0";
+
+            text = "Close";
+            x = 0.2375 * safezoneW + safezoneX;
+            y = 0.8164 * safezoneH + safezoneY;
+            w = 0.35 * safezoneW;
+            h = 0.028 * safezoneH;
+            colorBackground[] = {-1,-1,-1,0.65};
+            sizeEx = "(((((safezoneW / safezoneH) min 1.2) / 1.2) / 25) * 0.8)";
+        };
+
+
+    };
 };

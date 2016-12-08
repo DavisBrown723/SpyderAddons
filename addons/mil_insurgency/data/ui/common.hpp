@@ -630,6 +630,16 @@ color[] = {0.3,0.1,0.9,1};
 size = 50;
 };
 
+class LineMarker
+{
+color[] = {0.3,0.1,0.9,1};
+size = 20;
+lineWidthThin = 2;
+lineWidthThick = 3;
+lineLengthMin = 5;
+lineDistanceMin = 5;
+};
+
 class Legend {
 color[] = {0,0,0,1};
 colorBackground[] = {1,1,1,0.5};

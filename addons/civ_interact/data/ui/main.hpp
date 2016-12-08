@@ -1,286 +1,239 @@
 #include "common.hpp"
 
-//-- GUI editor: configfile >> "Civ_Interact"
-
-class Civ_Interact
-{
+class SpyderAddons_CivilianInteraction {
 	idd = 923;
 	movingEnable = 1;
-	//onLoad = "[SpyderAddons_civilianInteraction,'onLoad'] call SpyderAddons_fnc_civilianInteraction"; //-- Get's executed before the menu is opened.. wtf
-	onUnload = "[SpyderAddons_civilianInteraction,'unLoad'] call SpyderAddons_fnc_civilianInteraction";
+	onUnload = "[SpyderAddons_civInteractHandler,'closeMenu'] call SpyderAddons_fnc_civInteract";
 
-	class controlsBackground {
-		class CivInteract_inventory_Background: CivInteract_RscText
-		{
-			idc = 9240;
+	class controls {
 
-			x = 34.5 * GUI_GRID_W + GUI_GRID_X;
-			y = -2 * GUI_GRID_H + GUI_GRID_Y;
-			w = 14.5 * GUI_GRID_W;
-			h = 25 * GUI_GRID_H;
-			colorBackground[] = {0,0,0,1};
-			colorActive[] = {-1,-1,-1,-1};
-		};
-		class CivInteract_inventory_Header: CivInteract_RscText
-		{
-			idc = 9241;
-
-			moving = 1;
-			text = " Inventory";
-			x = 34 * GUI_GRID_W + GUI_GRID_X;
-			y = -3 * GUI_GRID_H + GUI_GRID_Y;
-			w = 15 * GUI_GRID_W;
-			h = 1 * GUI_GRID_H;
-			colorBackground[] = {0.788,0.443,0.157,1};
-			colorActive[] = {-1,-1,-1,-1};
-			sizeEx = .9 * GUI_GRID_H;
-		};
-
-		class CivInteract_Background: CivInteract_RscText
-		{
+		class CivInteract_Background: CivInteract_RscText {
 			idc = 9231;
 
-			x = -2 * GUI_GRID_W + GUI_GRID_X;
-			y = -2 * GUI_GRID_H + GUI_GRID_Y;
-			w = 36 * GUI_GRID_W;
-			h = 25 * GUI_GRID_H;
-			colorBackground[] = {0,0,0,1}; //colorBackground[] = {0,0,0,0.7};
-			colorActive[] = {-1,-1,-1,-1};
+            x = 0.2375 * safezoneW + safezoneX;
+            y = 0.234 * safezoneH + safezoneY;
+            w = 0.444792 * safezoneW;
+            h = 0.588 * safezoneH;
+			colorBackground[] = {0,0,0,0.65};
+			colorActive[] = {0,0,0,0.65};
 		};
-		class CivInteract_Header: CivInteract_RscText
-		{
+
+		class CivInteract_Header: CivInteract_RscText {
 			idc = 9232;
 
-			moving = 1;
-			text = "Civilian Interaction";
-			x = -2 * GUI_GRID_W + GUI_GRID_X;
-			y = -3 * GUI_GRID_H + GUI_GRID_Y;
-			w = 36 * GUI_GRID_W;
-			h = 1 * GUI_GRID_H;
-			colorBackground[] = {0.788,0.443,0.157,1};
-			colorActive[] = {-1,-1,-1,-1};
-			sizeEx = .9 * GUI_GRID_H;
+			text = "Civilian interaction";
+            x = 0.2375 * safezoneW + safezoneX;
+            y = 0.206 * safezoneH + safezoneY;
+            w = 0.444792 * safezoneW;
+            h = 0.028 * safezoneH;
+			colorBackground[] = {0.788,0.443,0.157,0.65};
+			colorActive[] = {0.788,0.443,0.157,0.65};
+			sizeEx = "(((((safezoneW / safezoneH) min 1.2) / 1.2) / 25) * 0.9)";
 		};
-		class CivInteract_QuestionsTitle: CivInteract_RscText
-		{
+
+		class CivInteract_QuestionsTitle: CivInteract_RscText {
 			idc = 9233;
 
 			text = "Questions";
-			x = 0.5 * GUI_GRID_W + GUI_GRID_X;
-			y = 0 * GUI_GRID_H + GUI_GRID_Y;
-			w = 5 * GUI_GRID_W;
-			h = 1 * GUI_GRID_H;
-			colorActive[] = {-1,-1,-1,-1};
-			sizeEx = 1 * GUI_GRID_H;
+            x = 0.434375 * safezoneW + safezoneX;
+            y = 0.318 * safezoneH + safezoneY;
+            w = 0.065625 * safezoneW;
+            h = 0.042 * safezoneH;
+			colorActive[] = {0,0,0,0};
 		};
-		class CivInteract_ResponseTitle: CivInteract_RscText
-		{
+
+		class CivInteract_QuestionList: CivInteract_RscListBox {
+			idc = 9234;
+
+            x = 0.244792 * safezoneW + safezoneX;
+            y = 0.36 * safezoneH + safezoneY;
+            w = 0.422917 * safezoneW;
+            h = 0.196 * safezoneH;
+			colorBackground[] = {0,0,0,0};
+			colorActive[] = {0,0,0,0};
+			sizeEx = "(((((safezoneW / safezoneH) min 1.2) / 1.2) / 25) * 1)";
+		};
+
+		class CivInteract_CivName: CivInteract_RscText {
+			idc = 9236;
+
+            x = 0.415417 * safezoneW + safezoneX;
+            y = 0.248 * safezoneH + safezoneY;
+            w = 0.233333 * safezoneW;
+            h = 0.056 * safezoneH;
+			sizeEx = "(((((safezoneW / safezoneH) min 1.2) / 1.2) / 25) * 1)";
+		};
+
+		class CivInteract_ResponseTitle: CivInteract_RscText {
 			idc = 9238;
 
 			text = "Response";
-			x = 0.5 * GUI_GRID_W + GUI_GRID_X;
-			y = 12.5 * GUI_GRID_H + GUI_GRID_Y;
-			w = 4.5 * GUI_GRID_W;
-			h = 1.5 * GUI_GRID_H;
+            x = 0.434375 * safezoneW + safezoneX;
+            y = 0.5532 * safezoneH + safezoneY;
+            w = 0.065625 * safezoneW;
+            h = 0.042 * safezoneH;
 			colorActive[] = {0,0,0,0};
-			sizeEx = 1 * GUI_GRID_H;
 		};
-	};
 
-	class controls 
-	{
-
-		class CivInteract_CivName: CivInteract_RscText
-		{
-			idc = 9236;
-
-			text = "Name";
-			x = 12.5 * GUI_GRID_W + GUI_GRID_X;
-			y = -1.7 * GUI_GRID_H + GUI_GRID_Y;
-			w = 16 * GUI_GRID_W;
-			h = 2 * GUI_GRID_H;
-			sizeEx = 1 * GUI_GRID_H;
-		};
-		class CivInteract_QuestionListOne: CivInteract_RscListBox
-		{
-			idc = 9234;
-
-			text = "";
-			font = "PuristaMedium";
-			x = -1 * GUI_GRID_W + GUI_GRID_X;
-			y = 1.5 * GUI_GRID_H + GUI_GRID_Y;
-			w = 17 * GUI_GRID_W;
-			h = 9.3 * GUI_GRID_H;
-			colorBackground[] = {0.173,0.173,0.173,0.8};
-			sizeEx = .67 * GUI_GRID_H;
-		};
-		class CivInteract_QuestionListTwo: CivInteract_RscListBox
-		{
-			idc = 9235;
-
-			text = "";
-			font = "PuristaMedium";
-			x = 16.5 * GUI_GRID_W + GUI_GRID_X;
-			y = 1.5 * GUI_GRID_H + GUI_GRID_Y;
-			w = 16.5 * GUI_GRID_W;
-			h = 9.3 * GUI_GRID_H;
-			colorBackground[] = {0.173,0.173,0.173,0.8};
-			sizeEx = .67 * GUI_GRID_H;
-		};
-		class CivInteract_AskQuestion: CivInteract_RscButton
-		{
-			idc = 9247;
-			action = "[SpyderAddons_civilianInteraction,'prepQuestion'] call SpyderAddons_fnc_civilianInteraction";
-
-			text = "Ask Question";
-			x = -1 * GUI_GRID_W + GUI_GRID_X;
-			y = 11.2 * GUI_GRID_H + GUI_GRID_Y;
-			w = 34 * GUI_GRID_W;
-			h = 1.2 * GUI_GRID_H;
-			colorBackground[] = {0.788,0.443,0.157,0.8};
-			colorSelect[] = {0.788,0.443,0.157,0.8};
-			colorSelect2[] = {0.788,0.443,0.157,0.8};
-			colorBackgroundDisabled[] = {0.788,0.443,0.157,0.5};
-			sizeEx = .85 * GUI_GRID_H;
-		};
-		class CivInteract_ResponseBox: CivInteract_RscStructuredText
-		{
+		class CivInteract_ResponseList: CivInteract_RscStructuredText {
 			idc = 9239;
 
-			x = -1.1 * GUI_GRID_W + GUI_GRID_X;
-			y = 14 * GUI_GRID_H + GUI_GRID_Y;
-			w = 33.5 * GUI_GRID_W;
-			h = 8 * GUI_GRID_H;
+            x = 0.252083 * safezoneW + safezoneX;
+            y = 0.598 * safezoneH + safezoneY;
+            w = 0.422917 * safezoneW;
+            h = 0.21 * safezoneH;
 			colorBackground[] = {0,0,0,0};
 			colorActive[] = {0,0,0,0};
-			sizeEx = .6 * GUI_GRID_H;
+			sizeEx = "(((((safezoneW / safezoneH) min 1.2) / 1.2) / 25) * 1)";
 		};
-		class CivInteract_ProgressBarTitle: CivInteract_RscText
-		{
-			idc = 9248;
 
-			text = "";
-			x = 13.5 * GUI_GRID_W + GUI_GRID_X;
-			y = 20 * GUI_GRID_H + GUI_GRID_Y;
-			w = 15 * GUI_GRID_W;
-			h = 1 * GUI_GRID_H;
-			sizeEx = 1 * GUI_GRID_H;
-		};
-		//class CivInteract_AskingProgressBar: CivInteract_RscProgress
-		//{
-		//	idc = 9249;
-		//	x = -1.1 * GUI_GRID_W + GUI_GRID_X;
-		//	y = 21.5 * GUI_GRID_H + GUI_GRID_Y;
-		//	w = 34 * GUI_GRID_W;
-		//	h = 1 * GUI_GRID_H;
-		//	colorBackground[] = {0.788,0.443,0.157,1};
-		//	colorText[] = {0.788,0.443,0.157,1};
-		//};
-		class CivInteract_Detain: CivInteract_RscButton
-		{
+		class CivInteract_Detain: CivInteract_RscButton {
 			idc = 92311;
-			action = "[SpyderAddons_civilianInteraction,'Detain'] call SpyderAddons_fnc_civilianInteraction";
+			action = "[SpyderAddons_civInteractHandler,'Detain'] call SpyderAddons_fnc_civInteract";
 
 			text = "Detain";
-			x = 7.5 * GUI_GRID_W + GUI_GRID_X;
-			y = 23.25 * GUI_GRID_H + GUI_GRID_Y;
-			w = 5.5 * GUI_GRID_W;
-			h = 1.2 * GUI_GRID_H;
-			colorBackground[] = {0,0,0,0.5};
-			sizeEx = .85 * GUI_GRID_H;
+            x = 0.408854 * safezoneW + safezoneX;
+            y = 0.8276 * safezoneH + safezoneY;
+            w = 0.065625 * safezoneW;
+            h = 0.028 * safezoneH;
+			colorActive[] = {0,0,0,0.5};
 		};
-		class CivInteract_GetDown: CivInteract_RscButton
-		{
+
+		class CivInteract_GetDown: CivInteract_RscButton {
 			idc = 92312;
-			action = "[SpyderAddons_civilianInteraction,'getDown'] call SpyderAddons_fnc_civilianInteraction";
+			action = "[SpyderAddons_civInteractHandler,'getDown'] call SpyderAddons_fnc_civInteract";
 
 			text = "Get Down";
-			x = 13.5 * GUI_GRID_W + GUI_GRID_X;
-			y = 23.25 * GUI_GRID_H + GUI_GRID_Y;
-			w = 5.5 * GUI_GRID_W;
-			h = 1.2 * GUI_GRID_H;
+            x = 0.478125 * safezoneW + safezoneX;
+            y = 0.8276 * safezoneH + safezoneY;
+            w = 0.065625 * safezoneW;
+            h = 0.028 * safezoneH;
 			colorBackground[] = {0,0,0,0.5};
-			sizeEx = .85 * GUI_GRID_H;
+			colorActive[] = {0,0,0,0.5};
 		};
-		class CivInteract_GoAway: CivInteract_RscButton
-		{
+
+		class CivInteract_GoAway: CivInteract_RscButton {
 			idc = 92313;
-			action = "[SpyderAddons_civilianInteraction,'goAway'] call SpyderAddons_fnc_civilianInteraction";
+			action = "[SpyderAddons_civInteractHandler,'goAway'] call SpyderAddons_fnc_civInteract";
 
 			text = "Go Away";
-			x = 19.5 * GUI_GRID_W + GUI_GRID_X;
-			y = 23.25 * GUI_GRID_H + GUI_GRID_Y;
-			w = 5.5 * GUI_GRID_W;
-			h = 1.2 * GUI_GRID_H;
+            x = 0.547396 * safezoneW + safezoneX;
+            y = 0.8276 * safezoneH + safezoneY;
+            w = 0.065625 * safezoneW;
+            h = 0.028 * safezoneH;
 			colorBackground[] = {0,0,0,0.5};
-			sizeEx = .85 * GUI_GRID_H;
+			colorActive[] = {0,0,0,0.5};
 		};
-		class CivInteract_Close: CivInteract_RscButton
-		{
+
+		class CivInteract_Close: CivInteract_RscButton {
 			idc = 9237;
 			action = "closeDialog 0";
 
 			text = "Close";
-			x = -2 * GUI_GRID_W + GUI_GRID_X;
-			y = 23.25 * GUI_GRID_H + GUI_GRID_Y;
-			w = 5.5 * GUI_GRID_W;
-			h = 1.2 * GUI_GRID_H;
+            x = 0.2375 * safezoneW + safezoneX;
+            y = 0.8276 * safezoneH + safezoneY;
+            w = 0.065625 * safezoneW;
+            h = 0.028 * safezoneH;
 			colorBackground[] = {0,0,0,0.5};
-			sizeEx = .85 * GUI_GRID_H;
+			colorActive[] = {0,0,0,0.5};
 		};
-		class CivInteract_Search: CivInteract_RscButton
-		{
+
+		class CivInteract_inventory_Background: CivInteract_RscText {
+			idc = 9240;
+
+            x = 0.689583 * safezoneW + safezoneX;
+            y = 0.234 * safezoneH + safezoneY;
+            w = 0.182292 * safezoneW;
+            h = 0.588 * safezoneH;
+			colorBackground[] = {0,0,0,0.65};
+			colorActive[] = {0,0,0,0.65};
+		};
+
+		class CivInteract_inventory_Header: CivInteract_RscText {
+			idc = 9241;
+
+			text = "Inventory";
+            x = 0.689583 * safezoneW + safezoneX;
+            y = 0.206 * safezoneH + safezoneY;
+            w = 0.182292 * safezoneW;
+            h = 0.028 * safezoneH;
+			colorBackground[] = {0.788,0.443,0.157,0.65};
+			colorActive[] = {0.788,0.443,0.157,0.65};
+			sizeEx = "(((((safezoneW / safezoneH) min 1.2) / 1.2) / 25) * 1.1)";
+		};
+
+		class CivInteract_Search: CivInteract_RscButton {
 			idc = 9242;
-			action = "[SpyderAddons_civilianInteraction,'toggleSearchMenu'] call SpyderAddons_fnc_inventoryHandler";
+			action = "[nil,'toggleSearchMenu'] call SpyderAddons_fnc_civInteract";
 
 			text = "Search";
-			tooltip = "Search the civilian's inventory";
-			x = 28.5 * GUI_GRID_W + GUI_GRID_X;
-			y = 23.25 * GUI_GRID_H + GUI_GRID_Y;
-			w = 5.5 * GUI_GRID_W;
-			h = 1.2 * GUI_GRID_H;
+            x = 0.616667 * safezoneW + safezoneX;
+            y = 0.8276 * safezoneH + safezoneY;
+            w = 0.0663542 * safezoneW;
+            h = 0.028 * safezoneH;
 			colorBackground[] = {0,0,0,0.5};
-			sizeEx = .85 * GUI_GRID_H;
+			colorActive[] = {0,0,0,0.5};
 		};
 
-		class CivInteract_inventory_GearList: CivInteract_RscListNBox
-		{
+		class CivInteract_inventory_Close: CivInteract_RscButton {
+			idc = 9243;
+			action = "[nil,'toggleSearchMenu'] call SpyderAddons_fnc_civInteract";
+
+			text = "Close";
+            x = 0.689583 * safezoneW + safezoneX;
+            y = 0.8276 * safezoneH + safezoneY;
+            w = 0.182292 * safezoneW;
+            h = 0.028 * safezoneH;
+			colorBackground[] = {0,0,0,0.5};
+			colorActive[] = {0,0,0,0.5};
+			class Attributes {
+				font = "PuristaMedium";
+				color = "#C0C0C0";
+				align = "center";
+				valign = "middle";
+				shadow = true;
+				shadowColor = "#000000";
+			};
+		};
+
+		class CivInteract_inventory_GearList: CivInteract_RscListNBox {
 			idc = 9244;
-
-			x = 34.95 * GUI_GRID_W + GUI_GRID_X;
-			y = -1.5 * GUI_GRID_H + GUI_GRID_Y;
-			w = 13.5 * GUI_GRID_W;
-			h = 24 * GUI_GRID_H;
-			colorBackground[] = {0,0,0,0};
-			rowHeight = 0.08;
-			sizeEx = 0.6 * GUI_GRID_H;
+            x = 0.696875 * safezoneW + safezoneX;
+            y = 0.248 * safezoneH + safezoneY;
+            w = 0.167708 * safezoneW;
+            h = 0.56 * safezoneH;
+			colorBackground[] = {0.173,0.173,0.173,0.8};
+			colorActive[] = {0.173,0.173,0.173,0.8};
+			sizeEx = "(((((safezoneW / safezoneH) min 1.2) / 1.2) / 25) * 1)";
+			rowHeight = .05;
 		};
-		class CivInteract_inventory_ButtonTwo: CivInteract_RscButton
-		{
+
+		class CivInteract_inventory_Confiscate: CivInteract_RscButton {
 			idc = 9245;
-			action = "";
+			action = "[nil,'confiscate'] call SpyderAddons_fnc_civInteract";
 
-			text = "";
-			x = 34.5 * GUI_GRID_W + GUI_GRID_X;
-			y = 24.8 * GUI_GRID_H + GUI_GRID_Y;
-			w = 14.5 * GUI_GRID_W;
-			h = 1.2 * GUI_GRID_H;
+			text = "Confiscate";
+            x = 0.689583 * safezoneW + safezoneX;
+            y = 0.864 * safezoneH + safezoneY;
+            w = 0.182292 * safezoneW;
+            h = 0.028 * safezoneH;
 			colorBackground[] = {0,0,0,0.5};
-			sizeEx = .85 * GUI_GRID_H;
+			colorActive[] = {0,0,0,0.5};
 		};
-		class CivInteract_inventory_ButtonThree: CivInteract_RscButton
-		{
-			idc = 9246;
-			action = "";
 
-			text = "";
-			x = 34.5 * GUI_GRID_W + GUI_GRID_X;
-			y = 26.35 * GUI_GRID_H + GUI_GRID_Y;
-			w = 14.5 * GUI_GRID_W;
-			h = 1.2 * GUI_GRID_H;
+		class CivInteract_inventory_OpenContainer: CivInteract_RscButton {
+			idc = 9246;
+			action = "[nil,'openGearContainer'] call SpyderAddons_fnc_civInteract";
+
+            text = "View Contents";
+            x = 0.689583 * safezoneW + safezoneX;
+            y = 0.9004 * safezoneH + safezoneY;
+            w = 0.182292 * safezoneW;
+            h = 0.028 * safezoneH;
 			colorBackground[] = {0,0,0,0.5};
-			sizeEx = .85 * GUI_GRID_H;
+			colorActive[] = {0,0,0,0.5};
 		};
 
 	};
+
 };

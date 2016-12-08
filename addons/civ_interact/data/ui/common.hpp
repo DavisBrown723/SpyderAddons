@@ -143,62 +143,138 @@ class CivInteract_RscText
 
 class CivInteract_RscListBox
 {
-	access = 0; 			// Control access (0 - ReadAndWrite, 1 - ReadAndCreate, 2 - ReadOnly, 3 - ReadOnlyVerified)
-	idc = 5; 				// Control identification (without it, the control won't be displayed)
-	type = CT_LISTBOX; 		// Type is 5
-	style = ST_LEFT + LB_TEXTURES; 	// Style
-	default = 0; 			// Control selected by default (only one within a display can be used)
-	blinkingPeriod = 0; 			// Time in which control will fade out and back in. Use 0 to disable the effect.
-
-	x = 1 * GUI_GRID_CENTER_W + GUI_GRID_CENTER_X; 	// Horizontal coordinates
-	y = 11 * GUI_GRID_CENTER_H + GUI_GRID_CENTER_Y; 	// Vertical coordinates
-	w = 10 * GUI_GRID_CENTER_W; 			// Width
-	h = 15 * GUI_GRID_CENTER_H;	 		// Height
-
-	colorBackground[] = {0,0,0,0.3}; 		// Fill color
-	colorSelectBackground[] = {0.95,0.95,0.95,1}; 	// Selected item fill color
-	colorSelectBackground2[] = {1,1,1,0.5}; 		// Selected item fill color (oscillates between this and colorSelectBackground)
-
-	sizeEx = GUI_GRID_CENTER_H; 	// Text size
-	shadow = 0; 			// Shadow (0 - none, 1 - directional, color affected by colorShadow, 2 - black outline)
-	colorText[] = {1,1,1,1}; 		// Text and frame color
-	colorDisabled[] = {1,1,1,0.5}; 		// Disabled text color
-	colorSelect[] = {0,0,0,0.5}; 		// Text selection color
-	colorSelect2[] = {0,0,0,1}; 		// Text selection color (oscillates between this and colorSelect)
-	colorShadow[] = {0,0,0,0.5}; 		// Text shadow color (used only when shadow is 1)
-
-	pictureColor[] = {1,0.5,0,1}; 		// Picture color
- 	pictureColorSelect[] = {1,1,1,1}; 	// Selected picture color
-	pictureColorDisabled[] = {1,1,1,0.5}; 	// Disabled picture color
-
-	tooltip = "CT_LISTBOX"; 		// Tooltip text
-	tooltipColorShade[] = {0,0,0,1}; 	// Tooltip background color
-	tooltipColorText[] = {1,1,1,1}; 		// Tooltip text color
-	tooltipColorBox[] = {1,1,1,1}; 		// Tooltip frame color
-
-	period = 1.7; 			// Oscillation time between colorSelect/colorSelectBackground2 and colorSelect2/colorSelectBackground when selected
-
-	rowHeight = 1.5 * GUI_GRID_CENTER_H; 	// Row height
-	itemSpacing = .005; 			// Height of empty space between items
-	maxHistoryDelay = 1; 			// Time since last keyboard type search to reset it
-	canDrag = 0; 				// 1 (true) to allow item dragging
-
-	soundSelect[] = {"\A3\ui_f\data\sound\RscListbox\soundSelect",0.09,1}; // Sound played when an item is selected
-
-	// Scrollbar configuration (applied only when LB_TEXTURES style is used)
-	class ListScrollBar
-		{
-		width = 0; 	// width of ListScrollBar
-		height = 0; 	// height of ListScrollBar
-		scrollSpeed = 0.01; // scroll speed of ListScrollBar
-
-		arrowEmpty = "\A3\ui_f\data\gui\cfg\scrollbar\arrowEmpty_ca.paa"; // Arrow
-		arrowFull = "\A3\ui_f\data\gui\cfg\scrollbar\arrowFull_ca.paa"; 	// Arrow when clicked on
-		border = "\A3\ui_f\data\gui\cfg\scrollbar\border_ca.paa"; 		// Slider background (stretched vertically)
-		thumb = "\A3\ui_f\data\gui\cfg\scrollbar\thumb_ca.paa"; 		// Dragging element (stretched vertically)
-
-		color[] = {1,1,1,1}; // Scrollbar color
+	access = 0;
+	type = 5;
+	w = 0.4;
+	h = 0.4;
+	rowHeight = 0;
+	colorText[] =
+	{
+		1,
+		1,
+		1,
+		1
 	};
+	colorDisabled[] =
+	{
+		1,
+		1,
+		1,
+		0.25
+	};
+	coloCivInteract_Rscrollbar[] =
+	{
+		1,
+		0,
+		0,
+		0
+	};
+	colorSelect[] =
+	{
+		0,
+		0,
+		0,
+		1
+	};
+	colorSelect2[] =
+	{
+		0,
+		0,
+		0,
+		1
+	};
+	colorSelectBackground[] =
+	{
+		0.95,
+		0.95,
+		0.95,
+		1
+	};
+	colorSelectBackground2[] =
+	{
+		1,
+		1,
+		1,
+		0.5
+	};
+	colorBackground[] =
+	{
+		0,
+		0,
+		0,
+		0.3
+	};
+	soundSelect[] =
+	{
+		"\A3\ui_f\data\sound\CivInteract_RscListbox\soundSelect",
+		0.09,
+		1
+	};
+	arrowEmpty = "#(argb,8,8,3)color(1,1,1,1)";
+	arrowFull = "#(argb,8,8,3)color(1,1,1,1)";
+	class ScrollBar
+	{
+		color[] =
+		{
+			1,
+			1,
+			1,
+			0.6
+		};
+		colorActive[] =
+		{
+			1,
+			1,
+			1,
+			1
+		};
+		colorDisabled[] =
+		{
+			1,
+			1,
+			1,
+			0.3
+		};
+		shadow = 0;
+		thumb = "\A3\ui_f\data\gui\cfg\scrollbar\thumb_ca.paa";
+		arrowFull = "\A3\ui_f\data\gui\cfg\scrollbar\arrowFull_ca.paa";
+		arrowEmpty = "\A3\ui_f\data\gui\cfg\scrollbar\arrowEmpty_ca.paa";
+		border = "\A3\ui_f\data\gui\cfg\scrollbar\border_ca.paa";
+	};
+	class ListScrollBar {
+		color[] = {1,1,1,1};
+		autoScrollEnabled = 1;
+		
+		colorActive[] = {1, 1, 1, 1};
+		colorDisabled[] = {1, 1, 1, 0.3};
+		thumb = "\A3\ui_f\data\gui\cfg\scrollbar\thumb_ca.paa";
+		arrowFull = "\A3\ui_f\data\gui\cfg\scrollbar\arrowFull_ca.paa";
+		arrowEmpty = "\A3\ui_f\data\gui\cfg\scrollbar\arrowEmpty_ca.paa";
+		border = "\A3\ui_f\data\gui\cfg\scrollbar\border_ca.paa";
+	};
+	style = 16;
+	font = "PuristaMedium";
+	sizeEx = "(((((safezoneW / safezoneH) min 1.2) / 1.2) / 25) * 1)";
+	shadow = 0;
+	colorShadow[] =
+	{
+		0,
+		0,
+		0,
+		0.5
+	};
+	color[] =
+	{
+		1,
+		1,
+		1,
+		1
+	};
+	period = 1.2;
+	maxHistoryDelay = 1;
+	autoScrollSpeed = -1;
+	autoScrollDelay = 5;
+	autoScrollRewind = 0;
 };
 
 class CivInteract_RscListNBox {
@@ -266,12 +342,12 @@ class CivInteract_RscButton
 	text = "";
 	colorText[] = {1,1,1,1};
 	colorDisabled[] = {1,1,1,0.25};
-	colorSelect[] = {0,0,0,0.5};
-	colorSelect2[] = {0,0,0,0.5};
+	colorSelect[] = {0,0,0,1};
+	colorSelect2[] = {0,0,0,1};
 	colorBackground[] = {0,0,0,0.5};
 	colorBackgroundDisabled[] = {0,0,0,0.5};
 	colorBackgroundActive[] = {1,1,1,.7};
-	colorFocused[] = {0,0,0,.5};
+	colorFocused[] = {1,1,1,1};
 	colorShadow[] = {0,0,0,0};
 	colorBorder[] = {0,0,0,1};
 	soundEnter[] = {"\A3\ui_f\data\sound\RscButton\soundEnter",0.09,1};
@@ -329,49 +405,6 @@ class CivInteract_RscStructuredText
 	text = "";
 	size = "(((((safezoneW / safezoneH) min 1.2) / 1.2) / 25) * 1)";
 	shadow = 1;
-};
-
-class CivInteract_RscFrame
-{
-	colorBackground[] = {0,0,0,0};
-	colorText[] = {1,1,1,1};
-	font = "PuristaMedium";
-	h = 0.3;
-	idc = -1;
-	shadow = 2;
-	sizeEx = 0.02;
-	style = 0x40;
-	text = "";
-	type = 0;
-	w = 0.3;
-	x = 0;
-	y = 0;
-};
-
-class CivInteract_RscProgress
-{
-	access = 0;
-	idc = -1;
-	type = 0;
-	style = "0x30 + 0x800";
-	colorFrame[] = {0.788,0.443,0.157,1};
-	colorBar[] = {0.788,0.443,0.157,1};
-	texture = "ProgressBar_Bg.paa";
-	deletable = 0;
-	fade = 0;
-	fixedWidth = 0;
-	font = "PuristaMedium";
-	lineSpacing = 0;
-	text = "";
-	sizeEx = 0;
-	tooltipColorBox[] = {1,1,1,1};
-	tooltipColorShade[] = {0,0,0,0.65};
-	tooltipColorText[] = {1,1,1,1};
-	shadow = 0;
-	x = 0;
-	y = 0;
-	w = 0.2;
-	h = 0.15;
 };
 
 class CivInteract_RscControlsGroup

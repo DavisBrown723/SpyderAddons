@@ -33,5 +33,5 @@ nil
 if (isServer) then {
     [MOD(eventSystem),"registerEvent", _this] call SpyderAddons_fnc_eventHandler;
 } else {
-    [MOD(eventSystem),"registerEvent", _this] remoteExecCall ["SpyderAddons_fnc_eventSystem", 2];
+    _this remoteExecCall ["SpyderAddons_fnc_addEvent", 2];
 };

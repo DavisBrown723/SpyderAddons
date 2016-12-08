@@ -64,6 +64,11 @@ class CfgFunctions {
 			};
 
 			//////-- Logging --//////
+			class dumpModuleInit {
+				description = "Dumps module initialization information to the rpt";
+				file = "\x\spyderaddons\addons\x_lib\functions\logging\dumpModuleInit.sqf";
+				recompile = RECOMPILE;
+			};
 			class log {
 				description = "Logs a value to the rpt";
 				file = "\x\spyderaddons\addons\x_lib\functions\logging\log.sqf";
@@ -137,16 +142,38 @@ class CfgFunctions {
 				file = "\x\spyderaddons\addons\x_lib\functions\objectives\getSideDominantObjectives.sqf";
 				recompile = RECOMPILE;
 			};
+
+			//////-- OOP --//////
+			class baseClass {
+				description = "A base class for objects to inherit from";
+				file = "\x\spyderaddons\addons\x_lib\functions\oop\baseClass.sqf";
+				recompile = RECOMPILE;
+			};
+			class baseClassHash {
+				description = "A base class for hash objects to inherit from";
+				file = "\x\spyderaddons\addons\x_lib\functions\oop\baseClassHash.sqf";
+				recompile = RECOMPILE;
+			};
 			
 			//////-- OPCOM --//////
+			class getOpcomByFaction {
+				description = "Returns an opcom that controls the passed faction, if any exist";
+				file = "\x\spyderaddons\addons\x_lib\functions\opcom\getOpcomByFaction.sqf";
+				recompile = RECOMPILE;
+			};
 			class getOpcoms {
 				description = "Returns opcom handlers of given parameters";
 				file = "\x\spyderaddons\addons\x_lib\functions\opcom\getOpcoms.sqf";
 				recompile = RECOMPILE;
 			};
-			class getAsymmOpcoms {
-				description = "Returns asymmetric opcom handlers";
-				file = "\x\spyderaddons\addons\x_lib\functions\opcom\getAsymmOpcoms.sqf";
+			class getOpcomsBySide {
+				description = "Returns an array of opcoms controling factions of the passed side";
+				file = "\x\spyderaddons\addons\x_lib\functions\opcom\getOpcomsBySide.sqf";
+				recompile = RECOMPILE;
+			};
+			class isAsymmetric {
+				description = "Tests whether an opcom has a control type of asymmetric";
+				file = "\x\spyderaddons\addons\x_lib\functions\opcom\isAsymmetric.sqf";
 				recompile = RECOMPILE;
 			};
 			

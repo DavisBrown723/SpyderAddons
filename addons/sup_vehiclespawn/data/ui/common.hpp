@@ -291,140 +291,25 @@ class VehicleSpawner_RscCombo
 	font = "PuristaMedium";
 	sizeEx = "(((((safezoneW / safezoneH) min 1.2) / 1.2) / 25) * 1)";
 };
-class VehicleSpawner_RscListBox
-{
-	access = 0;
-	type = 5;
-	w = 0.4;
-	h = 0.4;
-	rowHeight = 0;
-	colorText[] =
-	{
-		1,
-		1,
-		1,
-		1
-	};
-	colorDisabled[] =
-	{
-		1,
-		1,
-		1,
-		0.25
-	};
-	colorScrollbar[] =
-	{
-		1,
-		0,
-		0,
-		0
-	};
-	colorSelect[] =
-	{
-		0,
-		0,
-		0,
-		1
-	};
-	colorSelect2[] =
-	{
-		0,
-		0,
-		0,
-		1
-	};
-	colorSelectBackground[] =
-	{
-		0.95,
-		0.95,
-		0.95,
-		1
-	};
-	colorSelectBackground2[] =
-	{
-		1,
-		1,
-		1,
-		0.5
-	};
-	colorBackground[] =
-	{
-		0,
-		0,
-		0,
-		0.3
-	};
-	soundSelect[] =
-	{
-		"\A3\ui_f\data\sound\RscListbox\soundSelect",
-		0.09,
-		1
-	};
-	arrowEmpty = "#(argb,8,8,3)color(1,1,1,1)";
-	arrowFull = "#(argb,8,8,3)color(1,1,1,1)";
-	class ScrollBar
-	{
-		color[] =
-		{
-			1,
-			1,
-			1,
-			0.6
-		};
-		colorActive[] =
-		{
-			1,
-			1,
-			1,
-			1
-		};
-		colorDisabled[] =
-		{
-			1,
-			1,
-			1,
-			0.3
-		};
-		shadow = 0;
-		thumb = "\A3\ui_f\data\gui\cfg\scrollbar\thumb_ca.paa";
-		arrowFull = "\A3\ui_f\data\gui\cfg\scrollbar\arrowFull_ca.paa";
-		arrowEmpty = "\A3\ui_f\data\gui\cfg\scrollbar\arrowEmpty_ca.paa";
-		border = "\A3\ui_f\data\gui\cfg\scrollbar\border_ca.paa";
-	};
-	class ListScrollBar {
-		color[] = {1,1,1,1};
-		autoScrollEnabled = 1;
-		
-		colorActive[] = {1, 1, 1, 1};
-		colorDisabled[] = {1, 1, 1, 0.3};
-		thumb = "\A3\ui_f\data\gui\cfg\scrollbar\thumb_ca.paa";
-		arrowFull = "\A3\ui_f\data\gui\cfg\scrollbar\arrowFull_ca.paa";
-		arrowEmpty = "\A3\ui_f\data\gui\cfg\scrollbar\arrowEmpty_ca.paa";
-		border = "\A3\ui_f\data\gui\cfg\scrollbar\border_ca.paa";
-	};
-	style = 16;
-	font = "PuristaMedium";
-	sizeEx = "(((((safezoneW / safezoneH) min 1.2) / 1.2) / 25) * 1)";
-	shadow = 0;
-	colorShadow[] =
-	{
-		0,
-		0,
-		0,
-		0.5
-	};
-	color[] =
-	{
-		1,
-		1,
-		1,
-		1
-	};
-	period = 1.2;
-	maxHistoryDelay = 1;
-	autoScrollSpeed = -1;
-	autoScrollDelay = 5;
-	autoScrollRewind = 0;
+
+class RscListbox;
+class VehicleSpawner_RscListBox : RscListBox {
+    style = 16;
+    type = 5;
+    rowHeight = 0.0375;
+    colorText[] = {1,1,1,1};
+    colorDisabled[] = {1,1,1,0.25};
+    colorRsc_Rscrollbar[] = {1,0,0,0};
+    colorSelect[] = {0,0,0,1};
+    colorSelect2[] = {0,0,0,1};
+    colorSelectBackground[] = {1,0.5,0,0.75};
+    colorSelectBackground2[] = {1,0.5,0,0.75};
+    colorBackground[] = {0,0,0,0.3};
+    font = "PuristaMedium";
+    sizeEx = "(((((safezoneW / safezoneH) min 1.2) / 1.2) / 25) * 1)";
+    colorShadow[] = {0,0,0,0.5};
+    color[] = {1,1,1,1};
+    period = 1.2;
 };
 
 class VehicleSpawner_ListNBox {
@@ -459,8 +344,7 @@ class VehicleSpawner_ListNBox {
 	autoScrollDelay = 5;
 	autoScrollRewind = 0;
 	autoScrollSpeed = -1;
-	class ScrollBar
-	{
+	class ScrollBar {
 		color[] = {1,1,1,0.6};
 		colorActive[] = {1,1,1,1};
 		colorDisabled[] = {1,1,1,0.3};
@@ -473,6 +357,7 @@ class VehicleSpawner_ListNBox {
 	class ListScrollBar {
 		color[] = {1,1,1,1};
 		autoScrollEnabled = 1;
+		
 		colorActive[] = {1, 1, 1, 1};
 		colorDisabled[] = {1, 1, 1, 0.3};
 		thumb = "\A3\ui_f\data\gui\cfg\scrollbar\thumb_ca.paa";
@@ -485,79 +370,31 @@ class VehicleSpawner_ListNBox {
 	drawSideArrows = 1;
 };
 
-class VehicleSpawner_RscButton
-{
-	access = 0;
-	type = 1;
-	text = "";
-	colorText[] = {1,1,1,1};
-	colorDisabled[] = {1,1,1,0.25};
-	colorBackground[] = {0,0,0,0.5};
-	colorBackgroundDisabled[] = {0,0,0,0.5};
-	colorBackgroundActive[] = {0,0,0,1};
-	colorFocused[] =
-	{
-		0,
-		0,
-		0,
-		.65
-	};
-	colorShadow[] =
-	{
-		0,
-		0,
-		0,
-		0
-	};
-	colorBorder[] =
-	{
-		0,
-		0,
-		0,
-		1
-	};
-	soundEnter[] =
-	{
-		"\A3\ui_f\data\sound\RscButton\soundEnter",
-		0.09,
-		1
-	};
-	soundPush[] =
-	{
-		"\A3\ui_f\data\sound\RscButton\soundPush",
-		0.09,
-		1
-	};
-	soundClick[] =
-	{
-		"\A3\ui_f\data\sound\RscButton\soundClick",
-		0.09,
-		1
-	};
-	soundEscape[] =
-	{
-		"\A3\ui_f\data\sound\RscButton\soundEscape",
-		0.09,
-		1
-	};
-	textureNoShortcut = "";
-	animTextureNormal = "";
-	animTextureDisabled = "";
-	animTextureOver = "";
-	animTextureFocused = "";
-	animTexturePressed = "";
-	animTextureDefault = "";
-	style = 2;
-	x = 0;
-	y = 0;
-	w = 0.095589;
-	h = 0.039216;
-	shadow = 2;
-	font = "PuristaMedium";
-	sizeEx = "(((((safezoneW / safezoneH) min 1.2) / 1.2) / 25) * 1)";
-	offsetX = 0.003;
-	offsetY = 0.003;
-	offsetPressedX = 0.000;
-	offsetPressedY = 0.002;
-	borderSize = 0;
+class RscButton;
+class VehicleSpawner_RscButton : RscButton {
+    access = 0;
+    type = 1;
+    text = "";
+    colorText[] = {1,1,1,1};
+    colorDisabled[] = {1,1,1,0.25};
+    colorSelect[] = {0,0,0,0.5};
+    colorSelect2[] = {0,0,0,0.5};
+    colorBackground[] = {0,0,0,0.5};
+    colorBackgroundDisabled[] = {0,0,0,0.5};
+    colorBackgroundActive[] = {1,1,1,.7};
+    class Attributes {
+        font = "RobotoCondensed";
+        color = "#C0C0C0";
+        align = "center";
+        valign = "middle";
+        shadow = false;
+        shadowColor = "#000000";
+    };
+    font = "RobotoCondensed";
+    sizeEx = "(((((safezoneW / safezoneH) min 1.2) / 1.2) / 25) * 1)";
+    borderSize = 0;
+    colorFocused[] = {0,0,0,.5};
+    colorShadow[] = {0,0,0,0};
+    colorBorder[] = {0,0,0,1};
+    style = 2;
 };
