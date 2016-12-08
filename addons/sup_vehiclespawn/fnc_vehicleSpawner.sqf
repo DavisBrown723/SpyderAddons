@@ -286,7 +286,7 @@ switch (_operation) do {
 
         _args params ["_class","_pos","_dir","_code"];
 
-        private _vehicle = _class createVehicle [0,0,0];
+        private _vehicle = createVehicle [_class, _pos, [], 0, "CAN_COLLIDE"];
 		_vehicle setPos _pos;
         _vehicle setDir _dir;
 		_vehicle setVectorUp (surfaceNormal _pos);
