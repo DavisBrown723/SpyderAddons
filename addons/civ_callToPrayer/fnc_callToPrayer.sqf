@@ -24,9 +24,9 @@ Peer Reviewed:
 nil
 ---------------------------------------------------------------------------- */
 
-#define MAINCLASS SpyderAddons_fnc_callToPrayer
+#define MAINCLASS   SpyderAddons_fnc_callToPrayer
 
-#define CTP_TIMES [[4.25,4.5],[5.25,5.75],[11.75,12],[15.25,15.5],[17.75,18.25],[19,19.25]]
+#define CTP_TIMES   [[4.25,4.5],[5.25,5.75],[11.75,12],[15.25,15.5],[17.75,18.25],[19,19.25]]
 
 private ["_result"];
 params [
@@ -51,7 +51,7 @@ switch (_operation) do {
         _timesOfPrayer = call compile ("[" + (_logic getVariable "timesOfPrayer") + "]");
         _CTPSound = _logic getVariable "CTPSound";
         _CTPSoundsCustom = [_logic getVariable ["CTPSoundsCustom", []]] call SpyderAddons_fnc_getModuleArray;
-        
+
         _sounds = [];
         if (_CTPSound != "") then {_sounds pushback _CTPSound};
         _sounds append _CTPSoundsCustom;
@@ -192,10 +192,12 @@ switch (_operation) do {
                     _sounds = [_logic,"sounds", []] call SpyderAddons_fnc_hashGet;
 
                     {
-                        [_x, [selectRandom _sounds,650]] remoteExecCall ["say3D"];
+                        if (alive _x) then {
+                            [_x, [selectRandom _sounds,650]] remoteExecCall ["say3D"];
 
-                        if (_moveCivs) then {
-                            [_logic,"moveCivs", _x] call MAINCLASS;
+                            if (_moveCivs) then {
+                                [_logic,"moveCivs", _x] call MAINCLASS;
+                            };
                         };
                     } foreach _loudspeakers;
 
