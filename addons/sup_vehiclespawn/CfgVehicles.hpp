@@ -14,7 +14,7 @@ class CfgVehicles
 		//isDisposable = 1;
 
 		class Arguments {
-			
+
 			class Enable {
 				displayName = "Enable";
 				description = "Enable module";
@@ -55,7 +55,7 @@ class CfgVehicles
 				description = "Vehicles that will be able to be spawned";
 				defaultValue = "";
 			};
-			
+
 			class VehiclesBlacklist {
 				displayName = "Blacklist";
 				description = "Vehicles that will be excluded";
@@ -73,11 +73,18 @@ class CfgVehicles
 				description = "Vehicles of these types will be excluded. Some types are [Car, Truck, Armored, Tank, Helicopter, Plane]";
 				defaultValue = "";
 			};
+
 			class SpawnCode {
 				displayName = "Code";
 				description = "Code ran when a vehicle is spawned. The vehicle can be referenced by the variable _this";
 				defaultValue = "";
 			};
+
+            class SpawnCondition {
+				displayName = "Condition";
+				description = "Must return true in order for the vehicle to spawn. Passed Arguments are [player, vehicle classname, spawner object (synced to module)]. Code is executed on the client attempting to spawn the vehicle.";
+				defaultValue = "";
+            };
 		};
 
 		class ModuleDescription
