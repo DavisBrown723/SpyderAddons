@@ -14,7 +14,7 @@ class CfgVehicles
 		//isDisposable = 1;
 
 		class Arguments {
-			
+
 			class Enable {
 				displayName = "Enable";
 				description = "Enable module";
@@ -75,7 +75,7 @@ class CfgVehicles
 
 			class Locations {
 				displayName = "Locations";
-				description = "Locations that ambiance will spawn around";
+				description = "Locations that ambiance will spawn around \nWARNING: For advanced users only \nhttps://community.bistudio.com/wiki/Location";
 				defaultValue = "NameVillage, NameCity, NameCityCapital, NameLocal";
 			};
 
@@ -197,7 +197,7 @@ class CfgVehicles
 				displayName = "Enemy Chance";
 				description = "Chance that enemies will be spawned inside a vehicle instead of civilians, max 100";
 				defaultValue = "15";
-			};	
+			};
 
 			class EnemyClasses {
 				displayName = "Enemy Classes";
