@@ -17,9 +17,9 @@ I started this project so that I could use it as a method of learning the addon 
      <a href="https://github.com/SpyderBlack723/SpyderAddons/wiki">Wiki</a></strong></sup>
 </p>
 
-#Features
+# Features
 
-####Civilian Interaction
+#### Civilian Interaction
   - Integrated with ALiVE
   - Order civilians to "Get Down", "Go Away", and "Detain" them in order to maintain control over the situation.
   - Ask civilians about personal details such as where they live in order to collect intel.
@@ -29,7 +29,7 @@ I started this project so that I could use it as a method of learning the addon 
    - Usage: Define insurgent faction being used
    - Requires: ALiVE
 
-####Loadout Organizer
+#### Loadout Organizer
   - Save, Load, Delete, and Name loadouts
   - View class gear before loading it
   - Transfer loadouts to other players and AI
@@ -37,7 +37,7 @@ I started this project so that I could use it as a method of learning the addon 
   - Load class on respawn
    - Usage: Sync module to object to add the loadout manager action to it
 
-####Recruitment
+#### Recruitment
   - Specify entire factions of units to whitelist
   - Whitelist units
   - Blacklist units
@@ -45,7 +45,7 @@ I started this project so that I could use it as a method of learning the addon 
   - Set a maximum limit of units that a player may recruit into his squad at one time
    - Usage: Sync module to object to add recruit action to it
 
-####Detection
+#### Detection
  - Easily create scenarios with players as the guerilla fighters
  - Define hostile sides
  - Define cooldown timer
@@ -57,14 +57,14 @@ I started this project so that I could use it as a method of learning the addon 
  - Define detection values for each on foot, in vehicle, and incognito vehicles
   - Usage: Sync module to players to have them tracked by the detection system
 
-####Vehicle Spawner
+#### Vehicle Spawner
  - Specify entire factions of vehicles to whitelist
  - Whitelist vehicles
  - Blacklist vehicles
  - View vehicle characteristics such as top speed, number of passenger seats, fuel consumption and more prior to spawning it.
   - Usage: Sync module to object to add vehicle spawner action to it
 
-####Ambiance
+#### Ambiance
  - Randomly spawned animal herds, civilian vehicles, undercover enemy vehicles
  - Units are only spawned when players are near
  - Define spawn ranges
@@ -74,7 +74,7 @@ I started this project so that I could use it as a method of learning the addon 
  - Each feature is customizable to fit the mission maker's preferences.
   - Usage: Place module and input preferred parameters
 
-####Insurgency (WIP)
+#### Insurgency (WIP)
  - Establish recruitment HQ's, weapon depots, and IED factories.
  - Recruit civilians
  - Plan coordinated assaults
